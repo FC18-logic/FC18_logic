@@ -14,3 +14,8 @@
 2017/10/8 1:00 by KeviKai
 #增加map.cpp
 #开始写student.cpp
+
+2017/10/14 17:56 by Chiba
+#写完了tentacle.cpp
+#给Student和Tentacle增加接口
+#删除根目录下一些文件

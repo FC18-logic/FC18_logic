@@ -21,7 +21,11 @@ typedef double TPower;  //倍率
 typedef int    TTentacleNum;
 typedef int    TTentacleID;
 
-
+//兵力密度
+const double       Density = 0.1;
+const TSpeed       BaseExtendSpeed = 3;
+const TSpeed       BaseFontSpeed = 12;
+const TSpeed       BaseBackSpeed = 20;
 const TLevel       STUDENT_LEVEL_COUNT = 5;
 const TResourceI   MAX_RESOURCE = 200;
 const TSpeed       BASE_REGENERETION_SPEED[STUDENT_LEVEL_COUNT]{ 1,1.5,2,2.5,3 };
@@ -37,7 +41,7 @@ const TLevel MAX_DEFENCE_LEVEL = 3;
 
 //各技能等级对应数值
 const TPower RegenerationSpeedStage[MAX_REGENERATION_SPEED_LEVEL + 1] = { 1,1.05,1.1,1.15,1.2,1.25 };
-const TPower ExtendingSpeedStage[MAX_EXTENDING_SPEED_LEVEL + 1] = { 1,1.1,1.2,1.3,1.4,1.5 };
+const TPower SpeedStage[MAX_EXTENDING_SPEED_LEVEL + 1] = { 1,1.1,1.2,1.3,1.4,1.5 };
 const TPower ExtraControlStage[MAX_EXTRA_CONTROL_LEVEL + 1] = { 0,0.5,1,1.5 };
 const TPower DefenceStage[MAX_DEFENCE_LEVEL + 1] = { 1.5,1.4,1.3,1.2 };
 
@@ -70,6 +74,7 @@ enum TPlayerProperty
 enum TentacleStatus
 {
 	Extending           //延伸中
+	,Attacking          //攻击中（面对对方触手）
 	,Backing            //退后中（被打退）
 	,Confrontation      //对峙中
 	,Arrived            //已到达目的地
