@@ -1,21 +1,44 @@
-2017/10/6 22:01 by Chiba
-#修改definition中的pointstatus枚举名（Barrier->Blocked）防止名冲突
-#增加player.h
+## 2017/10/6 22:01 by Chiba
+- 修改definition中的pointstatus枚举名（Barrier->Blocked）防止名冲突
+- 增加player.h
 
-2017/10/7 14:52 by Chiba
-#分离Map类继承自BaseMap
-#完成给选手的信息（Info类）/还差CommendList
-#Game刚开头
+## 2017/10/7 14:52 by Chiba
+- 分离Map类继承自BaseMap
+- 完成给选手的信息（Info类）/还差CommendList
+- Game刚开头
 
-2017/10/7 18:20 by Chiba
-#data.h存储数据
-#改进definition的细胞阶段/增加升级消耗量
+## 2017/10/7 18:20 by Chiba
+- data.h存储数据
+- 改进definition的细胞阶段/增加升级消耗量
 
-2017/10/8 1:00 by KeviKai
-#增加map.cpp
-#开始写student.cpp
+## 2017/10/8 1:00 by KeviKai
+- 增加map.cpp
+- 开始写student.cpp
 
-2017/10/14 17:56 by Chiba
-#写完了tentacle.cpp
-#给Student和Tentacle增加接口
-#删除根目录下一些文件
+## 2017/10/14 17:56 by Chiba
+- 写完了tentacle.cpp
+- 给Student和Tentacle增加接口
+- 删除根目录下一些文件
+
+## 2017/10/15 15:28 by Chiba
+- 写完了player.cpp
+
+## 2017/10/16 20:36 by Chiba
+- 写完了student.cpp
+- 完善了map.cpp
+- 修复tentacle.cpp小错误
+- 用markdown重写这份备注
+
+## 2017/10/18 01:36 by Chiba
+- 进一步增加原先的接口便于Game.cpp的调用
+- 完成Game.cpp的几个阶段/还差结算的一小部分
+- 好困好累QAQ
+
+## 2017/10/20 00:26 by Chiba
+- 基本逻辑完成//尚未跑过可能还有语法错误
+- Log存储、选手代码调用还没写
+- 更改底层存储逻辑
+
+## 2017/10/20 01:15 by Chiba
+- 初步纠正语法错误
+- 还有LNK2005和error LNK 1169

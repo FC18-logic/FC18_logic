@@ -157,7 +157,10 @@
     <ClInclude Include="tentacle.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="Game.cpp" />
+    <ClCompile Include="main.cpp" />
     <ClCompile Include="map.cpp" />
+    <ClCompile Include="player.cpp" />
     <ClCompile Include="student.cpp" />
     <ClCompile Include="tentacle.cpp" />
   </ItemGroup>

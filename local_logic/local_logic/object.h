@@ -28,11 +28,14 @@ TId Object<T>::ID() const
 template<typename T>
 Object<T>::Object()
 {
-	m_id = count++;
+	m_id = s_count++;
 }
 
 //拷贝时的构造函数，不递增count
 template<typename T>
 Object<T>::Object(TId id):m_id(id){}
+
+template<typename T>
+int Object<T>::s_count = 0;
 
 #endif  //OBJECT_H

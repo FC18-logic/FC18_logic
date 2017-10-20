@@ -6,18 +6,19 @@
 **  在外部存储相关类只需存储 ID 在 Data 中调用
 */
 #include<vector>
+#include<map>
 #include "student.h"
 #include "tentacle.h"
 #include "map.h"
 #include "player.h"
-using std::vector;
+using std::map;
 namespace DATA {
 	struct Data
 	{
-		static vector<Student>  students;
-		static vector<Tentacle> tentacles;
-		static vector<Player>   players;
-		//static Map              gameMap1;
+		map<TStudentID, Student>  students;
+		map<TTentacleID, Tentacle> tentacles;
+		map<TCamp, Player>   players;
+		Map              gameMap;
 	};
 }
 
