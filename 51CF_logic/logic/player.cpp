@@ -27,7 +27,7 @@ void Player::regenerateTechPoint()
 	addTechPoint(r);
 }
 
-bool Player::upgrade(TPlayerPowerProperty kind)
+bool Player::upgrade(TPlayerProperty kind)
 {
 	switch (kind)
 	{

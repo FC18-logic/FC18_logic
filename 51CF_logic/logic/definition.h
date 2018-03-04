@@ -113,7 +113,7 @@ const TPower TentacleDecay[4] =
 	           1.0, 1.0, 0.8, 0.6
 };
 
-enum TPlayerPowerProperty
+enum TPlayerProperty
 {
 	RegenerationSpeed    //再生速度
 	, ExtendingSpeed //延伸速度

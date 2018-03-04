@@ -15,7 +15,7 @@ public:
 	void addTechPoint(TResourceD _techPoint);
 	void regenerateTechPoint();
 	//减少科技点数，失败返回false
-	bool upgrade(TPlayerPowerProperty kind);
+	bool upgrade(TPlayerProperty kind);
 	bool subTechPoint(TResourceD _techPoint);
 	int getDefenceLevel() const { return m_DefenceLevel; }
 	bool upgradeDefence(); //升级防御，返回是否成功

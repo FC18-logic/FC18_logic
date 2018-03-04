@@ -515,7 +515,7 @@ void Game::commandPhase(vector<CommandList>& command_list)
 			case upgrade:
 			{
 				if (c.parameters.size() < 1)break;
-				TPlayerPowerProperty upgradeType = static_cast<TPlayerPowerProperty>(c.parameters[0]);
+				TPlayerProperty upgradeType = static_cast<TPlayerProperty>(c.parameters[0]);
 				data.players[i].upgrade(upgradeType);
 			}
 			break;
