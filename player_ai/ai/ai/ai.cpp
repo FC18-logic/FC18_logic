@@ -1,23 +1,12 @@
 #include "ai.h"
 #include "definition.h"
+#include "user_toolbox.h"
 #include <iostream>
 #include <vector>
-void player_ai(Info* info)
+void player_ai(Info& info)
 {
-	std::cout << "I'm in ai.dll!!!!!!!!!" << endl;
-	info->myCommandList.addCommand(upgrade, { RegenerationSpeed });
-}
-
-void test(int a,int &b,int *c)
-{
-	std::cout << a << endl;
-	std::cout << b++ << endl;
-	std::cout << ((*c)++) << endl;
-}
-
-void test_vec(vector<int> a, vector<int> &b, vector<int> *c)
-{
-	a.push_back(1);
-	b.push_back(2);
-	c->push_back(3);
+	TPlayerID myid = info.myID;
+	//将各种指令压入堆中，根据得分选取指令
+	MaxHeap<float, Command> evalution; 
+	for(TCellID mycell:info.playerInfo[info.])
 }

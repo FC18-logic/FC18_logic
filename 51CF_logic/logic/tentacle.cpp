@@ -8,7 +8,7 @@ Tentacle::Tentacle(TCellID source, TCellID target, DATA::Data* _data):
 	data->tentacles[m_source][m_target] = this;
 	data->TentacleNum++;
 	m_resource = m_frontResource = m_backResource = 0;
-	m_ID = data->TentacleCount++;
+	m_id = data->TentacleCount++;
 }
 
 bool Tentacle::cut(TResourceD position /*= 0*/)

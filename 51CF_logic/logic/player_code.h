@@ -35,9 +35,7 @@ namespace DAGAN {
 
 	using namespace std;
 
-	typedef void(*TPlayerAi)(Info* info);
-	typedef void(*TTest)(int a, int &b, int*c);
-	typedef void (*Ttest_vec)(vector<int> a, vector<int> &b, vector<int> *c);
+	typedef void(*TPlayerAi)(Info& info);
 
 	class Player_Code
 	{
@@ -46,7 +44,7 @@ namespace DAGAN {
 		Player_Code(string file_name, int id);
 		~Player_Code();
 
-		bool run(Info *info);
+		bool run(Info &info);
 
 		bool load();
 
@@ -56,8 +54,6 @@ namespace DAGAN {
 
 	private:
 		TPlayerAi        player_ai;
-		TTest  test;
-		Ttest_vec test_vec;
 		string           file_name;
 		string           name;
 		TPlayerID        id;

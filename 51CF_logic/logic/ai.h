@@ -9,15 +9,12 @@
 #include "definition.h"
 
 #ifdef _MSC_VER
-extern "C" _declspec(dllexport) void player_ai(Info* info);
-extern "C" _declspec(dllexport) void test(int a, int &b, int *c);
-extern "C" _declspec(dllexport) void test_vec(vector<int> a, vector<int> &b, vector<int> *c);
+extern "C" _declspec(dllexport) void player_ai(Info& info);
 #endif
 
 
 #ifdef __GNUC__
 extern "C" void player_ai(Info& info);
-extern "C" _declspec(dllexport) void test(int a, int &b);
 #endif
 
 

@@ -33,7 +33,7 @@ namespace DAGAN
 			{
 				// 单个玩家执行
 				if (!silent_mode_) cout << "Calling Player " << (int)id << "'s Run() method" << endl;
-				players_[id].run(&info_list[id]);
+				players_[id].run(info_list[id]);
 				commands.push_back(info_list[id].myCommandList);
 			}
 			else

@@ -44,8 +44,6 @@ namespace DAGAN {
 		if (NULL != hDLL)
 		{
 			player_ai = (TPlayerAi)_GETFUNC(hDLL, "player_ai");
-			test = (TTest)_GETFUNC(hDLL, "test");
-			test_vec = (Ttest_vec)_GETFUNC(hDLL, "test_vec");
 		}
 
 		Valid = true;
@@ -63,7 +61,7 @@ namespace DAGAN {
 		return Valid;
 	}
 
-	bool Player_Code::run(Info *info)
+	bool Player_Code::run(Info &info)
 	{
 		int time_a = GetTickCount();
 		int time_b;

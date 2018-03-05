@@ -278,6 +278,10 @@ public:
 		c.parameters = _parameters;
 		m_commands.push_back(c);
 	}
+	void addCommand(const Command& c)
+	{
+		m_commands.push_back(c);
+	}
 	void removeCommand(int n)
 	{
 		m_commands.erase(m_commands.begin() + n);
