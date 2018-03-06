@@ -9,6 +9,7 @@ class Player
 {
 public:
 	Player();
+	Player(Player&); //#json
 	~Player();
 	//增加科技点数
 	void setdata(DATA::Data* d) { data = d; }

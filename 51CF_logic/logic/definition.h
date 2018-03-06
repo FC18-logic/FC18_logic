@@ -162,8 +162,13 @@ struct CellInfo
 	TResourceD resource;
 	TResourceD occupyPoint;  //只有中立时才有意义
 	TPlayerID occupyOwner;//只有中立时才有意义
-	
+
 	TPoint position;
+
+	TResourceD maxResource;
+	int maxTentacleNum;  //最大触手数量
+	int currTentacleNum;
+	TPower techSpeed;    //科创点数是资源再生速率的几倍
 };
 
 struct PlayerInfo
@@ -283,7 +288,7 @@ public:
 	{
 		m_commands.erase(m_commands.begin() + n);
 	}
-	int  size() const { return m_commands.size(); }
+	int  size() const { return int(m_commands.size()); }
 	vector<Command>::iterator begin() { return m_commands.begin(); }
 	vector<Command>::iterator end() { return m_commands.end(); }
 	vector<Command>::const_iterator  begin()const { return m_commands.cbegin(); }

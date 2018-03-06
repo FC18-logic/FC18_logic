@@ -42,22 +42,32 @@ private:
 	const TCellID             m_source;              //源细胞
 	const TCellID             m_target;              //目标细胞
 	TentacleState  m_state;                     //触手状态
-	TTentacleID  m_id;
+
 	const TLength         m_length;                     //触手长度（由源/目标决定）
 	const TResourceD      m_maxResource;
 	TResourceD      m_resource;                   //当前资源      （切断前有效）
 	TResourceD      m_frontResource;              //切断后前方资源（切断后有效）
 	TResourceD      m_backResource;               //切断后后方资源（切断后有效）
-
+	TTentacleID		m_ID;
+	TTentacleID		m_cutID;
+	static TTentacleID	ID;  //#json 增加触手id属性
+	static TTentacleID  cut_ID; //断触手id
 	DATA::Data* const     data;
 
 public:
+	//#json
+	int getID() const { return m_ID; }
+	int getCutID() const { return m_cutID; }
+	void setID() { m_ID = ID; }
+
 	//新建触手
+	Tentacle(const Tentacle& _tentacle); //#json
 	Tentacle() :m_source(NO_DATA),
-		m_target(NO_DATA), m_length(0), m_maxResource(0), data(nullptr) {}
+		m_target(NO_DATA), m_length(0), m_maxResource(0), data(nullptr) { setID(); ID++;}
 	Tentacle(TCellID source, TCellID target, DATA::Data* _data);
+
+
 	//切断触手，position为从源细胞算起的资源数，返回值表示是否成功
-	
 	bool cut(TResourceD position = 0);
 	//结算移动，只对Extending/Attacking/Backing有效
 	TransEffect move();
@@ -67,7 +77,7 @@ public:
 	bool           isTargetEnemy() const;
 	const CellStrategy   srcStg(); //源细胞策略
 	const CellStrategy   tgtStg(); //目标细胞策略
-	TTentacleID getID()const { return m_id; }
+	
 	const TSpeed         getExtendSpeed()   const;
 	const TSpeed         getFrontSpeed()   const;
 	const TSpeed         getBackSpeed()   const;

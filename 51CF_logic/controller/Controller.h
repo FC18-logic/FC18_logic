@@ -11,6 +11,7 @@ namespace DAGAN
 	public:
 		Controller(Game& g, std::vector<Player_Code>& p)
 			: game_(g)
+			, data(&(g.getData()))
 			, silent_mode_(false), file_output_enabled_(true)
 			, isValid_(true), debug_mode(true)
 			, players_(p){ }
@@ -24,6 +25,7 @@ namespace DAGAN
 	protected:
 		bool debug_mode;
 		Game& game_;
+		DATA::Data *data;
 		std::ofstream ofs;
 		std::vector<Player_Code>& players_;
 		bool file_output_enabled_;

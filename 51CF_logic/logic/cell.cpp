@@ -10,6 +10,21 @@ Cell::Cell(DATA::Data* _data, TPoint pos, TPlayerID playerid, TResourceD resourc
 	updateProperty();
 }
 
+Cell::Cell(Cell& _cell)
+{
+	m_ID = _cell.getID();
+	m_cellType = _cell.getCellType();
+	m_property = _cell.getCellProperty();
+	m_strategy = _cell.getStg();
+	m_resource = _cell.getResource();
+	m_PlayerID = _cell.getPlayerID();
+	m_position = _cell.getPos();
+	m_occupyPoint = _cell.getOccupyPoint();
+	m_occupyOwner = _cell.getOccupyOwner();
+	m_currTentacleNumber = _cell.TentacleNumber();
+
+}
+
 void Cell::init(TCellID _id, DATA::Data* _data, TPoint pos, TPlayerID campid, TResourceD resource, TResourceD maxResource, TPower techPower)
 {
 	m_ID = _id;
@@ -55,8 +70,11 @@ TResourceD Cell::totalResource()
 
 TSpeed Cell::baseRegenerateSpeed() const
 {
-	return BASE_REGENERETION_SPEED[getCellType()] *
+	if (getPlayerID() != -1)
+		return BASE_REGENERETION_SPEED[getCellType()] *
 		RegenerationSpeedStage[data->players[getPlayerID()].getRegenerationLevel()];
+	else
+		return 0.0;//ÖÐÁ¢
 }
 
 TSpeed Cell::techRegenerateSpeed()const
@@ -72,7 +90,7 @@ TSpeed Cell::baseTransSpeed() const
 
 }
 
-#define _DEBUG_
+//#define _DEBUG_
 void Cell::regenerate()
 {
 #ifdef _DEBUG_
@@ -120,6 +138,7 @@ bool Cell::addTentacle(const TCellID& target)
 				Tentacle* t = new Tentacle(m_ID, target, data);
 				t->setstate(Extending);
 				data->tentacles[m_ID][target] = t;
+				m_currTentacleNumber++;
 				return true;
 			}
 			case Arrived:
@@ -127,6 +146,7 @@ bool Cell::addTentacle(const TCellID& target)
 				Tentacle* t = new Tentacle(m_ID, target, data);
 				t->setstate(Attacking); data->tentacles[target][m_ID]->setstate(Backing);
 				data->tentacles[m_ID][target] = t;
+				m_currTentacleNumber++;
 				return true;
 			}
 			case AfterCut:
@@ -138,6 +158,7 @@ bool Cell::addTentacle(const TCellID& target)
 					Tentacle* t = new Tentacle(m_ID, target, data);
 					t->setstate(Extending);
 					data->tentacles[m_ID][target] = t;
+					m_currTentacleNumber++;
 					return true;
 				}
 			}
@@ -152,6 +173,7 @@ bool Cell::addTentacle(const TCellID& target)
 		Tentacle* t = new Tentacle(m_ID, target, data);
 		t->setstate(Extending);
 		data->tentacles[m_ID][target] = t;
+		m_currTentacleNumber++;
 		return true;
 	}
 	return false;

@@ -90,7 +90,10 @@ using namespace DAGAN;
 		Controller controller(G, players);
 
 		// main
-		while (controller.isValid()) controller.run();
+		while (controller.isValid())
+		{
+			controller.run();
+		}
 
 		// output the result
 		outputResult(G, players_filename);

@@ -10,7 +10,9 @@ class Cell;
 class Tentacle;
 class Player;
 
+
 #include "Map.h"
+#include "../json/json.h"
 namespace DATA//名空间
 {
 	struct Data
@@ -20,10 +22,14 @@ namespace DATA//名空间
 
 		Tentacle*** tentacles;
 		int TentacleNum;
-		int TentacleCount;
+		//int TentacleCount;
 
 		Player* players;
 		int PlayerNum;
+
+		Json::Value root;
+		Json::Value currentRoundJson;
+		vector<vector<double>> cutTentacleJson;
 
 		Map gameMap;
 	};

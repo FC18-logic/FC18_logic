@@ -20,6 +20,19 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="controller\Controller.h" />
+    <ClInclude Include="json\allocator.h" />
+    <ClInclude Include="json\assertions.h" />
+    <ClInclude Include="json\autolink.h" />
+    <ClInclude Include="json\config.h" />
+    <ClInclude Include="json\features.h" />
+    <ClInclude Include="json\forwards.h" />
+    <ClInclude Include="json\json.h" />
+    <ClInclude Include="json\reader.h" />
+    <ClInclude Include="json\supplement.h" />
+    <ClInclude Include="json\value.h" />
+    <ClInclude Include="json\version.h" />
+    <ClInclude Include="json\writer.h" />
+    <ClInclude Include="lib_json\json_tool.h" />
     <ClInclude Include="logic\ai.h" />
     <ClInclude Include="logic\cell.h" />
     <ClInclude Include="logic\data.h" />
@@ -32,6 +45,9 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="controller\Controller.cpp" />
+    <ClCompile Include="lib_json\json_reader.cpp" />
+    <ClCompile Include="lib_json\json_value.cpp" />
+    <ClCompile Include="lib_json\json_writer.cpp" />
     <ClCompile Include="logic\cell.cpp" />
     <ClCompile Include="logic\definition.cpp" />
     <ClCompile Include="logic\game.cpp" />
@@ -95,12 +111,18 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <LinkIncremental>true</LinkIncremental>
+    <IncludePath>C:\Users\thinkpad\Desktop\merge_51CF_logic-master\51CF_logic\json;$(IncludePath)</IncludePath>
+    <SourcePath>C:\Users\thinkpad\Desktop\merge_51CF_logic-master\51CF_logic\lib_json;$(SourcePath)</SourcePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LinkIncremental>true</LinkIncremental>
+    <IncludePath>C:\Users\thinkpad\Desktop\merge_51CF_logic-master\51CF_logic\json;$(IncludePath)</IncludePath>
+    <SourcePath>C:\Users\thinkpad\Desktop\merge_51CF_logic-master\51CF_logic\lib_json;$(SourcePath)</SourcePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>false</LinkIncremental>
+    <IncludePath>H:\merge_51CF_logic-master\51CF_logic\json;C:\Users\thinkpad\Desktop\merge_51CF_logic-master\51CF_logic\json;$(IncludePath)</IncludePath>
+    <SourcePath>H:\merge_51CF_logic-master\51CF_logic\lib_json;C:\Users\thinkpad\Desktop\merge_51CF_logic-master\51CF_logic\lib_json;$(SourcePath)</SourcePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <LinkIncremental>false</LinkIncremental>

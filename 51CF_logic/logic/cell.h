@@ -35,11 +35,13 @@ public:
 	//根据输入信息进行初始化
 	Cell(DATA::Data* _data, TPoint pos, TPlayerID campid, TResourceD resource, TResourceD maxResource, TPower techPower);
 	~Cell(){}
-	Cell(const Cell &) = default;
+	//Cell(const Cell &) = default;
+	Cell(Cell& _cell); //#json
+	
 	void init(TCellID _id, DATA::Data* _data, TPoint pos, TPlayerID campid, TResourceD resource, TResourceD maxResource, TPower techPower);
 	
 	inline  TResourceD              getResource()           const { return m_resource; }
-
+	inline  TCellID          getID() { return m_ID; }  //#json
 	inline  TPlayerID        getPlayerID()const { return m_PlayerID; }
 	inline  TPoint           getPos()              const { return m_position; }
 	inline  TResourceD              getOccupyPoint()         const { return m_occupyPoint; }
@@ -71,6 +73,7 @@ public:
 	void    updateProperty();            //根据当前资源更新属性
 	void    changeOwnerTo(TPlayerID newOwner); //改变主人，资源结算需在外部
 	void    N_addOcuppyPoint(TPlayerID owner, TResourceD point);  //N_前缀/只有中立细胞能够调用/加相应点数
+	void    subTentacleNum() { m_currTentacleNumber--; }
 
 private:
 	TCellID m_ID; //我的ID

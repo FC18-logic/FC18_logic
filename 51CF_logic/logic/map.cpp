@@ -7,7 +7,7 @@
 #include "tentacle.h"
 
 
-bool Map::init(ifstream& inMap,TResourceI _MAX_RESOURCE_, bool enableOutput)  //通过文件流初始化信息
+bool Map::init(ifstream& inMap, TResourceI _MAX_RESOURCE_, bool enableOutput)  //通过文件流初始化信息
 {
 
 	//初始化地图
@@ -22,6 +22,7 @@ bool Map::init(ifstream& inMap,TResourceI _MAX_RESOURCE_, bool enableOutput)  //
 	if (enableOutput)
 		cout << "初始化地图......" << endl;
 
+	Json::Value barrierAdditionJson;
 	for (int i = 0; i < barrierNum; i++)
 	{
 		inMap >> beginP.m_x;
@@ -34,15 +35,40 @@ bool Map::init(ifstream& inMap,TResourceI _MAX_RESOURCE_, bool enableOutput)  //
 		_barrier.m_beginPoint = beginP;
 		_barrier.m_endPoint = endP;
 		m_barrier.push_back(_barrier);
+
+		//#json		
+		barrierAdditionJson["type"] = Json::Value(uint8_t(1));
+		barrierAdditionJson["id"] = Json::Value(i);
+		Json::Value startPointJson;
+		startPointJson["x"] = Json::Value(beginP.m_x);
+		startPointJson["y"] = Json::Value(beginP.m_y);
+		barrierAdditionJson["startPoint"] = Json::Value(startPointJson);
+		Json::Value endPointJson;
+		endPointJson["x"] = Json::Value(endP.m_x);
+		endPointJson["y"] = Json::Value(endP.m_y);
+		barrierAdditionJson["endPoint"] = Json::Value(endPointJson);
 	}
+	data->currentRoundJson["barrierActions"].append(barrierAdditionJson);
+
 
 	//初始化阵营
 	if (enableOutput)
 		cout << "初始化阵营......" << endl;
 	inMap >> data->PlayerNum;
+	data->root["head"]["totalPlayers"] = data->PlayerNum; //#json
 	data->players = new Player[data->PlayerNum];
+
+
+	Json::Value playerInfoJson;  //#json
 	for (int i = 0; i != data->PlayerNum; ++i)
+	{
 		data->players[i].setdata(data);
+		Json::Value pIJ;
+		pIJ["id"] = Json::Value(i + 1);
+		pIJ["team"] = Json::Value(i + 1);
+		playerInfoJson.append(pIJ);
+	}
+	data->root["head"]["playerInfo"] = playerInfoJson;
 
 	//初始化细胞
 	if (enableOutput)
@@ -65,16 +91,31 @@ bool Map::init(ifstream& inMap,TResourceI _MAX_RESOURCE_, bool enableOutput)  //
 		if (_camp != Neutral)
 		{
 			data->cells[i].init(_id, data, _point, _camp, _resource, _maxResource, _techPower);
-			data->players[_camp].cells().insert(i);//势力cells集合
+			data->players[_camp].cells().insert(i); //势力cells集合
 		}
 		else
 		{
 			data->cells[i].init(_id, data, _point, _camp, _resource, _maxResource, _techPower);
 		}
+
+		//#json
+		Json::Value cellAdditionJson;
+		cellAdditionJson["type"] = 1;
+		cellAdditionJson["id"] = Json::Value(_id);
+		cellAdditionJson["team"] = Json::Value(_camp + 1);
+		cellAdditionJson["size"] = Json::Value(int(_resource*0.5 + 20));
+		cellAdditionJson["level"] = Json::Value(data->cells[_id].getCellType());
+		Json::Value birthPositionJson;
+		birthPositionJson["x"] = _point.m_x;
+		birthPositionJson["y"] = _point.m_y;
+		cellAdditionJson["birthPosition"] = birthPositionJson;
+		cellAdditionJson["techVal"] = int(data->cells[i].techRegenerateSpeed());
+		cellAdditionJson["strategy"] = Json::Value(Normal);
+		data->currentRoundJson["cellActions"].append(cellAdditionJson);
 	}
-	data->TentacleCount = 0;
 	return true;
 }
+
 
 bool Map::init(const TMapID& filename,TResourceI _MAX_RESOURCE_)
 {

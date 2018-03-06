@@ -19,7 +19,9 @@ void sample_ai(Info& info);
 class Game
 {
 public:
+	vector<time_t> roundTime; //#json
 	bool init(string filename);//初始化信息
+	DATA::Data& getData() { return data; } //#json
 	vector<TPlayerID> getRank() { return Rank; }
 	int getPlayerSize() { return data.PlayerNum; }
 	TRound getRound() { return currentRound; }
@@ -34,11 +36,12 @@ public:
 	void commandPhase(vector<CommandList>& command_list); //处理玩家指令
 	void killPlayer(TPlayerID id); //杀死玩家 
 	bool isAlive(TPlayerID id) { return data.players[id].isAlive(); }
+	void saveJson(DATA::Data & dataLastRound, DataSupplement & dataSuppleMent);
+	void addRound() { currentRound++; }
 protected:
 	void takeEffect(TransEffect& te); //将te施用到目标上
 	void handleExtending(TransEffect& t);
 	std::ofstream LogFile;
-
 	DATA::Data data;      //所有的数据存放处
 	TRound currentRound;  //当前回合数
 	size_t playerSize;    //游戏规模

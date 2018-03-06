@@ -19,6 +19,7 @@ typedef double TTechPoint;  //科技点数
 typedef double TLength;
 typedef int    TCellID;
 typedef int    TPlayerID;
+typedef int    TTentacleID;
 
 typedef int    TPosition;
 
@@ -112,7 +113,7 @@ const TPower TentacleDecay[4] =
 	           1.0, 1.0, 0.8, 0.6
 };
 
-enum TPlayerPowerProperty
+enum TPlayerProperty
 {
 	RegenerationSpeed    //再生速度
 	, ExtendingSpeed //延伸速度
@@ -161,8 +162,13 @@ struct CellInfo
 	TResourceD resource;
 	TResourceD occupyPoint;  //只有中立时才有意义
 	TPlayerID occupyOwner;//只有中立时才有意义
-	
+
 	TPoint position;
+
+	TResourceD maxResource;
+	int maxTentacleNum;  //最大触手数量
+	int currTentacleNum;
+	TPower techSpeed;    //科创点数是资源再生速率的几倍
 };
 
 struct PlayerInfo
@@ -278,15 +284,11 @@ public:
 		c.parameters = _parameters;
 		m_commands.push_back(c);
 	}
-	void addCommand(const Command& c)
-	{
-		m_commands.push_back(c);
-	}
 	void removeCommand(int n)
 	{
 		m_commands.erase(m_commands.begin() + n);
 	}
-	int  size() const { return m_commands.size(); }
+	int  size() const { return int(m_commands.size()); }
 	vector<Command>::iterator begin() { return m_commands.begin(); }
 	vector<Command>::iterator end() { return m_commands.end(); }
 	vector<Command>::const_iterator  begin()const { return m_commands.cbegin(); }
@@ -309,7 +311,7 @@ struct Info
 	int playerAlive;  //剩余玩家数
 	int myID;           //选手ID号
 	int myMaxControl;   //最大操作数
-
+	
 	TRound round;     //回合数
 	CommandList myCommandList;
 	vector<PlayerInfo> playerInfo;   //势力信息

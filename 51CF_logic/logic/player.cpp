@@ -7,6 +7,18 @@ Player::Player()
 	m_techPoint = 0.0;
 }
 
+//#json
+Player::Player(Player& _player)
+{
+	alive = _player.isAlive();
+	m_cells = _player.cells();
+	m_techPoint = _player.techPoint();
+	m_RegenerationLevel = _player.getRegenerationLevel();
+	m_ExtraControlLevel = _player.getExtraControlLevel();
+	m_DefenceLevel = _player.getDefenceLevel();
+	data = nullptr;
+}
+
 
 Player::~Player()
 {
