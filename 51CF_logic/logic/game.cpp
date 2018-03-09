@@ -45,11 +45,11 @@ bool Game::init(string filename, char* json_filename)
 		for (int j = 0; j != data.CellNum; ++j)
 			data.tentacles[i][j] = nullptr;
 	}
-	//³õÊ¼»¯ÅÅÃû
+	//åˆå§‹åŒ–æ’å
 	for (int i = 0; i != playerSize; ++i)
 		Rank.push_back(i);
 
-	//³õÊ¼»¯¼ÆÊı
+	//åˆå§‹åŒ–è®¡æ•°
 	for (int i = 0; i != playerSize; ++i)
 		controlCount.push_back(0);
 
@@ -57,7 +57,7 @@ bool Game::init(string filename, char* json_filename)
 	data.root["body"].append(data.currentRoundJson);
 	data.currentRoundJson.clear();
 
-	//Êä³öµ½ÎÄ¼ş #json 
+	//è¾“å‡ºåˆ°æ–‡ä»¶ #json 
 	Json::FastWriter sw;
 	ofstream json_os;
 	json_os.open(json_filename);
@@ -68,30 +68,30 @@ bool Game::init(string filename, char* json_filename)
 
 void Game::DebugPhase()
 {
-	cout << "/*************** DEBUG ĞÅÏ¢ ***************/" << endl;
+	cout << "/*************** DEBUG ä¿¡æ¯ ***************/" << endl;
 	cout << "Round " << currentRound << endl;
-	cout << "Íæ¼ÒÊ£Óà£º " << playerAlive << " / " << playerSize << endl;
+	cout << "ç©å®¶å‰©ä½™ï¼š " << playerAlive << " / " << playerSize << endl;
 	for (int i = 0; i != data.PlayerNum; ++i)
 	{
-		cout << "Íæ¼Ò " << i << " £º " <<" ×Ü×ÊÔ´Êı£º "<< data.players[i].totalResource() << " ¿Æ¼¼µãÊı£º " << data.players[i].techPoint() << " ¼¼ÄÜµÈ¼¶£º "
-			<< " »Ø¸´ " << data.players[i].getRegenerationLevel() << " ÒÆ¶¯ " << data.players[i].getMoveLevel()
-			<< " ²Ù×÷ " << data.players[i].getExtraControlLevel() << " ·ÀÓù " << data.players[i].getDefenceLevel() 
-			<< " ×î´ó²Ù×÷£º" << data.players[i].maxControlNumber() << endl;
-		cout << "ÏÂÊôÏ¸°û£º";
+		cout << "ç©å®¶ " << i << " ï¼š " <<" æ€»èµ„æºæ•°ï¼š "<< data.players[i].totalResource() << " ç§‘æŠ€ç‚¹æ•°ï¼š " << data.players[i].techPoint() << " æŠ€èƒ½ç­‰çº§ï¼š "
+			<< " å›å¤ " << data.players[i].getRegenerationLevel() << " ç§»åŠ¨ " << data.players[i].getMoveLevel()
+			<< " æ“ä½œ " << data.players[i].getExtraControlLevel() << " é˜²å¾¡ " << data.players[i].getDefenceLevel() 
+			<< " æœ€å¤§æ“ä½œï¼š" << data.players[i].maxControlNumber() << endl;
+		cout << "ä¸‹å±ç»†èƒï¼š";
 		for (TCellID u : data.players[i].cells())
 			cout << u <<" ";
 		cout << endl;
-		cout << "ÅÅÃû£º " << std::find(Rank.begin(),Rank.end(),i) - Rank.begin() + 1;
+		cout << "æ’åï¼š " << std::find(Rank.begin(),Rank.end(),i) - Rank.begin() + 1;
 		cout << endl;
 	}
 	cout << endl;
 	char stg[4] = { 'N','A','D','G' };
 	for (int i = 0; i != data.CellNum; ++i)
 	{
-		cout << "Ï¸°û " << i << " £º " << "ËùÊô£º " << data.cells[i].getPlayerID() << " Î»ÖÃ£º(" << data.cells[i].getPos().m_x << ", " << data.cells[i].getPos().m_y << ")"
-			<< " ×ÊÔ´£º " << data.cells[i].getResource() << " ×Ü×ÊÔ´£º " << data.cells[i].totalResource()
-			<< " ²ßÂÔ£º " << stg[data.cells[i].getStg()]
-			<< " ÕıÔÚ¹¥»÷£º ";
+		cout << "ç»†èƒ " << i << " ï¼š " << "æ‰€å±ï¼š " << data.cells[i].getPlayerID() << " ä½ç½®ï¼š(" << data.cells[i].getPos().m_x << ", " << data.cells[i].getPos().m_y << ")"
+			<< " èµ„æºï¼š " << data.cells[i].getResource() << " æ€»èµ„æºï¼š " << data.cells[i].totalResource()
+			<< " ç­–ç•¥ï¼š " << stg[data.cells[i].getStg()]
+			<< " æ­£åœ¨æ”»å‡»ï¼š ";
 		for (int j = 0; j != data.CellNum; ++j)
 		{
 			if (data.tentacles[i][j])
@@ -99,9 +99,9 @@ void Game::DebugPhase()
 		}
 		cout << endl;
 		if (data.cells[i].getPlayerID() == Neutral)
-			cout << "ÖĞÁ¢Ï¸°ûÊôĞÔ£º" << "Õ¼ÁìÊÆÁ¦£º " << data.cells[i].getOccupyOwner() << " Õ¼Áìµã£º " << data.cells[i].getOccupyPoint() <<endl;
+			cout << "ä¸­ç«‹ç»†èƒå±æ€§ï¼š" << "å é¢†åŠ¿åŠ›ï¼š " << data.cells[i].getOccupyOwner() << " å é¢†ç‚¹ï¼š " << data.cells[i].getOccupyPoint() <<endl;
 	}
-	cout << "´¥ÊÖĞÅÏ¢£º" <<endl;
+	cout << "è§¦æ‰‹ä¿¡æ¯ï¼š" <<endl;
 	for (int i = 0; i != data.CellNum; ++i)
 	{
 		for (int j = 0; j != data.CellNum; ++j)
@@ -117,34 +117,38 @@ void Game::DebugPhase()
 		for (int j = 0; j != data.CellNum; ++j)
 			if (data.tentacles[i][j])
 			{
-				cout << "´¥ÊÖ " << i << " -> " << j << " : "
-					<< " ×´Ì¬£º " << n2str[data.tentacles[i][j]->getstate()];
+				cout << "è§¦æ‰‹ " << i << " -> " << j << " : "
+					<< " çŠ¶æ€ï¼š " << n2str[data.tentacles[i][j]->getstate()];
 				if (data.tentacles[i][j]->getstate() == AfterCut)
-					cout << " Ç°·½×ÊÔ´£º " << data.tentacles[i][j]->getFrontResource()
-					<< "ºó·½×ÊÔ´£º " << data.tentacles[i][j]->getBackResource();
+					cout << " å‰æ–¹èµ„æºï¼š " << data.tentacles[i][j]->getFrontResource()
+					<< "åæ–¹èµ„æºï¼š " << data.tentacles[i][j]->getBackResource();
 				else
-					cout << " ×ÊÔ´£º " << data.tentacles[i][j]->getResource();
+					cout << " èµ„æºï¼š " << data.tentacles[i][j]->getResource();
 				cout << endl;
 			}
 	cout << "\n\n";
 }
 
-//Ã¿»ØºÏ-==============================================================
+//æ¯å›åˆ-==============================================================
 void Game::saveJson(DATA::Data & dataLastRound, DataSupplement & dataSuppleMent)
 {
 	//cellActions
 	for (int i = 0; i != data.CellNum; i++)
 	{
-		//´óĞ¡/×ÊÔ´Öµ/¿Æ¼¼Öµ¸Ä±ä
+		//å¤§å°/èµ„æºå€¼/ç§‘æŠ€å€¼æ”¹å˜
 		if (data.cells[i].getResource() != dataLastRound.cells[i].getResource()
 			|| (data.cells[i].techRegenerateSpeed() != dataSuppleMent.cellTechPoint[i]))
 		{
 			Json::Value resourceChangeJson;
 			resourceChangeJson["type"] = 2;
 			resourceChangeJson["id"] = i;
-			resourceChangeJson["newSize"] = float(sqrt(data.cells[i].getResource())*4 + 10);  //#json_change_8_noon
+			float tem = float(sqrt(data.cells[i].getResource()) * 4 + 10); //#jsonChange_3_9
+			tem = floor(tem * 100.000f + 0.5) / 100.000f;
+			resourceChangeJson["newSize"] = tem;
 			resourceChangeJson["newResource"] = float(data.cells[i].getResource());
-			resourceChangeJson["newTechVal"] = data.cells[i].techRegenerateSpeed();
+			float techTem = data.cells[i].techRegenerateSpeed();
+			techTem = floor(techTem * 100.000f + 0.5) / 100.000f;
+			resourceChangeJson["newTechVal"] = techTem;
 
 			Json::Value srcTentatclesJson;
 			Json::Value dstTentaclesJson;
@@ -172,7 +176,7 @@ void Game::saveJson(DATA::Data & dataLastRound, DataSupplement & dataSuppleMent)
 			data.currentRoundJson["cellActions"].append(resourceChangeJson);
 		}
 
-		//µÈ¼¶¸Ä±ä done
+		//ç­‰çº§æ”¹å˜ done
 		if (data.cells[i].getCellType() != dataLastRound.cells[i].getCellType())
 		{
 			Json::Value typeChangeJson;
@@ -182,7 +186,7 @@ void Game::saveJson(DATA::Data & dataLastRound, DataSupplement & dataSuppleMent)
 			data.currentRoundJson["cellActions"].append(typeChangeJson);
 		}
 
-		//²ßÂÔ¸Ä±ä done
+		//ç­–ç•¥æ”¹å˜ done
 		if (data.cells[i].getStg() != dataLastRound.cells[i].getStg())
 		{
 			Json::Value stgChangeJson;
@@ -192,13 +196,23 @@ void Game::saveJson(DATA::Data & dataLastRound, DataSupplement & dataSuppleMent)
 			data.currentRoundJson["cellActions"].append(stgChangeJson);
 		}
 
-		//ÅÉÏµ¸Ä±ä 5 change
+		//æ´¾ç³»æ”¹å˜ 5 change
 		if (data.cells[i].getPlayerID() != dataLastRound.cells[i].getPlayerID())
 		{
 			Json::Value teamJson;
 			teamJson["type"] = 5;
 			teamJson["id"] = i;
-			teamJson["newTeam"] = data.cells[i].getPlayerID();
+			teamJson["newTeam"] = data.cells[i].getPlayerID() + 1;
+			//#jsonChange_3_9 æ·»åŠ è§¦æ‰‹åˆ—è¡¨
+			for (int j=0;j<data.CellNum;j++)
+				for (int k = 0; k < data.CellNum; k++)
+				{
+					if (data.tentacles[j][k] && data.tentacles[j][k]->getSourceCell() == i)
+					{
+						teamJson["srcTentatcles"].append(data.tentacles[j][k]->getID());
+					}
+				}
+			
 			data.currentRoundJson["cellActions"].append(teamJson);
 		}
 
@@ -221,11 +235,11 @@ void Game::saveJson(DATA::Data & dataLastRound, DataSupplement & dataSuppleMent)
 				if (data.tentacles[i][j] && data.tentacles[i][j]->getstate() == AfterCut) cout << "now AfterCut" << endl;
 				*/
 
-				//ĞÂÔö done
+				//æ–°å¢ done
 				if (!dataLastRound.tentacles[i][j] && data.tentacles[i][j] &&
 					data.tentacles[i][j]->getResource()>0.001)
 				{
-					//ÏÈĞÂÔö
+					//å…ˆæ–°å¢
 					Json::Value tentacleAddtionJson;
 					tentacleAddtionJson["type"] = 1;
 					tentacleAddtionJson["id"] = data.tentacles[i][j]->getID();
@@ -235,7 +249,7 @@ void Game::saveJson(DATA::Data & dataLastRound, DataSupplement & dataSuppleMent)
 					data.currentRoundJson["tentacleActions"].append(tentacleAddtionJson);
 
 
-					//µÚÒ»´ÎÉì³¤
+					//ç¬¬ä¸€æ¬¡ä¼¸é•¿
 					Json::Value tentacleExtendJson;
 					tentacleExtendJson["type"] = 2;
 					tentacleExtendJson["id"] = data.tentacles[i][j]->getID();
@@ -249,7 +263,7 @@ void Game::saveJson(DATA::Data & dataLastRound, DataSupplement & dataSuppleMent)
 
 				}
 
-				//Éì³¤  done
+				//ä¼¸é•¿  done
 				if (dataLastRound.tentacles[i][j] && data.tentacles[i][j] && data.tentacles[i][j]->getResource()>0.001
 					&& (dataLastRound.tentacles[i][j]->getBackResource()+dataLastRound.tentacles[i][j]->getResource() <
 						data.tentacles[i][j]->getResource()+data.tentacles[i][j]->getBackResource()))
@@ -268,7 +282,7 @@ void Game::saveJson(DATA::Data & dataLastRound, DataSupplement & dataSuppleMent)
 				}
 
 
-				//Ëõ¶Ì
+				//ç¼©çŸ­
 				if (dataLastRound.tentacles[i][j] && data.tentacles[i][j] &&
 					(
 					(dataLastRound.tentacles[i][j]->getResource() + dataLastRound.tentacles[i][j]->getBackResource())
@@ -290,7 +304,7 @@ void Game::saveJson(DATA::Data & dataLastRound, DataSupplement & dataSuppleMent)
 				}
 
 				/*
-				//´«ÊäËÙ¶È¸Ä±ä ¿ÉÄÜĞèÒª¸ü¶àµÄĞÅÏ¢
+				//ä¼ è¾“é€Ÿåº¦æ”¹å˜ å¯èƒ½éœ€è¦æ›´å¤šçš„ä¿¡æ¯
 				if (dataLastRound.tentacles[i][j]&&data.tentacles[i][j]&&
 				dataLastRound.tentacles[i][j]->getstate()== Arrived &&
 				data.tentacles[i][j]->getstate() == Arrived)
@@ -298,15 +312,15 @@ void Game::saveJson(DATA::Data & dataLastRound, DataSupplement & dataSuppleMent)
 				}
 				*/
 
-				//ÇĞ¶Ï ÔÚtentacle.cpp cut()ÖĞ
+				//åˆ‡æ–­ åœ¨tentacle.cpp cut()ä¸­
 
-				//ÏûÊ§ done
+				//æ¶ˆå¤± done
 				if (dataLastRound.tentacles[i][j] &&
 					(!data.tentacles[i][j] ||
 					(data.tentacles[i][j]->getResource() + data.tentacles[i][j]->getBackResource())<0.001)
 					)
 				{
-					//ÏÈËõ»ØºóÏûÊ§
+					//å…ˆç¼©å›åæ¶ˆå¤±
 					Json::Value tentacleBackJson;
 					tentacleBackJson["type"] = 3;
 					tentacleBackJson["id"] = dataLastRound.tentacles[i][j]->getID();
@@ -319,7 +333,7 @@ void Game::saveJson(DATA::Data & dataLastRound, DataSupplement & dataSuppleMent)
 					data.currentRoundJson["tentacleActions"].append(tentacleBackJson);
 
 
-					//ÏûÊ§
+					//æ¶ˆå¤±
 					Json::Value tentacleGoneJson;
 					tentacleGoneJson["type"] = 6;
 					tentacleGoneJson["id"] = dataLastRound.tentacles[i][j]->getID();
@@ -332,7 +346,7 @@ void Game::saveJson(DATA::Data & dataLastRound, DataSupplement & dataSuppleMent)
 
 			//cutTentacleActions
 			{
-				//Ëõ¶Ì
+				//ç¼©çŸ­
 				if (dataLastRound.tentacles[i][j] && data.tentacles[i][j]
 					&& dataLastRound.tentacles[i][j]->getFrontResource()>0.0001&&data.tentacles[i][j]->getFrontResource()>0.0001 &&
 					(data.tentacles[i][j]->getFrontResource()<dataLastRound.tentacles[i][j]->getFrontResource()))
@@ -351,12 +365,12 @@ void Game::saveJson(DATA::Data & dataLastRound, DataSupplement & dataSuppleMent)
 				}
 
 
-				//cut ÏûÊ§
+				//cut æ¶ˆå¤±
 				if (
 					(dataLastRound.tentacles[i][j] && (dataLastRound.tentacles[i][j]->getFrontResource() > 0.001))
 					&& ((!data.tentacles[i][j]) || (data.tentacles[i][j]->getFrontResource() < 0.0001)))
 				{
-					//ÏÈËõ¶Ì
+					//å…ˆç¼©çŸ­
 					Json::Value cutTentacleBackJson;
 					cutTentacleBackJson["type"] = 2;
 					cutTentacleBackJson["id"] = dataLastRound.tentacles[i][j]->getCutID();
@@ -369,7 +383,7 @@ void Game::saveJson(DATA::Data & dataLastRound, DataSupplement & dataSuppleMent)
 					data.currentRoundJson["cutTentacleActions"].append(cutTentacleBackJson);
 
 
-					//ºóÏûÊ§
+					//åæ¶ˆå¤±
 					Json::Value cutTentacleGoneJson;
 					cutTentacleGoneJson["type"] = 3;
 					cutTentacleGoneJson["id"] = dataLastRound.tentacles[i][j]->getCutID();
@@ -377,15 +391,15 @@ void Game::saveJson(DATA::Data & dataLastRound, DataSupplement & dataSuppleMent)
 				}
 
 
-				//Ò»¸ö»ØºÏÄÚÍê³ÉĞÂ½¨¡¢Ëõ¶Ì¡¢ÏûÊ§
-				if (    //Ìõ¼ş£ºÒÑ¾­Íê³ÉÁËĞÂ½¨£¬ÇÒÉÏ´Î»¹ÊÇÓĞµÄ´¥ÊÖÇĞ£¬µ«ÊÇÕâ´ÎÃ»ÓĞ´¥ÊÖÁË£¬»òÕß¶Ï´¥ÊÖÃ»ÓĞÁË
+				//ä¸€ä¸ªå›åˆå†…å®Œæˆæ–°å»ºã€ç¼©çŸ­ã€æ¶ˆå¤±
+				if (    //æ¡ä»¶ï¼šå·²ç»å®Œæˆäº†æ–°å»ºï¼Œä¸”ä¸Šæ¬¡è¿˜æ˜¯æœ‰çš„è§¦æ‰‹åˆ‡ï¼Œä½†æ˜¯è¿™æ¬¡æ²¡æœ‰è§¦æ‰‹äº†ï¼Œæˆ–è€…æ–­è§¦æ‰‹æ²¡æœ‰äº†
 					(data.cutTentacleJson[i][j] != -1) && dataLastRound.tentacles[i][j] &&
 					(!data.tentacles[i][j] || data.tentacles[i][j]->getFrontResource() < 0.001)
 					)
 				{
 					int m_cutID = int(data.cutTentacleJson[i][j] / 100000000);
 					double _position = data.cutTentacleJson[i][j] - m_cutID * 100000000;
-					//ÏÈËõ¶Ì
+					//å…ˆç¼©çŸ­
 					Json::Value cutTentacleBackJson;
 					cutTentacleBackJson["type"] = 2;
 					cutTentacleBackJson["id"] = m_cutID;
@@ -398,7 +412,7 @@ void Game::saveJson(DATA::Data & dataLastRound, DataSupplement & dataSuppleMent)
 					data.currentRoundJson["cutTentacleActions"].append(cutTentacleBackJson);
 
 
-					//ºóÏûÊ§
+					//åæ¶ˆå¤±
 					Json::Value cutTentacleGoneJson;
 					cutTentacleGoneJson["type"] = 3;
 					cutTentacleGoneJson["id"] = m_cutID;
@@ -412,15 +426,15 @@ void Game::saveJson(DATA::Data & dataLastRound, DataSupplement & dataSuppleMent)
 	}
 }
 
-//Éú³ÉÑ¡ÊÖĞÅÏ¢
+//ç”Ÿæˆé€‰æ‰‹ä¿¡æ¯
 vector<Info> Game::generateInfo()
 {
 	vector<Info> info;
-	//PlayerInfo playerInfo;   //ÊÆÁ¦ĞÅÏ¢
-	//CellInfo cellInfo; //Í¬Ñ§ĞÅÏ¢
-	//TentacleInfo tentacleInfo; //´¥ÊÖĞÅÏ¢
-	BaseMap* mapInfo;  //µØÍ¼ĞÅÏ¢
-	//³õÊ¼»¯ÆäËûĞÅÏ¢
+	//PlayerInfo playerInfo;   //åŠ¿åŠ›ä¿¡æ¯
+	//CellInfo cellInfo; //åŒå­¦ä¿¡æ¯
+	//TentacleInfo tentacleInfo; //è§¦æ‰‹ä¿¡æ¯
+	BaseMap* mapInfo;  //åœ°å›¾ä¿¡æ¯
+	//åˆå§‹åŒ–å…¶ä»–ä¿¡æ¯
 	for (int i = 0; i != data.PlayerNum; ++i)
 	{
 		Info I;
@@ -439,7 +453,7 @@ vector<Info> Game::generateInfo()
 		I.mapInfo = &data.gameMap;
 		info.push_back(I);
 	}
-	//³õÊ¼»¯ÕóÓª
+	//åˆå§‹åŒ–é˜µè¥
 	for (int i = 0; i != data.PlayerNum; ++i)
 	{
 		PlayerInfo temp;
@@ -460,7 +474,7 @@ vector<Info> Game::generateInfo()
 		}
 	}
 
-	//³õÊ¼»¯Ï¸°ûĞÅÏ¢
+	//åˆå§‹åŒ–ç»†èƒä¿¡æ¯
 	for (int i = 0; i != data.CellNum; ++i)
 	{
 		CellInfo temp;
@@ -482,7 +496,7 @@ vector<Info> Game::generateInfo()
 		}
 	}
 
-	//³õÊ¼»¯Tentacle
+	//åˆå§‹åŒ–Tentacle
 	vector<TentacleInfo> templist;
 	for (int k = 0; k != data.PlayerNum; ++k)
 		for (int j = 0; j != data.CellNum; ++j)
@@ -518,7 +532,7 @@ vector<Info> Game::generateInfo()
 		}
 	}
 
-	//³õÊ¼»¯µØÍ¼£¬»ùÀàÖ¸Õë
+	//åˆå§‹åŒ–åœ°å›¾ï¼ŒåŸºç±»æŒ‡é’ˆ
 	mapInfo = &data.gameMap;
 
 	return info;
@@ -537,40 +551,40 @@ void Game::takeEffect(TransEffect& te)
 	Tentacle& t = *data.tentacles[te.m_source][te.m_target];
 	t.takeEffect(te);
 	data.cells[te.m_source].addResource(te.m_resourceToSource);
-	if(abs(te.m_resourceToTarget) > 0.0001)//ÓĞĞ§
+	if(abs(te.m_resourceToTarget) > 0.0001)//æœ‰æ•ˆ
 		if (data.cells[te.m_target].getPlayerID() != Neutral)
 			data.cells[te.m_target].addResource(te.m_resourceToTarget);
-		else//Ä¿±êÎªÖĞÁ¢
+		else//ç›®æ ‡ä¸ºä¸­ç«‹
 			data.cells[te.m_target].N_addOcuppyPoint(data.cells[te.m_source].getPlayerID(), -te.m_resourceToTarget);
 	te.handle = false;
 	cout << te.m_source << " -> " << te.m_target;
 	switch (te.m_type)
 	{
 	case moveE:
-		cout << " ÒÆ¶¯£º ";
+		cout << " ç§»åŠ¨ï¼š ";
 		break;
 	case transE:
-		cout << " ´«Êä£º ";
+		cout << " ä¼ è¾“ï¼š ";
 		break;
 	default:
 		break;
 	}
-	cout << " ¶ÔÔ´Ï¸°û " << te.m_source << " : " << te.m_resourceToSource
-		<< " ¶ÔÄ¿±êÏ¸°û " << te.m_target << " : " << te.m_resourceToTarget
-		<< " ×ÔÉí¸Ä±ä£º" << te.m_resourceChange
+	cout << " å¯¹æºç»†èƒ " << te.m_source << " : " << te.m_resourceToSource
+		<< " å¯¹ç›®æ ‡ç»†èƒ " << te.m_target << " : " << te.m_resourceToTarget
+		<< " è‡ªèº«æ”¹å˜ï¼š" << te.m_resourceChange
 		<< "/" << te.m_frontChange << "/" << te.m_backChange << endl;
 }
 
 void Game::regeneratePhase()
 {
-	/*//»Ø¸´¿Æ¼¼µãÊı
+	/*//å›å¤ç§‘æŠ€ç‚¹æ•°
 	for (int i = 0;i!=data.PlayerNum;++i)
 	{
 		Player& p = data.players[i];
 		if (p.isAlive())
 			p.regenerateTechPoint();
 	}*/
-	//Ã¿¸öÏ¸°û»Ø¸´×ÊÔ´//Í¬Ê±»Ø¸´ÊÆÁ¦¿Æ¼¼µãÊı
+	//æ¯ä¸ªç»†èƒå›å¤èµ„æº//åŒæ—¶å›å¤åŠ¿åŠ›ç§‘æŠ€ç‚¹æ•°
 	for (int i = 0;i!=data.CellNum;++i)
 	{
 		if (data.cells[i].getPlayerID() != Neutral) {
@@ -582,7 +596,7 @@ void Game::regeneratePhase()
 void Game::movePhase()
 {
 	TransEffect** TE = new TransEffect*[data.CellNum];
-	//µÃµ½TE±í
+	//å¾—åˆ°TEè¡¨
 	for (int i = 0; i != data.CellNum; ++i)
 	{
 		TE[i] = new TransEffect[data.CellNum];
@@ -593,30 +607,30 @@ void Game::movePhase()
 			TE[i][j] = data.tentacles[i][j]->move();
 		}
 	}
-	//´¦ÀíTE±í
+	//å¤„ç†TEè¡¨
 	for (int i = 0; i != data.CellNum; ++i)
 	{
 		for (int j = 0; j != data.CellNum; ++j)
 		{
 			if (TE[i][j].handle)
 			{
-				if (TE[j][i].handle)//¶ÔÃæÒ²ÓĞ´¥ÊÖ
+				if (TE[j][i].handle)//å¯¹é¢ä¹Ÿæœ‰è§¦æ‰‹
 				{
 					if (data.tentacles[i][j]->getstate() == Extending
-						&& data.tentacles[j][i]->getstate() == Extending)//¶¼ÔÚÑÓÉìÖĞ
+						&& data.tentacles[j][i]->getstate() == Extending)//éƒ½åœ¨å»¶ä¼¸ä¸­
 					{
 						if (data.tentacles[i][j]->getResource() + data.tentacles[j][i]->getResource()
-							+ TE[i][j].m_resourceChange + TE[j][i].m_resourceChange <= data.tentacles[i][j]->getLength() / 10)//ÉĞÎ´´¥Åö
+							+ TE[i][j].m_resourceChange + TE[j][i].m_resourceChange <= data.tentacles[i][j]->getLength() / 10)//å°šæœªè§¦ç¢°
 						{
 							takeEffect(TE[i][j]); takeEffect(TE[j][i]);
 						}
-						else//¾ÛÔÚÖĞ¼ä
+						else//èšåœ¨ä¸­é—´
 						{
 							TResourceD distance = data.tentacles[i][j]->getLength() * Density - (data.tentacles[i][j]->getResource() + data.tentacles[j][i]->getResource());
 							TE[i][j].m_resourceChange = TE[j][i].m_resourceChange = distance / 2;
 							TE[i][j].m_resourceToSource = TE[j][i].m_resourceToSource = -distance / 2;
-							//ÅĞ¶¨¹¥·À
-							if (data.tentacles[i][j]->getResource() + distance / 2 > data.tentacles[i][j]->getLength() *Density / 2)//Ô½¹ıÒ»°ë
+							//åˆ¤å®šæ”»é˜²
+							if (data.tentacles[i][j]->getResource() + distance / 2 > data.tentacles[i][j]->getLength() *Density / 2)//è¶Šè¿‡ä¸€åŠ
 							{
 								data.tentacles[i][j]->setstate(Attacking);
 								data.tentacles[j][i]->setstate(Backing);
@@ -638,33 +652,33 @@ void Game::movePhase()
 					else if (data.tentacles[i][j]->getstate() == Attacking
 						&& data.tentacles[j][i]->getstate() == Backing)
 					{
-						if (data.tentacles[i][j]->getResource() + TE[i][j].m_resourceChange > data.tentacles[i][j]->getLength()*Density / 2) //¼´½«ÍÆµ½ÖĞµã
+						if (data.tentacles[i][j]->getResource() + TE[i][j].m_resourceChange > data.tentacles[i][j]->getLength()*Density / 2) //å³å°†æ¨åˆ°ä¸­ç‚¹
 						{
-							TResourceD distance = data.tentacles[i][j]->getLength() *Density / 2 - data.tentacles[i][j]->getResource();//ÀëÖĞµãµÄ¾àÀë
+							TResourceD distance = data.tentacles[i][j]->getLength() *Density / 2 - data.tentacles[i][j]->getResource();//ç¦»ä¸­ç‚¹çš„è·ç¦»
 							TE[i][j].m_resourceChange = TE[j][i].m_resourceToSource = distance;
 							TE[i][j].m_resourceToSource = TE[j][i].m_resourceChange = -distance;
 							data.tentacles[j][i]->setstate(Confrontation);
 							data.tentacles[i][j]->setstate(Confrontation);
 							takeEffect(TE[i][j]); takeEffect(TE[j][i]);
 						}
-						else//Ë³Æä×ÔÈ»
+						else//é¡ºå…¶è‡ªç„¶
 						{
 							takeEffect(TE[i][j]); takeEffect(TE[j][i]);
 						}
 					}
 					else if (data.tentacles[i][j]->getstate() == Backing
-						&& data.tentacles[j][i]->getstate() == Attacking)//ÓëÉÏÃæÏà·´
+						&& data.tentacles[j][i]->getstate() == Attacking)//ä¸ä¸Šé¢ç›¸å
 					{
-						if (data.tentacles[j][i]->getResource() + TE[j][i].m_resourceChange > data.tentacles[j][i]->getLength()*Density / 2) //¼´½«ÍÆµ½ÖĞµã
+						if (data.tentacles[j][i]->getResource() + TE[j][i].m_resourceChange > data.tentacles[j][i]->getLength()*Density / 2) //å³å°†æ¨åˆ°ä¸­ç‚¹
 						{
-							TResourceD distance = data.tentacles[j][i]->getLength() *Density / 2 - data.tentacles[j][i]->getResource();//ÀëÖĞµãµÄ¾àÀë
+							TResourceD distance = data.tentacles[j][i]->getLength() *Density / 2 - data.tentacles[j][i]->getResource();//ç¦»ä¸­ç‚¹çš„è·ç¦»
 							TE[j][i].m_resourceChange = TE[i][j].m_resourceToSource = distance;
 							TE[j][i].m_resourceToSource = TE[i][j].m_resourceChange = -distance;
 							data.tentacles[i][j]->setstate(Confrontation);
 							data.tentacles[j][i]->setstate(Confrontation);
 							takeEffect(TE[j][i]); takeEffect(TE[i][j]);
 						}
-						else//Ë³Æä×ÔÈ»
+						else//é¡ºå…¶è‡ªç„¶
 						{
 							takeEffect(TE[j][i]); takeEffect(TE[i][j]);
 						}
@@ -707,7 +721,7 @@ void Game::movePhase()
 			}
 		}
 	}
-	//¿´ÊÇ·ñ³öÏÖÊÆÁ¦×ªÒÆ
+	//çœ‹æ˜¯å¦å‡ºç°åŠ¿åŠ›è½¬ç§»
 	OwnerChange(TE);
 	for (int i = 0; i != data.CellNum; ++i)
 		delete[] TE[i];
@@ -717,7 +731,7 @@ void Game::movePhase()
 void Game::transPhase()
 {
 	TransEffect** TE = new TransEffect*[data.CellNum];
-	//µÃµ½TE±í
+	//å¾—åˆ°TEè¡¨
 	for (int i = 0; i != data.CellNum; ++i)
 	{
 		TE[i] = new TransEffect[data.CellNum];
@@ -751,7 +765,7 @@ void Game::endPhase()
 			if (data.tentacles[i][j]
 				&& data.tentacles[i][j]->getstate() == AfterCut
 				&& data.tentacles[i][j]->getFrontResource() <= 0.0001
-				&& data.tentacles[i][j]->getBackResource() <= 0.0001)//Êµ¼ÊÒÑ¾­Ã»ÁË
+				&& data.tentacles[i][j]->getBackResource() <= 0.0001)//å®é™…å·²ç»æ²¡äº†
 			{
 				delete data.tentacles[i][j];
 				data.tentacles[i][j] = nullptr;
@@ -764,12 +778,12 @@ void Game::endPhase()
 		if (data.players[i].isAlive() && data.players[i].cells().empty())
 			killPlayer(i);
 	}
-	//¸üĞÂÏ¸°ûĞÅÏ¢
+	//æ›´æ–°ç»†èƒä¿¡æ¯
 	for (int i = 0; i != data.CellNum; ++i)
 	{
 		data.cells[i].updateProperty();
 	}
-	//ÅÅÃûĞÅÏ¢
+	//æ’åä¿¡æ¯
 	vector<std::pair<TPlayerID, TResourceD> > playerpair;
 	for (int i = 0;i!=data.PlayerNum;++i)
 	{
@@ -792,7 +806,7 @@ void Game::commandPhase(vector<CommandList>& command_list)
 		controlCount[i] = 0;
 		for (Command& c : command_list[i])
 		{
-			//²Ù×÷ÊıÒç³ö
+			//æ“ä½œæ•°æº¢å‡º
 			if (data.players[i].maxControlNumber() <= controlCount[i])
 				break;
 			switch (c.type)
@@ -850,12 +864,12 @@ void Game::killPlayer(TPlayerID id)
 
 void Game::handleExtending(TransEffect& te)
 {
-	//ÏÂÃæÊÇÍ¨³£µÄ´¦ÀíExtendµÄ·½·¨
+	//ä¸‹é¢æ˜¯é€šå¸¸çš„å¤„ç†Extendçš„æ–¹æ³•
 	int i = te.m_source;
 	int j = te.m_target;
-	if (data.tentacles[i][j]->getResource() + te.m_resourceChange > data.tentacles[i][j]->getLength()*Density)//¼´½«µÖ´ï
+	if (data.tentacles[i][j]->getResource() + te.m_resourceChange > data.tentacles[i][j]->getLength()*Density)//å³å°†æŠµè¾¾
 	{
-		TResourceD distance = data.tentacles[i][j]->getLength() *Density - data.tentacles[i][j]->getResource();//ÀëÄ¿±êµÄ¾àÀë
+		TResourceD distance = data.tentacles[i][j]->getLength() *Density - data.tentacles[i][j]->getResource();//ç¦»ç›®æ ‡çš„è·ç¦»
 		te.m_resourceChange = distance;
 		te.m_resourceToSource = -distance;
 		data.tentacles[i][j]->setstate(Arrived);
@@ -871,7 +885,7 @@ void Game::OwnerChange(TransEffect** TE)
 	{
 		if (data.cells[i].getResource()!=Neutral && data.cells[i].getResource() <= 0 )
 		{
-			set<TPlayerID> Cuter, Arriver, Confrontationer;//¶ÔÓ¦ÇĞ¶Ï¡¢Ñ¹ÖÆ¡¢¶ÔÖÅÈıÖÖ¹¥»÷ÓÅÏÈµÈ¼¶
+			set<TPlayerID> Cuter, Arriver, Confrontationer;//å¯¹åº”åˆ‡æ–­ã€å‹åˆ¶ã€å¯¹å³™ä¸‰ç§æ”»å‡»ä¼˜å…ˆç­‰çº§
 			for (int j = 0; j != data.CellNum; ++j)
 			{
 				if (data.tentacles[j][i]
@@ -880,7 +894,7 @@ void Game::OwnerChange(TransEffect** TE)
 					switch (TE[j][i].m_currstate)
 					{
 					case AfterCut:
-						if(TE[j][i].m_resourceToTarget <= -0.01) //È·ÊµÔì³ÉÓĞĞ§¹¥»÷µÄÇĞ¶Ï´¥ÊÖ
+						if(TE[j][i].m_resourceToTarget <= -0.01) //ç¡®å®é€ æˆæœ‰æ•ˆæ”»å‡»çš„åˆ‡æ–­è§¦æ‰‹
 							Cuter.insert(TE[j][i].m_currOwner);
 						break;
 					case Arrived:
@@ -896,7 +910,7 @@ void Game::OwnerChange(TransEffect** TE)
 					}
 				}
 			}
-			//ÒÀ¾İ¹¥»÷µÈ¼¶ÅĞ¶¨¹éÊô
+			//ä¾æ®æ”»å‡»ç­‰çº§åˆ¤å®šå½’å±
 			if (!Cuter.empty())
 				if (Cuter.size() == 1)
 					data.cells[i].changeOwnerTo(*Cuter.begin());
@@ -912,11 +926,11 @@ void Game::OwnerChange(TransEffect** TE)
 					data.cells[i].changeOwnerTo(*Confrontationer.begin());
 				else
 					data.cells[i].changeOwnerTo(Neutral);
-			else//Ã»ÓĞÈËÔÚ½ø¹¥,Ö±½ÓÇĞ¶ÏËùÓĞÁËÊÂ
+			else//æ²¡æœ‰äººåœ¨è¿›æ”»,ç›´æ¥åˆ‡æ–­æ‰€æœ‰äº†äº‹
 				for (int j = 0; j != data.CellNum; ++j)
-					data.cells[i].cutTentacle(j, 1000000/*Ò»¸öºÜ´óµÄÊı*/);
+					data.cells[i].cutTentacle(j, 1000000/*ä¸€ä¸ªå¾ˆå¤§çš„æ•°*/);
 		}
-		else if (data.cells[i].getPlayerID() == Neutral && data.cells[i].getOccupyPoint() > data.cells[i].getResource() / 3)//ÖĞÁ¢¸Ä±ä
+		else if (data.cells[i].getPlayerID() == Neutral && data.cells[i].getOccupyPoint() > data.cells[i].getResource() / 3)//ä¸­ç«‹æ”¹å˜
 		{
 			data.cells[i].changeOwnerTo(data.cells[i].getOccupyOwner());
 		}
@@ -929,15 +943,15 @@ void sample_ai(Info& info)
 {
 	vector<int> para;
 	int temp;
-	cout << "Player " << info.myID << " ÇëÊäÈë²Ù×÷£º" << endl;
+	cout << "Player " << info.myID << " è¯·è¾“å…¥æ“ä½œï¼š" << endl;
 	while (1)
 	{
 		para.clear();
-		cout << "ÊÇ·ñÊäÈëÖ¸Áî£¿(½áÊøÊäÈë 0)" << endl;
+		cout << "æ˜¯å¦è¾“å…¥æŒ‡ä»¤ï¼Ÿ(ç»“æŸè¾“å…¥ 0)" << endl;
 		cin >> temp;
 		if (temp == 0)
 			break;
-		cout << "ÇëÊäÈë£ºÉı¼¶(0)£¬²ßÂÔ(1)£¬Éì³ö(2)£¬ÇĞ¶Ï(3)£¬ÒÔ -1 ½áÊø\n";
+		cout << "è¯·è¾“å…¥ï¼šå‡çº§(0)ï¼Œç­–ç•¥(1)ï¼Œä¼¸å‡º(2)ï¼Œåˆ‡æ–­(3)ï¼Œä»¥ -1 ç»“æŸ\n";
 		cin.clear();	
 		cin.sync();	
 		while (cin >> temp)
