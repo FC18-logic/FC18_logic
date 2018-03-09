@@ -1,4 +1,4 @@
-#include "game.h"
+﻿#include "game.h"
 #include <set>
 #include <iostream>
 #include <fstream>
@@ -202,17 +202,16 @@ void Game::saveJson(DATA::Data & dataLastRound, DataSupplement & dataSuppleMent)
 			Json::Value teamJson;
 			teamJson["type"] = 5;
 			teamJson["id"] = i;
-			teamJson["newTeam"] = data.cells[i].getPlayerID() + 1;
+			teamJson["newTeam"] =  data.cells[i].getPlayerID() + 1 ;
 			//#jsonChange_3_9 添加触手列表
 			for (int j=0;j<data.CellNum;j++)
-				for (int k = 0; k < data.CellNum; k++)
+				if (data.tentacles[i][j])
 				{
-					if (data.tentacles[j][k] && data.tentacles[j][k]->getSourceCell() == i)
-					{
-						teamJson["srcTentatcles"].append(data.tentacles[j][k]->getID());
-					}
+					if (data.tentacles[i][j]->getBackResource()+data.tentacles[i][j]->getResource()>0.001)
+						teamJson["srcTentatcles"].append(data.tentacles[i][j]->getID());
+					if (data.tentacles[i][j]->getFrontResource() > 0.001)
+						teamJson["cutTentacles"].append(data.tentacles[i][j]->getCutID());
 				}
-			
 			data.currentRoundJson["cellActions"].append(teamJson);
 		}
 
