@@ -77,7 +77,7 @@ void Game::DebugPhase()
 			<< " 回复 " << data.players[i].getRegenerationLevel() << " 移动 " << data.players[i].getMoveLevel()
 			<< " 操作 " << data.players[i].getExtraControlLevel() << " 防御 " << data.players[i].getDefenceLevel() 
 			<< " 最大操作：" << data.players[i].maxControlNumber() << endl;
-		cout << "下属细胞：";
+		cout << "当前细胞： ";
 		for (TCellID u : data.players[i].cells())
 			cout << u <<" ";
 		cout << endl;
@@ -101,7 +101,7 @@ void Game::DebugPhase()
 		if (data.cells[i].getPlayerID() == Neutral)
 			cout << "中立细胞属性：" << "占领势力： " << data.cells[i].getOccupyOwner() << " 占领点： " << data.cells[i].getOccupyPoint() <<endl;
 	}
-	cout << "触手信息：" <<endl;
+	cout << "触手信息: " <<endl;
 	for (int i = 0; i != data.CellNum; ++i)
 	{
 		for (int j = 0; j != data.CellNum; ++j)
@@ -202,16 +202,12 @@ void Game::saveJson(DATA::Data & dataLastRound, DataSupplement & dataSuppleMent)
 			Json::Value teamJson;
 			teamJson["type"] = 5;
 			teamJson["id"] = i;
-			teamJson["newTeam"] =  data.cells[i].getPlayerID() + 1 ;
+			teamJson["newTeam"] = data.cells[i].getPlayerID() + 1;
 			//#jsonChange_3_9 添加触手列表
-			for (int j=0;j<data.CellNum;j++)
-				if (data.tentacles[i][j])
-				{
-					if (data.tentacles[i][j]->getBackResource()+data.tentacles[i][j]->getResource()>0.001)
-						teamJson["srcTentatcles"].append(data.tentacles[i][j]->getID());
-					if (data.tentacles[i][j]->getFrontResource() > 0.001)
-						teamJson["cutTentacles"].append(data.tentacles[i][j]->getCutID());
-				}
+			for (TTentacleID id:data.cells[i].getTentacles())
+			{
+				teamJson["srcTentatcles"].append(id);
+			}
 			data.currentRoundJson["cellActions"].append(teamJson);
 		}
 
@@ -570,7 +566,7 @@ void Game::takeEffect(TransEffect& te)
 	}
 	cout << " 对源细胞 " << te.m_source << " : " << te.m_resourceToSource
 		<< " 对目标细胞 " << te.m_target << " : " << te.m_resourceToTarget
-		<< " 自身改变：" << te.m_resourceChange
+		<< " 自身改变: " << te.m_resourceChange
 		<< "/" << te.m_frontChange << "/" << te.m_backChange << endl;
 }
 

@@ -138,6 +138,7 @@ bool Cell::addTentacle(const TCellID& target)
 				t->setstate(Extending);
 				data->tentacles[m_ID][target] = t;
 				m_currTentacleNumber++;
+				m_currTentacle.insert(t->getID());
 				return true;
 			}
 			case Arrived:
@@ -146,6 +147,7 @@ bool Cell::addTentacle(const TCellID& target)
 				t->setstate(Attacking); data->tentacles[target][m_ID]->setstate(Backing);
 				data->tentacles[m_ID][target] = t;
 				m_currTentacleNumber++;
+				m_currTentacle.insert(t->getID());
 				return true;
 			}
 			case AfterCut:
@@ -158,6 +160,7 @@ bool Cell::addTentacle(const TCellID& target)
 					t->setstate(Extending);
 					data->tentacles[m_ID][target] = t;
 					m_currTentacleNumber++;
+					m_currTentacle.insert(t->getID());
 					return true;
 				}
 			}
@@ -173,6 +176,7 @@ bool Cell::addTentacle(const TCellID& target)
 		t->setstate(Extending);
 		data->tentacles[m_ID][target] = t;
 		m_currTentacleNumber++;
+		m_currTentacle.insert(t->getID());
 		return true;
 	}
 	return false;
@@ -215,6 +219,11 @@ void Cell::changeOwnerTo(TPlayerID newOwner)
 	}
 	if(m_PlayerID != Neutral) //不是中立则重置到10
 		m_resource = 10;
+	else
+	{
+		m_occupyOwner = Neutral;
+		m_occupyPoint = 0.0;
+	}
 	m_PlayerID = newOwner; //改变主人
 }
 

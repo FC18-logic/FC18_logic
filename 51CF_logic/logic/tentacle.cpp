@@ -305,4 +305,5 @@ TResourceD Tentacle::totalResource() const
 void Tentacle::finish()
 {
 	data->cells[m_source].m_currTentacleNumber--;
+	data->cells[m_source].getTentacles().erase(m_ID);
 }

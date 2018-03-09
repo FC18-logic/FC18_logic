@@ -74,6 +74,7 @@ public:
 	void    changeOwnerTo(TPlayerID newOwner); //改变主人，资源结算需在外部
 	void    N_addOcuppyPoint(TPlayerID owner, TResourceD point);  //N_前缀/只有中立细胞能够调用/加相应点数
 	void    subTentacleNum() { m_currTentacleNumber--; }
+	std::set<TTentacleID>& getTentacles() { return m_currTentacle; }
 
 private:
 	TCellID m_ID; //我的ID
@@ -89,6 +90,7 @@ private:
 	TResourceD              m_occupyPoint;         //中立同学的占有值
 	TPlayerID               m_occupyOwner;       //中立点所属者
 	TTentacleNum m_currTentacleNumber;
+	std::set<TTentacleID> m_currTentacle;
 };
 
 #endif // STUDENT_H_
