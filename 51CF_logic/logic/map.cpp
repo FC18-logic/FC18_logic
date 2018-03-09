@@ -7,10 +7,10 @@
 #include "tentacle.h"
 
 
-bool Map::init(ifstream& inMap, TResourceI _MAX_RESOURCE_, bool enableOutput)  //Í¨¹ıÎÄ¼şÁ÷³õÊ¼»¯ĞÅÏ¢
+bool Map::init(ifstream& inMap, TResourceI _MAX_RESOURCE_, bool enableOutput)  //é€šè¿‡æ–‡ä»¶æµåˆå§‹åŒ–ä¿¡æ¯
 {
 
-	//³õÊ¼»¯µØÍ¼
+	//åˆå§‹åŒ–åœ°å›¾
 	inMap >> m_height;
 	inMap >> m_width;
 
@@ -20,7 +20,7 @@ bool Map::init(ifstream& inMap, TResourceI _MAX_RESOURCE_, bool enableOutput)  /
 	inMap >> barrierNum;
 
 	if (enableOutput)
-		cout << "³õÊ¼»¯µØÍ¼......" << endl;
+		cout << "åˆå§‹åŒ–åœ°å›¾......" << endl;
 
 	Json::Value barrierAdditionJson;
 	for (int i = 0; i < barrierNum; i++)
@@ -51,9 +51,9 @@ bool Map::init(ifstream& inMap, TResourceI _MAX_RESOURCE_, bool enableOutput)  /
 	data->currentRoundJson["barrierActions"].append(barrierAdditionJson);
 
 
-	//³õÊ¼»¯ÕóÓª
+	//åˆå§‹åŒ–é˜µè¥
 	if (enableOutput)
-		cout << "³õÊ¼»¯ÕóÓª......" << endl;
+		cout << "åˆå§‹åŒ–é˜µè¥......" << endl;
 	inMap >> data->PlayerNum;
 	data->root["head"]["totalPlayers"] = data->PlayerNum; //#json
 	data->players = new Player[data->PlayerNum];
@@ -70,17 +70,17 @@ bool Map::init(ifstream& inMap, TResourceI _MAX_RESOURCE_, bool enableOutput)  /
 	}
 	data->root["head"]["playerInfo"] = playerInfoJson;
 
-	//³õÊ¼»¯Ï¸°û
+	//åˆå§‹åŒ–ç»†èƒ
 	if (enableOutput)
-		cout << "³õÊ¼»¯Ï¸°û......" << endl;
+		cout << "åˆå§‹åŒ–ç»†èƒ......" << endl;
 	inMap >> data->CellNum;
 	data->cells = new Cell[data->CellNum];
 	TCellID _id;
-	TPoint _point;   //Î»ÖÃ
-	TPlayerID _camp; //ÕóÓª
-	TResourceD _resource; //×ÊÔ´Öµ
-	TPower _techPower; //¿Æ¼¼ÖµÏµÊı
-	TResourceD _maxResource; //×î´ó×ÊÔ´
+	TPoint _point;   //ä½ç½®
+	TPlayerID _camp; //é˜µè¥
+	TResourceD _resource; //èµ„æºå€¼
+	TPower _techPower; //ç§‘æŠ€å€¼ç³»æ•°
+	TResourceD _maxResource; //æœ€å¤§èµ„æº
 	for (int i = 0; i < data->CellNum; i++)
 	{
 		inMap >> _point.m_x;
@@ -91,7 +91,7 @@ bool Map::init(ifstream& inMap, TResourceI _MAX_RESOURCE_, bool enableOutput)  /
 		if (_camp != Neutral)
 		{
 			data->cells[i].init(_id, data, _point, _camp, _resource, _maxResource, _techPower);
-			data->players[_camp].cells().insert(i); //ÊÆÁ¦cells¼¯ºÏ
+			data->players[_camp].cells().insert(i); //åŠ¿åŠ›cellsé›†åˆ
 		}
 		else
 		{
@@ -108,6 +108,7 @@ bool Map::init(ifstream& inMap, TResourceI _MAX_RESOURCE_, bool enableOutput)  /
 		Json::Value birthPositionJson;
 		birthPositionJson["x"] = _point.m_x;
 		birthPositionJson["y"] = _point.m_y;
+		cellAdditionJson["resource"] = _resource;  //#jsonChange_3_9
 		cellAdditionJson["birthPosition"] = birthPositionJson;
 		cellAdditionJson["techVal"] = int(data->cells[i].techRegenerateSpeed());
 		cellAdditionJson["strategy"] = Json::Value(Normal);
