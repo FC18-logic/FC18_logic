@@ -103,7 +103,7 @@ bool Map::init(ifstream& inMap, TResourceI _MAX_RESOURCE_, bool enableOutput)  /
 		cellAdditionJson["type"] = 1;
 		cellAdditionJson["id"] = Json::Value(_id);
 		cellAdditionJson["team"] = Json::Value(_camp + 1);
-		cellAdditionJson["size"] = Json::Value(int(_resource*0.5 + 20));
+		cellAdditionJson["size"] = Json::Value(float(float(sqrt(_resource)*4 + 10)));
 		cellAdditionJson["level"] = Json::Value(data->cells[_id].getCellType());
 		Json::Value birthPositionJson;
 		birthPositionJson["x"] = _point.m_x;

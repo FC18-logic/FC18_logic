@@ -3,6 +3,7 @@
 #include "user_toolbox.h"
 #include <iostream>
 #include <vector>
+
 void player_ai(Info& info)
 {
 	Command c;
@@ -35,7 +36,7 @@ void player_ai(Info& info)
 			leftTech -= CellChangeCost[info.cellInfo[mycell].strategy][Grow];
 			info.myCommandList.addCommand(changeStrategy, { mycell,Grow });
 		}
-		
+
 		if (info.cellInfo[mycell].resource > 40 && info.cellInfo[mycell].strategy == Attack
 			&& info.cellInfo[mycell].currTentacleNum < info.cellInfo[mycell].maxTentacleNum)
 		{

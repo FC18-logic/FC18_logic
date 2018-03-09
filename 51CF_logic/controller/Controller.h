@@ -16,7 +16,7 @@ namespace DAGAN
 			, isValid_(true), debug_mode(true)
 			, players_(p){ }
 
-		void run();
+		void run(char* json_filename);
 
 		inline void setSilentMode(bool flag) { silent_mode_ = flag; }
 		inline void setFileOutputEnabled(bool flag) { file_output_enabled_ = flag; }

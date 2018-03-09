@@ -14,13 +14,13 @@ using std::size_t;
 using std::cout;
 using std::cin;
 using std::endl;
-void sample_ai(Info& info);
 
 class Game
 {
 public:
+	Game() {}
 	vector<time_t> roundTime; //#json
-	bool init(string filename);//初始化信息
+	bool init(string filename, char* json_filename);//初始化信息
 	DATA::Data& getData() { return data; } //#json
 	vector<TPlayerID> getRank() { return Rank; }
 	int getPlayerSize() { return data.PlayerNum; }

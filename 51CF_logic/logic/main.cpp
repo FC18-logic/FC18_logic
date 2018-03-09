@@ -1,8 +1,9 @@
 #include"game.h"
 #include "player_code.h"
 #include "../controller/Controller.h"
+#include <time.h>
 void outputResult(Game& game, vector<string> players_filename) {
-	ofstream ofs("result.txt");
+	ofstream ofs("../log/result.txt");
 
 	vector<TPlayerID> rank = game.getRank();
 	for (size_t i = 0; i < rank.size(); ++i) {
@@ -12,6 +13,13 @@ void outputResult(Game& game, vector<string> players_filename) {
 using namespace DAGAN;
 	int main(int argc, char** argv)
 	{
+		/*打开输出文件*/
+		char buffer[1024];
+		time_t t = time(0);
+		strftime(buffer, sizeof(buffer), "../log_txt/log_%Y%m%d_%H%M%S.txt", localtime(&t));
+		freopen(buffer, "w", stdout);
+		char json_filename[1024];
+		strftime(json_filename, sizeof(buffer), "../log_json/log_%Y%m%d_%H%M%S.json", localtime(&t));
 
 		string  config_filename =
 #ifdef _MSC_VER
@@ -62,7 +70,7 @@ using namespace DAGAN;
 		}
 		// load map
 		Game G;
-		if (!G.init(map_filename)) {
+		if (!G.init(map_filename, json_filename)) {
 			cout << "[Error] failed to load " << map_filename << endl;
 			return -1;
 		}
@@ -92,7 +100,7 @@ using namespace DAGAN;
 		// main
 		while (controller.isValid())
 		{
-			controller.run();
+			controller.run(json_filename);
 		}
 
 		// output the result

@@ -4,7 +4,9 @@
 #include <fstream>
 #include <algorithm>
 #include <ctime>
-bool Game::init(string filename)
+#include <cmath> 
+
+bool Game::init(string filename, char* json_filename)
 {
 	//#json
 	roundTime.push_back(clock());
@@ -18,12 +20,6 @@ bool Game::init(string filename)
 	data.currentRoundJson["tentacleActions"];
 	data.currentRoundJson["cutTentacleActions"];
 	data.currentRoundJson["barrierActions"];
-
-	//创建Log文件//参考去年代码
-	char buffer[1024];
-	time_t t = time(0);
-	//strftime(buffer, sizeof(buffer), "log_%Y%m%d_%H%M%S.txt", localtime(&t)); //#?json
-	LogFile.open(buffer);
 
 	data.gameMap.setData(&data);
 	ifstream in(filename);
@@ -62,18 +58,16 @@ bool Game::init(string filename)
 	data.currentRoundJson.clear();
 
 	//输出到文件 #json 
-	ofstream os;
-	Json::FastWriter fw;
-	os.open("demo.json");
-	os << fw.write(data.root);
-	os.close();
-
+	Json::FastWriter sw;
+	ofstream json_os;
+	json_os.open(json_filename);
+	json_os << sw.write(data.root);
+	json_os.close();
 	return true;
 }
 
 void Game::DebugPhase()
 {
-	
 	cout << "/*************** DEBUG 信息 ***************/" << endl;
 	cout << "Round " << currentRound << endl;
 	cout << "玩家剩余： " << playerAlive << " / " << playerSize << endl;
@@ -94,9 +88,9 @@ void Game::DebugPhase()
 	char stg[4] = { 'N','A','D','G' };
 	for (int i = 0; i != data.CellNum; ++i)
 	{
-		cout << "细胞 " << i << " ： " << "所属： " << data.cells[i].getPlayerID()
+		cout << "细胞 " << i << " ： " << "所属： " << data.cells[i].getPlayerID() << " 位置：(" << data.cells[i].getPos().m_x << ", " << data.cells[i].getPos().m_y << ")"
 			<< " 资源： " << data.cells[i].getResource() << " 总资源： " << data.cells[i].totalResource()
-			<< " 策略： " <<stg[data.cells[i].getStg()]
+			<< " 策略： " << stg[data.cells[i].getStg()]
 			<< " 正在攻击： ";
 		for (int j = 0; j != data.CellNum; ++j)
 		{
@@ -148,8 +142,8 @@ void Game::saveJson(DATA::Data & dataLastRound, DataSupplement & dataSuppleMent)
 			Json::Value resourceChangeJson;
 			resourceChangeJson["type"] = 2;
 			resourceChangeJson["id"] = i;
-			resourceChangeJson["newSize"] = int(data.cells[i].getResource()*0.5 + 20);
-			resourceChangeJson["newResource"] = int(data.cells[i].getResource());
+			resourceChangeJson["newSize"] = float(sqrt(data.cells[i].getResource())*4 + 10);  //#json_change_8_noon
+			resourceChangeJson["newResource"] = float(data.cells[i].getResource());
 			resourceChangeJson["newTechVal"] = data.cells[i].techRegenerateSpeed();
 
 			Json::Value srcTentatclesJson;
@@ -198,6 +192,16 @@ void Game::saveJson(DATA::Data & dataLastRound, DataSupplement & dataSuppleMent)
 			data.currentRoundJson["cellActions"].append(stgChangeJson);
 		}
 
+		//派系改变 5 change
+		if (data.cells[i].getPlayerID() != dataLastRound.cells[i].getPlayerID())
+		{
+			Json::Value teamJson;
+			teamJson["type"] = 5;
+			teamJson["id"] = i;
+			teamJson["newTeam"] = data.cells[i].getPlayerID();
+			data.currentRoundJson["cellActions"].append(teamJson);
+		}
+
 	}
 
 	//tentacleActions & cutTentacleActions
@@ -227,7 +231,7 @@ void Game::saveJson(DATA::Data & dataLastRound, DataSupplement & dataSuppleMent)
 					tentacleAddtionJson["id"] = data.tentacles[i][j]->getID();
 					tentacleAddtionJson["srcCell"] = i;
 					tentacleAddtionJson["dstCell"] = j;
-					tentacleAddtionJson["transRate"] = data.tentacles[i][j]->getExtendSpeed();
+					tentacleAddtionJson["transRate"] = data.tentacles[i][j]->getExtendSpeed();  //#json
 					data.currentRoundJson["tentacleActions"].append(tentacleAddtionJson);
 
 
@@ -235,7 +239,7 @@ void Game::saveJson(DATA::Data & dataLastRound, DataSupplement & dataSuppleMent)
 					Json::Value tentacleExtendJson;
 					tentacleExtendJson["type"] = 2;
 					tentacleExtendJson["id"] = data.tentacles[i][j]->getID();
-					double extendCoefficient = data.tentacles[i][j]->getResource()
+					double extendCoefficient = (data.tentacles[i][j]->getResource() + data.tentacles[i][j]->getBackResource())
 						/ (data.tentacles[i][j]->getLength()*Density);
 					double xLengh = data.cells[j].getPos().m_x - data.cells[i].getPos().m_x;
 					double yLengh = data.cells[j].getPos().m_y - data.cells[i].getPos().m_y;
@@ -247,12 +251,14 @@ void Game::saveJson(DATA::Data & dataLastRound, DataSupplement & dataSuppleMent)
 
 				//伸长  done
 				if (dataLastRound.tentacles[i][j] && data.tentacles[i][j] && data.tentacles[i][j]->getResource()>0.001
-					&& (dataLastRound.tentacles[i][j]->getstate() == Extending))
+					&& (dataLastRound.tentacles[i][j]->getBackResource()+dataLastRound.tentacles[i][j]->getResource() <
+						data.tentacles[i][j]->getResource()+data.tentacles[i][j]->getBackResource()))
 				{
-					Json::Value tentacleExtendJson;
+					Json::Value tentacleExtendJson; 
 					tentacleExtendJson["type"] = 2;
 					tentacleExtendJson["id"] = dataLastRound.tentacles[i][j]->getID();
-					double extendCoefficient = (data.tentacles[i][j]->getResource() - dataLastRound.tentacles[i][j]->getResource())
+					double extendCoefficient = (data.tentacles[i][j]->getResource()+data.tentacles[i][j]->getBackResource() 
+						- dataLastRound.tentacles[i][j]->getResource()-dataLastRound.tentacles[i][j]->getBackResource())  //change
 						/ (data.tentacles[i][j]->getLength()*Density);
 					double xLengh = data.cells[j].getPos().m_x - data.cells[i].getPos().m_x;
 					double yLengh = data.cells[j].getPos().m_y - data.cells[i].getPos().m_y;
@@ -322,9 +328,10 @@ void Game::saveJson(DATA::Data & dataLastRound, DataSupplement & dataSuppleMent)
 
 			}
 
+
+
 			//cutTentacleActions
 			{
-
 				//缩短
 				if (dataLastRound.tentacles[i][j] && data.tentacles[i][j]
 					&& dataLastRound.tentacles[i][j]->getFrontResource()>0.0001&&data.tentacles[i][j]->getFrontResource()>0.0001 &&
@@ -333,7 +340,8 @@ void Game::saveJson(DATA::Data & dataLastRound, DataSupplement & dataSuppleMent)
 					Json::Value cutTentacleBackJson;
 					cutTentacleBackJson["type"] = 2;
 					cutTentacleBackJson["id"] = data.tentacles[i][j]->getCutID();
-					double backCoefficient = (dataLastRound.tentacles[i][j]->getFrontResource() - data.tentacles[i][j]->getFrontResource())
+					double backCoefficient = (dataLastRound.tentacles[i][j]->getFrontResource() 
+						- data.tentacles[i][j]->getFrontResource())
 						/ (data.tentacles[i][j]->getLength()*Density);
 					double xLengh = data.cells[j].getPos().m_x - data.cells[i].getPos().m_x;
 					double yLengh = data.cells[j].getPos().m_y - data.cells[i].getPos().m_y;
@@ -403,7 +411,6 @@ void Game::saveJson(DATA::Data & dataLastRound, DataSupplement & dataSuppleMent)
 		}
 	}
 }
-
 
 //生成选手信息
 vector<Info> Game::generateInfo()
@@ -536,9 +543,6 @@ void Game::takeEffect(TransEffect& te)
 		else//目标为中立
 			data.cells[te.m_target].N_addOcuppyPoint(data.cells[te.m_source].getPlayerID(), -te.m_resourceToTarget);
 	te.handle = false;
-#ifdef _DEBUG
-
-
 	cout << te.m_source << " -> " << te.m_target;
 	switch (te.m_type)
 	{
@@ -553,9 +557,8 @@ void Game::takeEffect(TransEffect& te)
 	}
 	cout << " 对源细胞 " << te.m_source << " : " << te.m_resourceToSource
 		<< " 对目标细胞 " << te.m_target << " : " << te.m_resourceToTarget
-		<< " 自身改变：" << te.m_resourceChange << "/" << te.m_frontChange << "/" << te.m_backChange << endl;
-#endif // _DEBUG
-
+		<< " 自身改变：" << te.m_resourceChange
+		<< "/" << te.m_frontChange << "/" << te.m_backChange << endl;
 }
 
 void Game::regeneratePhase()
@@ -677,6 +680,12 @@ void Game::movePhase()
 						takeEffect(TE[i][j]);
 						handleExtending(TE[j][i]);
 					}
+					else if (data.tentacles[i][j]->getstate() == AfterCut
+						&& data.tentacles[j][i]->getstate() == AfterCut)
+					{
+						takeEffect(TE[i][j]);
+						takeEffect(TE[j][i]);
+					}
 				}
 				else
 				{
@@ -747,7 +756,6 @@ void Game::endPhase()
 				delete data.tentacles[i][j];
 				data.tentacles[i][j] = nullptr;
 				data.TentacleNum--;
-				data.cells[i].subTentacleNum();
 			}
 		}
 

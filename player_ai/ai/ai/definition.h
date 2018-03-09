@@ -284,6 +284,30 @@ public:
 		c.parameters = _parameters;
 		m_commands.push_back(c);
 	}
+	void addCommand(CommandType _type, int para1)
+	{
+		Command c;
+		c.type = _type;
+		c.parameters.push_back(para1);
+		m_commands.push_back(c);
+	}
+	void addCommand(CommandType _type, int para1, int para2)
+	{
+		Command c;
+		c.type = _type;
+		c.parameters.push_back(para1);
+		c.parameters.push_back(para2);
+		m_commands.push_back(c);
+	}
+	void addCommand(CommandType _type, int para1, int para2, int para3)
+	{
+		Command c;
+		c.type = _type;
+		c.parameters.push_back(para1);
+		c.parameters.push_back(para2);
+		c.parameters.push_back(para3);
+		m_commands.push_back(c);
+	}
 	void removeCommand(int n)
 	{
 		m_commands.erase(m_commands.begin() + n);

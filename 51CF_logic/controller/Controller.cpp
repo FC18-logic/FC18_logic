@@ -1,11 +1,11 @@
 #include "Controller.h"
-#include <time.h>
-//#define _COMMAND_OUTPUT_ENABLED_
+#include <ctime>
+#define _COMMAND_OUTPUT_ENABLED_
 namespace DAGAN
 {
 	using namespace std;
 
-	void Controller::run()
+	void Controller::run(char* json_filename)
 	{
 
 		//#json getInitdata
@@ -42,7 +42,7 @@ namespace DAGAN
 				}
 			}
 		}
-		data->currentRoundJson["currentRound"] = Json::Value(game_.getRound()); //#json 需要得到round
+		data->currentRoundJson["currentRound"] = Json::Value(game_.getRound() + 1 );
 
 
 		int playerSize = game_.getPlayerSize();
@@ -50,15 +50,15 @@ namespace DAGAN
 		
 		if (file_output_enabled_ && !ofs.is_open())
 		{
-			char buffer[1024];
-			time_t t = time(0);
-			//strftime(buffer, sizeof(buffer), "log_%Y%m%d_%H%M%S.txt", localtime(&t));  #?json
-			ofs.open(buffer);
+			//char buffer[1024];
+			//time_t t = time(0);
+			//strftime(buffer, sizeof(buffer), "log_%Y%m%d_%H%M%S.txt", localtime(&t)); // #?json
+			//ofs.open(buffer);
 		}
 
 		if (!silent_mode_) cout << "-=-=-=-=-=-=-=-=-=-=-= Controller: Round[" << round << "] =-=-=-=-=-=-=-=-=-=-=-=-=-" << endl;
 		// 每个玩家开始运行
-		debug_mode = false;
+
 		if (debug_mode)
 			game_.DebugPhase();
 		game_.beginPhase();
@@ -148,19 +148,19 @@ namespace DAGAN
 		//#json save
 		{
 			game_.saveJson(dataCopyLastRound, dataSuppleMent);
-			game_.roundTime.push_back(clock()); //#json
+			game_.roundTime.push_back(clock()); 
 			data->currentRoundJson["runDuration"] =
 				int(game_.roundTime[game_.roundTime.size() - 1] - game_.roundTime[game_.roundTime.size() - 2]);
 
-			data->root["head"]["totalRounds"] = round + 1; //#json 需要得到round
+			data->root["head"]["totalRounds"] = round + 1; 
 			data->root["body"].append(data->currentRoundJson);
 
 			//输出到文件 #json 
-			ofstream os;
 			Json::FastWriter fw;
-			os.open("demo.json");
-			os << fw.write(data->root);
-			os.close();
+			ofstream json_os;
+			json_os.open(json_filename);
+			json_os << fw.write(data->root);
+			json_os.close();
 		}
 	}
 }

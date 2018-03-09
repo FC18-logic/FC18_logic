@@ -90,17 +90,16 @@ TSpeed Cell::baseTransSpeed() const
 
 }
 
-//#define _DEBUG_
 void Cell::regenerate()
 {
-#ifdef _DEBUG_
+#ifdef FC15_DEBUG
 	TResourceD m_oldR = m_resource, m_oldT = data->players[m_PlayerID].techPoint();
 #endif
 	m_resource += baseRegenerateSpeed() * CellStrategyRegenerate[m_strategy];
 	if (m_resource > m_property.m_maxResource)
 		m_resource = m_property.m_maxResource;
 	data->players[m_PlayerID].addTechPoint(baseRegenerateSpeed() * m_property.m_techSpeed * CellStrategyRegenerate[m_strategy]);
-#ifdef _DEBUG_
+#ifdef FC15_DEBUG
 	cout << "细胞 " << m_ID << " 回复 " << m_resource - m_oldR << " 资源 " << data->players[m_PlayerID].techPoint() - m_oldT << " 科技 " << endl;
 #endif
 }

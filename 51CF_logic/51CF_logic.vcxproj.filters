@@ -98,9 +98,6 @@
     <ClCompile Include="logic\definition.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
-    <ClCompile Include="logic\game.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
     <ClCompile Include="logic\main.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
@@ -127,6 +124,9 @@
     </ClCompile>
     <ClCompile Include="lib_json\json_writer.cpp">
       <Filter>源文件\json_lib</Filter>
+    </ClCompile>
+    <ClCompile Include="logic\game.cpp">
+      <Filter>源文件</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

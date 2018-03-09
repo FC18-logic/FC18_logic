@@ -48,7 +48,6 @@ bool Tentacle::cut(TResourceD position /*= 0*/)
 
 		m_resource = 0;
 		m_state = AfterCut;
-		//不产生断触手
 		flag = true;
 		break;
 	}
@@ -269,19 +268,25 @@ const CellStrategy Tentacle::tgtStg()
 
 const TSpeed Tentacle::getExtendSpeed() const
 {
-	double power = SpeedStage[data->players[data->cells[m_source].getPlayerID()].getMoveLevel()];
+	double power = 1.0;
+	if(data->cells[m_source].getPlayerID()!=Neutral)
+		power = SpeedStage[data->players[data->cells[m_source].getPlayerID()].getMoveLevel()];
 	return BaseExtendSpeed * power;
 }
 
 const TSpeed Tentacle::getFrontSpeed() const
 {
-	double power = SpeedStage[data->players[data->cells[m_source].getPlayerID()].getMoveLevel()];
+	double power = 1.0;
+	if (data->cells[m_source].getPlayerID() != Neutral)
+		power = SpeedStage[data->players[data->cells[m_source].getPlayerID()].getMoveLevel()];
 	return BaseFrontSpeed * power;
 }
 
 const TSpeed Tentacle::getBackSpeed() const
 {
-	double power = SpeedStage[data->players[data->cells[m_source].getPlayerID()].getMoveLevel()];
+	double power = 1.0;
+	if (data->cells[m_source].getPlayerID() != Neutral)
+		power = SpeedStage[data->players[data->cells[m_source].getPlayerID()].getMoveLevel()];
 	return BaseBackSpeed * power;
 }
 
