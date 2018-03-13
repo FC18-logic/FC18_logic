@@ -3,6 +3,7 @@
 
 #include <string>
 #include "definition.h"
+#include <math.h>
 using namespace std;
 namespace DATA 
 {

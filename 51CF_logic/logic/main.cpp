@@ -1,7 +1,8 @@
-#include"game.h"
+#include "game.h"
 #include "player_code.h"
 #include "../controller/Controller.h"
 #include <time.h>
+
 void outputResult(Game& game, vector<string> players_filename) {
 	ofstream ofs("../log/result.txt");
 
@@ -17,9 +18,8 @@ using namespace DAGAN;
 		char buffer[1024];
 		time_t t = time(0);
 		strftime(buffer, sizeof(buffer), "../log_txt/log_%Y%m%d_%H%M%S.txt", localtime(&t));
-		freopen(buffer, "w", stdout);
-		char json_filename[1024];
-		strftime(json_filename, sizeof(buffer), "../log_json/log_%Y%m%d_%H%M%S.json", localtime(&t));
+		//freopen(buffer, "w", stdout);
+		char json_filename[1024] = "../log_json/log.json";
 
 		string  config_filename =
 #ifdef _MSC_VER
@@ -47,7 +47,7 @@ using namespace DAGAN;
 		ifstream ifs(config_filename.c_str());
 		if (!ifs.is_open()) {
 			cout << "Failed to load \"" << config_filename << "\". Aborted. " << endl;
-			return -1;
+			return 1;
 		}
 
 		// read config file
@@ -61,18 +61,18 @@ using namespace DAGAN;
 		}
 		if (players_filename.size() == 0) {
 			cout << "[Error] player_ai file names expected." << endl;
-			return -1;
+			return 2;
 		}
 		else if (players_filename.size() != player_size)
 		{
 			cout << "[Error]" <<player_size<< " player_ai file required." << endl;
-			return -1;
+			return 3;
 		}
 		// load map
 		Game G;
 		if (!G.init(map_filename, json_filename)) {
 			cout << "[Error] failed to load " << map_filename << endl;
-			return -1;
+			return 4;
 		}
 
 		// load players
@@ -89,7 +89,7 @@ using namespace DAGAN;
 		}
 		if (players.size() <= 1) {
 			cout << "[Error] Not enough player_ais to start the game." << endl;
-			return -1;
+			return 5;
 		}
 		cout << "[Info] " << players.size() << " players loaded." << endl;
 

@@ -1,7 +1,7 @@
 #pragma once
 #ifndef DEFINITION_H
 #define DEFINITION_H
-#define FC15_DEBUG
+//#define FC15_DEBUG
 
 
 #include <vector>

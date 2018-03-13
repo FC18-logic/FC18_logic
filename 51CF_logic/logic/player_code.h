@@ -1,10 +1,10 @@
 #pragma once
-/* XiangGuHuaJi 2016, player.h
+/* DAGAN 2017, player_code.h
 *
 */
 
-#ifndef _XIANGGUHUAJI_PLAYER_H__
-#define _XIANGGUHUAJI_PLAYER_H__
+#ifndef _DAGAN_PLAYER_CODE_H__
+#define _DAGAN_PLAYER_CODE_H__
 
 
 #include<string>
@@ -62,6 +62,11 @@ namespace DAGAN {
 	};
 
 }
+#ifdef __GNUC__
+unsigned long GetTickCount();
+#endif // !__GNUC__
+
+
 
 
 #endif

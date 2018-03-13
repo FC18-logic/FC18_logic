@@ -4,9 +4,21 @@
 *
 */
 
-#include <ctime>
+#include <time.h>
 #include "player_code.h"
 #include <iostream>
+
+#ifdef __GNUC__
+unsigned long GetTickCount()
+{
+    struct timespec ts;
+
+    clock_gettime(CLOCK_MONOTONIC, &ts);
+
+    return (ts.tv_sec * 1000 + ts.tv_nsec / 1000000);
+}
+#endif //__GNUC__
+
 namespace DAGAN {
 	using namespace std;
 	Player_Code::Player_Code()
@@ -66,7 +78,7 @@ namespace DAGAN {
 		int time_a = GetTickCount();
 		int time_b;
 		
-#if (defined _MSC_VER) //|| (defined _DEBUG)
+#if (!defined _MSC_VER) //|| (defined _DEBUG)
 		try {
 			player_ai(info);
 		}

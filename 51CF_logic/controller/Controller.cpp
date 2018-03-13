@@ -1,6 +1,6 @@
 #include "Controller.h"
 #include <ctime>
-#define _COMMAND_OUTPUT_ENABLED_
+//#define _COMMAND_OUTPUT_ENABLED_
 namespace DAGAN
 {
 	using namespace std;
