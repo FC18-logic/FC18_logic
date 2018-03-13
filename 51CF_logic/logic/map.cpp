@@ -108,7 +108,7 @@ bool Map::init(ifstream& inMap, TResourceI _MAX_RESOURCE_, bool enableOutput)  /
 		Json::Value birthPositionJson;
 		birthPositionJson["x"] = _point.m_x;
 		birthPositionJson["y"] = _point.m_y;
-		cellAdditionJson["resource"] = _resource;  //#jsonChange_3_9
+		cellAdditionJson["resources"] = _resource;  //#jsonChange_3_9
 		cellAdditionJson["birthPosition"] = birthPositionJson;
 		cellAdditionJson["techVal"] = int(data->cells[i].techRegenerateSpeed());
 		cellAdditionJson["strategy"] = Json::Value(Normal);

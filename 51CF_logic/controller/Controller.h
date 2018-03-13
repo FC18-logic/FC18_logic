@@ -22,6 +22,7 @@ namespace DAGAN
 		inline void setSilentMode(bool flag) { silent_mode_ = flag; }
 		inline void setFileOutputEnabled(bool flag) { file_output_enabled_ = flag; }
 		inline bool isValid() const { return isValid_; }
+		inline DATA::Data* getData() { return data; }
 
 	protected:
 		bool debug_mode;

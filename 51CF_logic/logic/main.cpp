@@ -97,6 +97,22 @@ using namespace DAGAN;
 
 		Controller controller(G, players);
 
+		for (int i = 0; i < players_filename.size(); i++)
+		{
+			string name = players_filename[i];
+			if (name.rfind('/') != string::npos) 
+			{
+				name = name.substr(name.rfind('/') + 1);
+			}
+			if (name.rfind('\\') != string::npos) 
+			{
+				name = name.substr(name.rfind('\\') + 1);
+			}
+
+			name = name.substr(0,name.size()-4);
+
+			controller.getData()->root["head"]["playerInfo"][i]["name"] = name;
+		}
 		// main
 		while (controller.isValid())
 		{
