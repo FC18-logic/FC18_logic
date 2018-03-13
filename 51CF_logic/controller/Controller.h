@@ -3,6 +3,7 @@
 #include <vector>
 #include <string>
 #include <fstream>
+#include "../json/json.h"
 
 namespace DAGAN
 {
@@ -12,8 +13,8 @@ namespace DAGAN
 		Controller(Game& g, std::vector<Player_Code>& p)
 			: game_(g)
 			, data(&(g.getData()))
-			, silent_mode_(false), file_output_enabled_(true)
-			, isValid_(true), debug_mode(true)
+			, silent_mode_(true), file_output_enabled_(true)
+			, isValid_(true), debug_mode(false)
 			, players_(p){ }
 
 		void run(char* json_filename);

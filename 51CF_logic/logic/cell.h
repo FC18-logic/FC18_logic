@@ -63,7 +63,7 @@ public:
 	TSpeed  baseRegenerateSpeed()const;
 	TSpeed  baseTransSpeed()const;
 	bool    resourceEmpty() { return m_resource <= 0.001; }                  //资源值是否减为0
-	TSpeed Cell::techRegenerateSpeed()const;
+	TSpeed  techRegenerateSpeed()const;
 	void    regenerate();                    //每一回合后的再生资源
 
 	void addResource(TResourceD _r) { m_resource += _r; if (m_resource > m_property.m_maxResource)m_resource = m_property.m_maxResource; }

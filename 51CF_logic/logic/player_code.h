@@ -62,6 +62,11 @@ namespace DAGAN {
 	};
 
 }
+#ifdef __GNUC__
+unsigned long GetTickCount();
+#endif // !__GNUC__
+
+
 
 
 #endif

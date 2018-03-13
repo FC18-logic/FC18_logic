@@ -550,6 +550,7 @@ void Game::takeEffect(TransEffect& te)
 		else//目标为中立
 			data.cells[te.m_target].N_addOcuppyPoint(data.cells[te.m_source].getPlayerID(), -te.m_resourceToTarget);
 	te.handle = false;
+#ifdef FC15_DEBUG
 	cout << te.m_source << " -> " << te.m_target;
 	switch (te.m_type)
 	{
@@ -566,6 +567,7 @@ void Game::takeEffect(TransEffect& te)
 		<< " 对目标细胞 " << te.m_target << " : " << te.m_resourceToTarget
 		<< " 自身改变: " << te.m_resourceChange
 		<< "/" << te.m_frontChange << "/" << te.m_backChange << endl;
+#endif
 }
 
 void Game::regeneratePhase()
@@ -930,30 +932,4 @@ void Game::OwnerChange(TransEffect** TE)
 	}
 
 
-}
-
-void sample_ai(Info& info)
-{
-	vector<int> para;
-	int temp;
-	cout << "Player " << info.myID << " 请输入操作：" << endl;
-	while (1)
-	{
-		para.clear();
-		cout << "是否输入指令？(结束输入 0)" << endl;
-		cin >> temp;
-		if (temp == 0)
-			break;
-		cout << "请输入：升级(0)，策略(1)，伸出(2)，切断(3)，以 -1 结束\n";
-		cin.clear();	
-		cin.sync();	
-		while (cin >> temp)
-		{
-			if (temp == -1)break;
-			para.push_back(temp);
-		}
-		CommandType t = CommandType(para[0]);
-		para.erase(para.begin());
-		info.myCommandList.addCommand(t, para);
-	}
 }
