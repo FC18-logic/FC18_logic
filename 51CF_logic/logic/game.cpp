@@ -132,6 +132,32 @@ void Game::DebugPhase()
 //每回合-==============================================================
 void Game::saveJson(DATA::Data & dataLastRound, DataSupplement & dataSuppleMent)
 {
+	//playerAction
+
+	for (int i = 0; i != data.PlayerNum; i++)
+	{
+
+		//各种属性改变
+		if (
+			(data.players[i].getDefenceLevel()      !=	dataLastRound.players[i].getDefenceLevel())      ||
+			(data.players[i].getExtraControlLevel() !=	dataLastRound.players[i].getExtraControlLevel())||
+			(data.players[i].getMoveLevel()         !=	dataLastRound.players[i].getMoveLevel())         ||
+			(data.players[i].getRegenerationLevel() !=	dataLastRound.players[i].getRegenerationLevel())
+		   )
+		{
+			Json::Value paj;
+			paj["id"] =  i+1 ;
+			paj["type"] = 1;
+			paj["rSS"] = data.players[i].getRegenerationLevel();
+			paj["sS"] = data.players[i].getMoveLevel();
+			paj["eCS"] = data.players[i].getExtraControlLevel();
+			paj["dS"] = data.players[i].getDefenceLevel();
+			data.currentRoundJson["playerAction"].append(paj);
+		}
+
+	}
+	
+	
 	//cellActions
 	for (int i = 0; i != data.CellNum; i++)
 	{

@@ -20,6 +20,13 @@ namespace DAGAN
 			dataCopyLastRound.cells = new Cell[data->CellNum];
 			dataSuppleMent.cellTechPoint.resize(data->CellNum);
 			data->cutTentacleJson.assign(data->CellNum, vector<double>(data->CellNum, -1));
+			
+			dataCopyLastRound.players = new Player[data->PlayerNum];
+			for (int i = 0; i != data->PlayerNum; i++)
+			{
+				dataCopyLastRound.players[i] = Player(data->players[i]);	
+			}
+
 			for (int i = 0; i != data->CellNum; i++)
 			{
 				dataCopyLastRound.cells[i] = Cell(data->cells[i]);

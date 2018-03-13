@@ -16,6 +16,7 @@ Player::Player(Player& _player)
 	m_RegenerationLevel = _player.getRegenerationLevel();
 	m_ExtraControlLevel = _player.getExtraControlLevel();
 	m_DefenceLevel = _player.getDefenceLevel();
+	m_MoveLevel = _player.getMoveLevel();
 	data = nullptr;
 }
 
