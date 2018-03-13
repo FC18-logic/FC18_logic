@@ -58,8 +58,9 @@ bool Map::init(ifstream& inMap, TResourceI _MAX_RESOURCE_, bool enableOutput)  /
 	data->root["head"]["totalPlayers"] = data->PlayerNum; //#json
 	data->players = new Player[data->PlayerNum];
 
-
+	//#json add
 	Json::Value playerInfoJson;  //#json
+	Json::Value playerActionJson; //
 	for (int i = 0; i != data->PlayerNum; ++i)
 	{
 		data->players[i].setdata(data);
@@ -67,8 +68,21 @@ bool Map::init(ifstream& inMap, TResourceI _MAX_RESOURCE_, bool enableOutput)  /
 		pIJ["id"] = Json::Value(i + 1);
 		pIJ["team"] = Json::Value(i + 1);
 		playerInfoJson.append(pIJ);
+		
+		Json::Value paj;
+		paj["id"] = i+1;
+		paj["type"] = 1;
+		paj["rSS"] = 0;
+		paj["sS"] = 0;
+		paj["eCS"] = 0;
+		paj["dS"] = 0;	
+		playerActionJson.append(paj);
 	}
+
 	data->root["head"]["playerInfo"] = playerInfoJson;
+	data->currentRoundJson["playerAction"].append(playerActionJson);
+	//-----------------------------------------
+
 
 	//初始化细胞
 	if (enableOutput)

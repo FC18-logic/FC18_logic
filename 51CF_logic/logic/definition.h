@@ -1,7 +1,6 @@
 #pragma once
 #ifndef DEFINITION_H
 #define DEFINITION_H
-//#define FC15_DEBUG
 
 
 #include <vector>
@@ -58,6 +57,7 @@ const TPower SpeedStage[MAX_EXTENDING_SPEED_LEVEL + 1] = { 1,1.1,1.2,1.3,1.4,1.5
 const TPower ExtraControlStage[MAX_EXTRA_CONTROL_LEVEL + 1] = { 0,0.5,1,1.5 };
 const TPower DefenceStage[MAX_DEFENCE_LEVEL + 1] = { 1.5,1.4,1.3,1.2 };
 
+
 //各个技能升级所需科创点数
 const TResourceD RegenerationSpeedUpdateCost[MAX_REGENERATION_SPEED_LEVEL] = { 2,4,6,8,10 };
 const TResourceD ExtendingSpeedUpdateCost[MAX_EXTENDING_SPEED_LEVEL] = { 2,4,6,8,10 };
@@ -91,6 +91,7 @@ const TPower CellConfrontPower[4][4] =
 	/*O  D */  1.0, 3.0, 1.0, 1.0,
 	/*M  G */  2.0, 1.0, 1.0, 1.0
 };
+
 
 //细胞压制消耗倍率
 const TPower CellSupressPower[4][4] =
@@ -170,7 +171,7 @@ struct CellInfo
 	TResourceD maxResource;
 	int maxTentacleNum;  //最大触手数量
 	int currTentacleNum;
-	TPower techSpeed;    //科创点数是资源再生速率的几倍
+	TPower techSpeed;    //科创点数是资源再生速率
 };
 
 struct PlayerInfo

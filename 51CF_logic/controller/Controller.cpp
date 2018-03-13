@@ -6,9 +6,8 @@ namespace DAGAN
 	using namespace std;
 
 	void Controller::run(char* json_filename)
-	{
-
-		//#json getInitdata
+	{	
+		//#json
 		data->currentRoundJson.clear();
 		DATA::Data dataCopyLastRound = *data;
 		DataSupplement dataSuppleMent;
@@ -20,10 +19,17 @@ namespace DAGAN
 			dataCopyLastRound.cells = new Cell[data->CellNum];
 			dataSuppleMent.cellTechPoint.resize(data->CellNum);
 			data->cutTentacleJson.assign(data->CellNum, vector<double>(data->CellNum, -1));
+			
+			dataCopyLastRound.players = new Player[data->PlayerNum];
+			for (int i = 0; i != data->PlayerNum; i++)
+			{
+				dataCopyLastRound.players[i] = Player(data->players[i]);	
+			}
+
 			for (int i = 0; i != data->CellNum; i++)
 			{
 				dataCopyLastRound.cells[i] = Cell(data->cells[i]);
-				dataSuppleMent.cellTechPoint[i] = data->cells[i].techRegenerateSpeed(); //科技点数
+				dataSuppleMent.cellTechPoint[i] = data->cells[i].techRegenerateSpeed();  //科技点数
 			}
 
 			dataCopyLastRound.tentacles = new Tentacle**[data->CellNum];
@@ -146,6 +152,7 @@ namespace DAGAN
 		game_.addRound();
 
 		//#json save
+        //#json
 		{
 			game_.saveJson(dataCopyLastRound, dataSuppleMent);
 			game_.roundTime.push_back(clock()); 
