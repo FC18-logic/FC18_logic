@@ -58,7 +58,7 @@ bool Map::init(ifstream& inMap, TResourceI _MAX_RESOURCE_, bool enableOutput)  /
 	data->root["head"]["totalPlayers"] = data->PlayerNum; //#json
 	data->players = new Player[data->PlayerNum];
 
-
+	//#json add
 	Json::Value playerInfoJson;  //#json
 	Json::Value playerActionJson; //
 	for (int i = 0; i != data->PlayerNum; ++i)

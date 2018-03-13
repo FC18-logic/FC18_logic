@@ -8,6 +8,7 @@ Player::Player()
 }
 
 //#json
+//#json add
 Player::Player(Player& _player)
 {
 	alive = _player.isAlive();

@@ -132,8 +132,8 @@ void Game::DebugPhase()
 //每回合-==============================================================
 void Game::saveJson(DATA::Data & dataLastRound, DataSupplement & dataSuppleMent)
 {
-	//playerAction
-
+	//playerAction	
+	//#json add
 	for (int i = 0; i != data.PlayerNum; i++)
 	{
 
