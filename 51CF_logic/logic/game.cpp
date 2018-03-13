@@ -143,11 +143,9 @@ void Game::saveJson(DATA::Data & dataLastRound, DataSupplement & dataSuppleMent)
 			resourceChangeJson["type"] = 2;
 			resourceChangeJson["id"] = i;
 			float tem = float(sqrt(data.cells[i].getResource()) * 4 + 10); //#jsonChange_3_9
-			tem = floor(tem * 100.000f + 0.5) / 100.000f;
-			resourceChangeJson["newSize"] = tem;
+			resourceChangeJson["newSize"] = int(tem);
 			resourceChangeJson["newResource"] = float(data.cells[i].getResource());
-			float techTem = data.cells[i].techRegenerateSpeed();
-			techTem = floor(techTem * 100.000f + 0.5) / 100.000f;
+			float techTem = float(data.cells[i].techRegenerateSpeed());
 			resourceChangeJson["newTechVal"] = techTem;
 
 			Json::Value srcTentatclesJson;
@@ -293,8 +291,8 @@ void Game::saveJson(DATA::Data & dataLastRound, DataSupplement & dataSuppleMent)
 					double extendCoefficient = (r2 - r1) / (data.tentacles[i][j]->getLength()*Density);
 					double xLengh = data.cells[j].getPos().m_x - data.cells[i].getPos().m_x;
 					double yLengh = data.cells[j].getPos().m_y - data.cells[i].getPos().m_y;
-					tentacleBackJson["movement"]["dx"] = int(extendCoefficient*xLengh);
-					tentacleBackJson["movement"]["dy"] = int(extendCoefficient*yLengh);
+					tentacleBackJson["movement"]["dx"] = extendCoefficient*xLengh;
+					tentacleBackJson["movement"]["dy"] = extendCoefficient*yLengh;
 					data.currentRoundJson["tentacleActions"].append(tentacleBackJson);
 				}
 
@@ -323,8 +321,8 @@ void Game::saveJson(DATA::Data & dataLastRound, DataSupplement & dataSuppleMent)
 					double extendCoefficient = -r1 / (dataLastRound.tentacles[i][j]->getLength()*Density);
 					double xLengh = data.cells[j].getPos().m_x - data.cells[i].getPos().m_x;
 					double yLengh = data.cells[j].getPos().m_y - data.cells[i].getPos().m_y;
-					tentacleBackJson["movement"]["dx"] = int(extendCoefficient*xLengh);
-					tentacleBackJson["movement"]["dy"] = int(extendCoefficient*yLengh);
+					tentacleBackJson["movement"]["dx"] = extendCoefficient*xLengh;
+					tentacleBackJson["movement"]["dy"] = extendCoefficient*yLengh;
 					data.currentRoundJson["tentacleActions"].append(tentacleBackJson);
 
 
@@ -354,8 +352,8 @@ void Game::saveJson(DATA::Data & dataLastRound, DataSupplement & dataSuppleMent)
 						/ (data.tentacles[i][j]->getLength()*Density);
 					double xLengh = data.cells[j].getPos().m_x - data.cells[i].getPos().m_x;
 					double yLengh = data.cells[j].getPos().m_y - data.cells[i].getPos().m_y;
-					cutTentacleBackJson["movement"]["dx"] = int(backCoefficient*xLengh);
-					cutTentacleBackJson["movement"]["dy"] = int(backCoefficient*yLengh);
+					cutTentacleBackJson["movement"]["dx"] = backCoefficient*xLengh;
+					cutTentacleBackJson["movement"]["dy"] = backCoefficient*yLengh;
 					data.currentRoundJson["cutTentacleActions"].append(cutTentacleBackJson);
 				}
 
@@ -373,8 +371,8 @@ void Game::saveJson(DATA::Data & dataLastRound, DataSupplement & dataSuppleMent)
 						/ (dataLastRound.tentacles[i][j]->getLength()*Density);
 					double xLengh = data.cells[j].getPos().m_x - data.cells[i].getPos().m_x;
 					double yLengh = data.cells[j].getPos().m_y - data.cells[i].getPos().m_y;
-					cutTentacleBackJson["movement"]["dx"] = int(backCoefficient*xLengh);
-					cutTentacleBackJson["movement"]["dy"] = int(backCoefficient*yLengh);
+					cutTentacleBackJson["movement"]["dx"] = backCoefficient*xLengh;
+					cutTentacleBackJson["movement"]["dy"] = backCoefficient*yLengh;
 					data.currentRoundJson["cutTentacleActions"].append(cutTentacleBackJson);
 
 
@@ -402,8 +400,8 @@ void Game::saveJson(DATA::Data & dataLastRound, DataSupplement & dataSuppleMent)
 						/ (dataLastRound.tentacles[i][j]->getLength()*Density);
 					double xLengh = data.cells[j].getPos().m_x - data.cells[i].getPos().m_x;
 					double yLengh = data.cells[j].getPos().m_y - data.cells[i].getPos().m_y;
-					cutTentacleBackJson["movement"]["dx"] = int(backCoefficient*xLengh);
-					cutTentacleBackJson["movement"]["dy"] = int(backCoefficient*yLengh);
+					cutTentacleBackJson["movement"]["dx"] = backCoefficient*xLengh;
+					cutTentacleBackJson["movement"]["dy"] = backCoefficient*yLengh;
 					data.currentRoundJson["cutTentacleActions"].append(cutTentacleBackJson);
 
 
