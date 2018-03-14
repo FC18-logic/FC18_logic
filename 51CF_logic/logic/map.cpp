@@ -76,11 +76,10 @@ bool Map::init(ifstream& inMap, TResourceI _MAX_RESOURCE_, bool enableOutput)  /
 		paj["sS"] = 0;
 		paj["eCS"] = 0;
 		paj["dS"] = 0;	
-		playerActionJson.append(paj);
+		data->currentRoundJson["playerAction"].append(paj);
 	}
-
 	data->root["head"]["playerInfo"] = playerInfoJson;
-	data->currentRoundJson["playerAction"].append(playerActionJson);
+
 	//-----------------------------------------
 
 
