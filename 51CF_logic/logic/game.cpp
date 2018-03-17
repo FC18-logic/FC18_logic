@@ -90,7 +90,7 @@ void Game::DebugPhase()
 	{
 		cout << "兵塔 " << i << " ： " << "所属： " << data.cells[i].getPlayerID() << " 位置：(" << data.cells[i].getPos().m_x << ", " << data.cells[i].getPos().m_y << ")"
 			<< " 资源： " << data.cells[i].getResource() << " 总资源： " << data.cells[i].totalResource()
-			<< " 策略： " << stg[data.cells[i].getStg()]
+			<< " 策略： " << stg[data.cells[i].getStg()] << " 总兵线：" << data.cells[i].TentacleNumber()
 			<< " 正在攻击： ";
 		for (int j = 0; j != data.CellNum; ++j)
 		{
@@ -784,8 +784,9 @@ void Game::endPhase()
 			if (data.tentacles[i][j]
 				&& data.tentacles[i][j]->getstate() == AfterCut
 				&& data.tentacles[i][j]->getFrontResource() <= 0.0001
-				&& data.tentacles[i][j]->getBackResource() <= 0.0001)//实际已经没了
+				&& data.tentacles[i][j]->getBackResource() <= 0.0001) //实际已经没了
 			{
+				data.tentacles[i][j]->finish();
 				delete data.tentacles[i][j];
 				data.tentacles[i][j] = nullptr;
 				data.TentacleNum--;

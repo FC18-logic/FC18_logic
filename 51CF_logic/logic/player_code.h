@@ -51,7 +51,7 @@ namespace DAGAN {
 		inline void kill() { Valid = false; }
 		inline string getName() { return name; }
 		inline bool isValid() { return Valid; }
-
+		void setName(string _name) { name = _name; }
 	private:
 		TPlayerAi        player_ai;
 		string           file_name;

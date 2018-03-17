@@ -78,8 +78,12 @@ using namespace DAGAN;
 		}
 
 		// load players
+
 		for (size_t i = 0; i < players_filename.size(); ++i) {
 			Player_Code player(players_filename[i], i);
+			string player_name;
+			if(ifs >> player_name && !player_name.empty())
+				player.setName(player_name);
 			if (player.isValid())
 				players.push_back(player);
 			else {
