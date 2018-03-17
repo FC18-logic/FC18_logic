@@ -18,7 +18,7 @@ typedef double TTechPoint;  //科技点数
 typedef double TLength;
 typedef int    TTowerID;
 typedef int    TPlayerID;
-typedef int    TTentacleID;
+typedef int    TLineID;
 
 typedef int    TPosition;
 
@@ -27,7 +27,7 @@ typedef int    TMap;
 typedef int    TLevel;  //各项属性等级
 typedef int    TRound;  //回合数
 typedef double TPower;  //倍率
-typedef int    TTentacleNum;
+typedef int    TLineNum;
 
 
 //兵力密度
@@ -35,10 +35,11 @@ const double       Density = 0.1;
 const TSpeed       BaseExtendSpeed = 3;
 const TSpeed       BaseFrontSpeed = 12;
 const TSpeed       BaseBackSpeed = 20;
+
 const TLevel       TOWER_LEVEL_COUNT = 5;
 const TResourceI   MAX_RESOURCE = 200;
 const TSpeed       BASE_REGENERETION_SPEED[TOWER_LEVEL_COUNT]{ 1,1.5,2,2.5,3 };
-const TTentacleNum MAX_TENTACLE_NUMBER[TOWER_LEVEL_COUNT]{ 1,2,2,3,3 };  //可伸兵线数量
+const TLineNum MAX_Line_NUMBER[TOWER_LEVEL_COUNT]{ 1,2,2,3,3 };  //可伸兵线数量
 const TResourceI   STUDENT_STAGE[TOWER_LEVEL_COUNT + 1]{ 0 ,10,40,80,150,MAX_RESOURCE };
 const int          NO_DATA = -1;
 const TPlayerID        Neutral = NO_DATA;

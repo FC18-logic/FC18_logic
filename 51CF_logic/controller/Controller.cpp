@@ -1,13 +1,16 @@
 #include "Controller.h"
 #include <ctime>
-//#define _COMMAND_OUTPUT_ENABLED_
+#ifdef FC15_DEBUG
+#define _COMMAND_OUTPUT_ENABLED_
+#endif // FC15_DEBUG
 namespace DAGAN
 {
 	using namespace std;
 
 	void Controller::run(char* json_filename)
-	{	
-		//#json
+	{
+
+		//#json getInitdata
 		data->currentRoundJson.clear();
 		DATA::Data dataCopyLastRound = *data;
 		DataSupplement dataSuppleMent;
@@ -16,20 +19,19 @@ namespace DAGAN
 			dataCopyLastRound.TentacleNum = data->TentacleNum;
 			dataCopyLastRound.CellNum = data->CellNum;
 
-			dataCopyLastRound.cells = new Cell[data->CellNum];
-			dataSuppleMent.cellTechPoint.resize(data->CellNum);
-			data->cutTentacleJson.assign(data->CellNum, vector<double>(data->CellNum, -1));
-			
 			dataCopyLastRound.players = new Player[data->PlayerNum];
 			for (int i = 0; i != data->PlayerNum; i++)
 			{
-				dataCopyLastRound.players[i] = Player(data->players[i]);	
+				dataCopyLastRound.players[i] = Player(data->players[i]);
 			}
 
+			dataCopyLastRound.cells = new Cell[data->CellNum];
+			dataSuppleMent.cellTechPoint.resize(data->CellNum);
+			data->cutTentacleJson.assign(data->CellNum, vector<double>(data->CellNum, -1));
 			for (int i = 0; i != data->CellNum; i++)
 			{
 				dataCopyLastRound.cells[i] = Cell(data->cells[i]);
-				dataSuppleMent.cellTechPoint[i] = data->cells[i].techRegenerateSpeed();  //科技点数
+				dataSuppleMent.cellTechPoint[i] = data->cells[i].techRegenerateSpeed(); //科技点数
 			}
 
 			dataCopyLastRound.tentacles = new Tentacle**[data->CellNum];
@@ -95,7 +97,7 @@ namespace DAGAN
 		if (file_output_enabled_)
 		{
 			vector<string> stg2str{ "Normal","Attack","Defence","Grow" };
-			vector<string> up2str{ "Regeneration","ExtendingSpeed","ExtraControl","CellWall" };
+			vector<string> up2str{ "Regeneration","ExtendingSpeed","ExtraControl","Wall" };
 			for (TPlayerID id = 0; id != playerSize; ++id)
 			{
 				if (!game_.isAlive(id))
@@ -106,13 +108,13 @@ namespace DAGAN
 					switch (c.type)
 					{
 					case addTentacle:
-						cout << "Add a tentacle from " << c.parameters[0] << " to " << c.parameters[1] << endl;
+						cout << "Add a line from " << c.parameters[0] << " to " << c.parameters[1] << endl;
 						break;
 					case cutTentacle:
-						cout << "Cut the tantacle from " << c.parameters[0] << " to " << c.parameters[1] << " at the position of " << c.parameters[2] << endl;
+						cout << "Cut the line from " << c.parameters[0] << " to " << c.parameters[1] << " at the position of " << c.parameters[2] << endl;
 						break;
 					case changeStrategy:
-						cout << "Change the strategy of cell " << c.parameters[0] << " to " << stg2str[c.parameters[1]] << endl;
+						cout << "Change the strategy of tower " << c.parameters[0] << " to " << stg2str[c.parameters[1]] << endl;
 						break;
 					case upgrade:
 						cout << "Upgrade " << up2str[c.parameters[0]] << endl;
@@ -152,7 +154,6 @@ namespace DAGAN
 		game_.addRound();
 
 		//#json save
-        //#json
 		{
 			game_.saveJson(dataCopyLastRound, dataSuppleMent);
 			game_.roundTime.push_back(clock()); 
