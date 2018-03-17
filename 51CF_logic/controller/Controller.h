@@ -14,7 +14,13 @@ namespace DAGAN
 			: game_(g)
 			, data(&(g.getData()))
 			, silent_mode_(true), file_output_enabled_(true)
-			, isValid_(true), debug_mode(false)
+			, isValid_(true), debug_mode(
+#ifdef FC15_DEBUG
+		true
+#else
+		false
+#endif
+			)
 			, players_(p){ }
 
 		void run(char* json_filename);
