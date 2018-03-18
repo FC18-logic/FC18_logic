@@ -3,18 +3,18 @@
 #include "../controller/Controller.h"
 #include <time.h>
 
-void outputResult(Game& game, vector<string> players_filename) {
+using namespace DAGAN;
+void outputResult(Game& game, vector<Player_Code>& players) {
 	ofstream ofs("../log_txt/result.txt");
 
 	vector<TPlayerID> rank = game.getRank();
 	for (size_t i = 0; i < rank.size(); ++i) {
-		ofs << players_filename[rank[i]] << endl;
+		ofs << players[rank[i]].getName() << endl;
 	}
 }
-using namespace DAGAN;
+
 int main(int argc, char** argv)
 {
-	/*´ò¿ªÊä³öÎÄ¼þ*/
 	char buffer[1024];
 	time_t t = time(0);
 	strftime(buffer, sizeof(buffer), "../log_txt/log_%Y%m%d_%H%M%S.txt", localtime(&t));
@@ -127,7 +127,7 @@ int main(int argc, char** argv)
 
 
 	// output the result
-	outputResult(G, players_filename);
+	outputResult(G, players);
 
 	return 0;
 
