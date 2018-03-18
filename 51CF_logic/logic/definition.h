@@ -1,6 +1,7 @@
 #pragma once
 #ifndef DEFINITION_H
 #define DEFINITION_H
+//#define FC15_DEBUG
 
 
 #include <vector>
@@ -57,7 +58,6 @@ const TPower SpeedStage[MAX_EXTENDING_SPEED_LEVEL + 1] = { 1,1.1,1.2,1.3,1.4,1.5
 const TPower ExtraControlStage[MAX_EXTRA_CONTROL_LEVEL + 1] = { 0,0.5,1,1.5 };
 const TPower DefenceStage[MAX_DEFENCE_LEVEL + 1] = { 1.5,1.4,1.3,1.2 };
 
-
 //各个技能升级所需科创点数
 const TResourceD RegenerationSpeedUpdateCost[MAX_REGENERATION_SPEED_LEVEL] = { 2,4,6,8,10 };
 const TResourceD ExtendingSpeedUpdateCost[MAX_EXTENDING_SPEED_LEVEL] = { 2,4,6,8,10 };
@@ -76,10 +76,10 @@ enum CellStrategy
 const TTechPoint CellChangeCost[4][4] =
 {
 	//TO        N    A    D    G
-	/*F  N */   0,   2,   2,   2,
-	/*R  A */   3,   0,   5,   5,
-	/*O  D */   3,   5,   0,   5,
-	/*M  G */   3,   5,   5,   0
+	/*F  N */   0,   3,   3,   3,
+	/*R  A */   2,   0,   5,   5,
+	/*O  D */   2,   5,   0,   5,
+	/*M  G */   2,   5,   5,   0
 };
 
 //细胞对峙消耗倍率
@@ -91,7 +91,6 @@ const TPower CellConfrontPower[4][4] =
 	/*O  D */  1.0, 3.0, 1.0, 1.0,
 	/*M  G */  2.0, 1.0, 1.0, 1.0
 };
-
 
 //细胞压制消耗倍率
 const TPower CellSupressPower[4][4] =
@@ -171,14 +170,14 @@ struct CellInfo
 	TResourceD maxResource;
 	int maxTentacleNum;  //最大触手数量
 	int currTentacleNum;
-	TPower techSpeed;    //科创点数是资源再生速率
+	TPower techSpeed;    //科创点数是资源再生速率的几倍
 };
 
 struct PlayerInfo
 {
 	TPlayerID id;
 
-	int rank;          //排名/按总资源/包括触手上的
+	int rank;          //该选手排名/按总资源/包括触手上的/从1开始
 	set<TCellID> cells; //所有的细胞
 	TResourceD technologyPoint;        //科技点数
 

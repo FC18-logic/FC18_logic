@@ -20,7 +20,7 @@ bool Map::init(ifstream& inMap, TResourceI _MAX_RESOURCE_, bool enableOutput)  /
 	inMap >> barrierNum;
 
 	if (enableOutput)
-		cout << "初始化地图......" << endl;
+		cout << "init map......" << endl;
 
 	Json::Value barrierAdditionJson;
 	for (int i = 0; i < barrierNum; i++)
@@ -53,7 +53,7 @@ bool Map::init(ifstream& inMap, TResourceI _MAX_RESOURCE_, bool enableOutput)  /
 
 	//初始化阵营
 	if (enableOutput)
-		cout << "初始化阵营......" << endl;
+		cout << "init team......" << endl;
 	inMap >> data->PlayerNum;
 	data->root["head"]["totalPlayers"] = data->PlayerNum; //#json
 	data->players = new Player[data->PlayerNum];
@@ -68,24 +68,22 @@ bool Map::init(ifstream& inMap, TResourceI _MAX_RESOURCE_, bool enableOutput)  /
 		pIJ["id"] = Json::Value(i + 1);
 		pIJ["team"] = Json::Value(i + 1);
 		playerInfoJson.append(pIJ);
-		
+
 		Json::Value paj;
-		paj["id"] = i+1;
+		paj["id"] = i + 1;
 		paj["type"] = 1;
 		paj["rSS"] = 0;
 		paj["sS"] = 0;
 		paj["eCS"] = 0;
-		paj["dS"] = 0;	
+		paj["dS"] = 0;
 		data->currentRoundJson["playerAction"].append(paj);
 	}
 	data->root["head"]["playerInfo"] = playerInfoJson;
 
-	//-----------------------------------------
-
 
 	//初始化细胞
 	if (enableOutput)
-		cout << "初始化细胞......" << endl;
+		cout << "init towers......" << endl;
 	inMap >> data->CellNum;
 	data->cells = new Cell[data->CellNum];
 	TCellID _id;

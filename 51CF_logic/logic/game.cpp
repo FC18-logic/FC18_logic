@@ -77,7 +77,7 @@ void Game::DebugPhase()
 			<< " 回复 " << data.players[i].getRegenerationLevel() << " 移动 " << data.players[i].getMoveLevel()
 			<< " 操作 " << data.players[i].getExtraControlLevel() << " 防御 " << data.players[i].getDefenceLevel() 
 			<< " 最大操作：" << data.players[i].maxControlNumber() << endl;
-		cout << "当前细胞： ";
+		cout << "当前兵塔： ";
 		for (TCellID u : data.players[i].cells())
 			cout << u <<" ";
 		cout << endl;
@@ -88,9 +88,9 @@ void Game::DebugPhase()
 	char stg[4] = { 'N','A','D','G' };
 	for (int i = 0; i != data.CellNum; ++i)
 	{
-		cout << "细胞 " << i << " ： " << "所属： " << data.cells[i].getPlayerID() << " 位置：(" << data.cells[i].getPos().m_x << ", " << data.cells[i].getPos().m_y << ")"
+		cout << "兵塔 " << i << " ： " << "所属： " << data.cells[i].getPlayerID() << " 位置：(" << data.cells[i].getPos().m_x << ", " << data.cells[i].getPos().m_y << ")"
 			<< " 资源： " << data.cells[i].getResource() << " 总资源： " << data.cells[i].totalResource()
-			<< " 策略： " << stg[data.cells[i].getStg()]
+			<< " 策略： " << stg[data.cells[i].getStg()] << " 总兵线：" << data.cells[i].TentacleNumber()
 			<< " 正在攻击： ";
 		for (int j = 0; j != data.CellNum; ++j)
 		{
@@ -99,9 +99,9 @@ void Game::DebugPhase()
 		}
 		cout << endl;
 		if (data.cells[i].getPlayerID() == Neutral)
-			cout << "中立细胞属性：" << "占领势力： " << data.cells[i].getOccupyOwner() << " 占领点： " << data.cells[i].getOccupyPoint() <<endl;
+			cout << "中立兵塔属性：" << "占领势力： " << data.cells[i].getOccupyOwner() << " 占领点： " << data.cells[i].getOccupyPoint() <<endl;
 	}
-	cout << "触手信息: " <<endl;
+	cout << "兵线信息: " <<endl;
 	for (int i = 0; i != data.CellNum; ++i)
 	{
 		for (int j = 0; j != data.CellNum; ++j)
@@ -117,7 +117,7 @@ void Game::DebugPhase()
 		for (int j = 0; j != data.CellNum; ++j)
 			if (data.tentacles[i][j])
 			{
-				cout << "触手 " << i << " -> " << j << " : "
+				cout << "兵线 " << i << " -> " << j << " : "
 					<< " 状态： " << n2str[data.tentacles[i][j]->getstate()];
 				if (data.tentacles[i][j]->getstate() == AfterCut)
 					cout << " 前方资源： " << data.tentacles[i][j]->getFrontResource()
@@ -139,14 +139,14 @@ void Game::saveJson(DATA::Data & dataLastRound, DataSupplement & dataSuppleMent)
 
 		//各种属性改变
 		if (
-			(data.players[i].getDefenceLevel()      !=	dataLastRound.players[i].getDefenceLevel())      ||
-			(data.players[i].getExtraControlLevel() !=	dataLastRound.players[i].getExtraControlLevel())||
-			(data.players[i].getMoveLevel()         !=	dataLastRound.players[i].getMoveLevel())         ||
-			(data.players[i].getRegenerationLevel() !=	dataLastRound.players[i].getRegenerationLevel())
-		   )
+			(data.players[i].getDefenceLevel() != dataLastRound.players[i].getDefenceLevel()) ||
+			(data.players[i].getExtraControlLevel() != dataLastRound.players[i].getExtraControlLevel()) ||
+			(data.players[i].getMoveLevel() != dataLastRound.players[i].getMoveLevel()) ||
+			(data.players[i].getRegenerationLevel() != dataLastRound.players[i].getRegenerationLevel())
+			)
 		{
 			Json::Value paj;
-			paj["id"] =  i+1 ;
+			paj["id"] = i + 1;
 			paj["type"] = 1;
 			paj["rSS"] = data.players[i].getRegenerationLevel();
 			paj["sS"] = data.players[i].getMoveLevel();
@@ -156,8 +156,6 @@ void Game::saveJson(DATA::Data & dataLastRound, DataSupplement & dataSuppleMent)
 		}
 
 	}
-	
-	
 	//cellActions
 	for (int i = 0; i != data.CellNum; i++)
 	{
@@ -227,7 +225,7 @@ void Game::saveJson(DATA::Data & dataLastRound, DataSupplement & dataSuppleMent)
 			teamJson["type"] = 5;
 			teamJson["id"] = i;
 			teamJson["newTeam"] = data.cells[i].getPlayerID() + 1;
-			//#jsonChange_3_9 添加触手列表
+			//#jsonChange_3_9 添加兵线列表
 			for (TTentacleID id:data.cells[i].getTentacles())
 			{
 				teamJson["srcTentatcles"].append(id);
@@ -411,7 +409,7 @@ void Game::saveJson(DATA::Data & dataLastRound, DataSupplement & dataSuppleMent)
 
 
 				//一个回合内完成新建、缩短、消失
-				if (    //条件：已经完成了新建，且上次还是有的触手切，但是这次没有触手了，或者断触手没有了
+				if (    //条件：已经完成了新建，且上次还是有的兵线切，但是这次没有兵线了，或者断兵线没有了
 					(data.cutTentacleJson[i][j] != -1) && dataLastRound.tentacles[i][j] &&
 					(!data.tentacles[i][j] || data.tentacles[i][j]->getFrontResource() < 0.001)
 					)
@@ -451,7 +449,7 @@ vector<Info> Game::generateInfo()
 	vector<Info> info;
 	//PlayerInfo playerInfo;   //势力信息
 	//CellInfo cellInfo; //同学信息
-	//TentacleInfo tentacleInfo; //触手信息
+	//TentacleInfo tentacleInfo; //兵线信息
 	BaseMap* mapInfo;  //地图信息
 	//初始化其他信息
 	for (int i = 0; i != data.PlayerNum; ++i)
@@ -483,7 +481,7 @@ vector<Info> Game::generateInfo()
 		temp.ExtraControlLevel = curr->getExtraControlLevel();
 		temp.id = i;
 		temp.maxControlNumber = curr->maxControlNumber();
-		temp.rank = Rank[i];
+		temp.rank = std::find(Rank.begin(), Rank.end(), i) - Rank.begin() + 1;
 		temp.RegenerationSpeedLevel = curr->getRegenerationLevel();
 		temp.technologyPoint = curr->techPoint();
 		temp.cells = curr->cells();
@@ -493,7 +491,7 @@ vector<Info> Game::generateInfo()
 		}
 	}
 
-	//初始化细胞信息
+	//初始化兵塔信息
 	for (int i = 0; i != data.CellNum; ++i)
 	{
 		CellInfo temp;
@@ -589,8 +587,8 @@ void Game::takeEffect(TransEffect& te)
 	default:
 		break;
 	}
-	cout << " 对源细胞 " << te.m_source << " : " << te.m_resourceToSource
-		<< " 对目标细胞 " << te.m_target << " : " << te.m_resourceToTarget
+	cout << " 对源兵塔 " << te.m_source << " : " << te.m_resourceToSource
+		<< " 对目标兵塔 " << te.m_target << " : " << te.m_resourceToTarget
 		<< " 自身改变: " << te.m_resourceChange
 		<< "/" << te.m_frontChange << "/" << te.m_backChange << endl;
 #endif
@@ -605,7 +603,7 @@ void Game::regeneratePhase()
 		if (p.isAlive())
 			p.regenerateTechPoint();
 	}*/
-	//每个细胞回复资源//同时回复势力科技点数
+	//每个兵塔回复资源//同时回复势力科技点数
 	for (int i = 0;i!=data.CellNum;++i)
 	{
 		if (data.cells[i].getPlayerID() != Neutral) {
@@ -635,7 +633,7 @@ void Game::movePhase()
 		{
 			if (TE[i][j].handle)
 			{
-				if (TE[j][i].handle)//对面也有触手
+				if (TE[j][i].handle)//对面也有兵线
 				{
 					if (data.tentacles[i][j]->getstate() == Extending
 						&& data.tentacles[j][i]->getstate() == Extending)//都在延伸中
@@ -786,8 +784,9 @@ void Game::endPhase()
 			if (data.tentacles[i][j]
 				&& data.tentacles[i][j]->getstate() == AfterCut
 				&& data.tentacles[i][j]->getFrontResource() <= 0.0001
-				&& data.tentacles[i][j]->getBackResource() <= 0.0001)//实际已经没了
+				&& data.tentacles[i][j]->getBackResource() <= 0.0001) //实际已经没了
 			{
+				data.tentacles[i][j]->finish();
 				delete data.tentacles[i][j];
 				data.tentacles[i][j] = nullptr;
 				data.TentacleNum--;
@@ -799,7 +798,7 @@ void Game::endPhase()
 		if (data.players[i].isAlive() && data.players[i].cells().empty())
 			killPlayer(i);
 	}
-	//更新细胞信息
+	//更新兵塔信息
 	for (int i = 0; i != data.CellNum; ++i)
 	{
 		data.cells[i].updateProperty();
@@ -915,7 +914,7 @@ void Game::OwnerChange(TransEffect** TE)
 					switch (TE[j][i].m_currstate)
 					{
 					case AfterCut:
-						if(TE[j][i].m_resourceToTarget <= -0.01) //确实造成有效攻击的切断触手
+						if(TE[j][i].m_resourceToTarget <= -0.01) //确实造成有效攻击的切断兵线
 							Cuter.insert(TE[j][i].m_currOwner);
 						break;
 					case Arrived:

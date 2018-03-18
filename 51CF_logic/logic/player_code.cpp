@@ -41,6 +41,7 @@ namespace DAGAN {
 		load();
 	}
 
+
 	Player_Code::~Player_Code()
 	{
 	}

@@ -4,7 +4,7 @@
 #include <time.h>
 
 void outputResult(Game& game, vector<string> players_filename) {
-	ofstream ofs("../log/result.txt");
+	ofstream ofs("../log_txt/result.txt");
 
 	vector<TPlayerID> rank = game.getRank();
 	for (size_t i = 0; i < rank.size(); ++i) {
@@ -18,9 +18,11 @@ using namespace DAGAN;
 		char buffer[1024];
 		time_t t = time(0);
 		strftime(buffer, sizeof(buffer), "../log_txt/log_%Y%m%d_%H%M%S.txt", localtime(&t));
-		//freopen(buffer, "w", stdout);
-		char json_filename[1024] = "../log_json/log.json";
-
+#ifdef FC15_DEBUG
+		freopen(buffer, "w", stdout);
+#endif // FC15_DEBUG
+		char json_filename[1024];
+		strftime(json_filename, sizeof(json_filename), "../log_json/log_%Y%m%d_%H%M%S.json", localtime(&t));
 		string  config_filename =
 #ifdef _MSC_VER
 			"../config_msvc.ini";
@@ -76,8 +78,12 @@ using namespace DAGAN;
 		}
 
 		// load players
+
 		for (size_t i = 0; i < players_filename.size(); ++i) {
 			Player_Code player(players_filename[i], i);
+			string player_name;
+			if(ifs >> player_name && !player_name.empty())
+				player.setName(player_name);
 			if (player.isValid())
 				players.push_back(player);
 			else {
@@ -118,6 +124,7 @@ using namespace DAGAN;
 		{
 			controller.run(json_filename);
 		}
+
 
 		// output the result
 		outputResult(G, players_filename);
