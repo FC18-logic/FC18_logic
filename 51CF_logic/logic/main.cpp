@@ -35,7 +35,9 @@ using namespace DAGAN;
 			config_filename = argv[1];
 		}
 		else if (argc >= 2) {
-			cout << "usage:												" << endl
+			
+			
+			<< "usage:												" << endl
 				<< "DAGAN						Load config file	" << endl;
 		}
 

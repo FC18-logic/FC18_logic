@@ -63,7 +63,15 @@ namespace DAGAN {
 		Valid = Valid && (NULL != player_ai);
 
 		if (NULL == hDLL)
-			cout << "[ERROR] failed to load \"" << file_name << "\"" << endl;
+			
+			
+			
+			
+			
+			
+			
+			
+			<< "[ERROR] failed to load \"" << file_name << "\"" << endl;
 		else
 			cout << "Succeed to load \"" << file_name << "\". ";
 		if (isValid())

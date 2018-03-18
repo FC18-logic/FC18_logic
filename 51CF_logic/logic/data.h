@@ -13,6 +13,13 @@ class Player;
 
 #include "map.h"
 #include "../json/json.h"
+
+struct CutTentacleInfoJson
+{
+	int cutID = -1;
+	double frontResource = -1;
+};
+
 namespace DATA//名空间
 {
 	struct Data
@@ -22,14 +29,15 @@ namespace DATA//名空间
 
 		Tentacle*** tentacles;
 		int TentacleNum;
-		//int TentacleCount;
 
 		Player* players;
 		int PlayerNum;
 
 		Json::Value root;
 		Json::Value currentRoundJson;
-		vector<vector<double>> cutTentacleJson;
+		vector<vector<CutTentacleInfoJson>>  cutTentacleInfoJson;
+		vector<vector<bool>> cutTentacleJson;  //触手切断标志
+		vector<vector<bool>> cutTentacleBornJson;  // 断触手生成标志
 
 		Map gameMap;
 	};

@@ -100,7 +100,13 @@ void Cell::regenerate()
 		m_resource = m_property.m_maxResource;
 	data->players[m_PlayerID].addTechPoint(baseRegenerateSpeed() * m_property.m_techSpeed * CellStrategyRegenerate[m_strategy]);
 #ifdef FC15_DEBUG
-	cout << "兵塔 " << m_ID << " 回复 " << m_resource - m_oldR << " 资源 " << data->players[m_PlayerID].techPoint() - m_oldT << " 科技 " << endl;
+	
+	
+	
+	
+	
+	
+	<< "兵塔 " << m_ID << " 回复 " << m_resource - m_oldR << " 资源 " << data->players[m_PlayerID].techPoint() - m_oldT << " 科技 " << endl;
 #endif
 }
 

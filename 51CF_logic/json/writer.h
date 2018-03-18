@@ -34,7 +34,8 @@ Usage:
   void writeToStdout(StreamWriter::Factory const& factory, Value const& value) {
     std::unique_ptr<StreamWriter> const writer(
       factory.newStreamWriter());
-    writer->write(value, &std::cout);
+    writer->write(value, &std::
+	);
     std::cout << std::endl;  // add lf and flush
   }
 \endcode

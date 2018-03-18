@@ -83,7 +83,8 @@ bool Tentacle::cut(TResourceD position /*= 0*/)
 		cutTentacleAddtionJson["transRate"] = getFrontSpeed();
 		cutTentacleAddtionJson["team"] = data->cells[getSourceCell()].getPlayerID() + 1;
 		data->currentRoundJson["cutTentacleActions"].append(cutTentacleAddtionJson);
-		data->cutTentacleJson[getSourceCell()][getTargetCell()] = m_cutID * 100000000 + m_frontResource;
+		data->cutTentacleBornJson[m_source][m_target] = true; //#----#
+		data->cutTentacleInfoJson[m_source][m_target].cutID = m_cutID;
 		m_state = AfterCut;
 		flag = true;
 		break;
@@ -97,6 +98,7 @@ bool Tentacle::cut(TResourceD position /*= 0*/)
 
 	if (flag)
 	{
+		data->cutTentacleInfoJson[m_source][m_target].frontResource = m_frontResource;
 		Json::Value tentacleCutJson;
 		tentacleCutJson["type"] = 5;
 		tentacleCutJson["id"] = m_ID;
