@@ -10,8 +10,15 @@ namespace DAGAN
 	void Controller::run(char* json_filename)
 	{
 
-		//#json getInitdata
+		//#json getInitdata 
 		data->currentRoundJson.clear();
+		data->cutTentacleInfoJson.clear();
+		data->cutTentacleBornJson.clear();
+		data->cutTentacleJson.clear();
+		data->cutTentacleBornJson.assign(data->CellNum,vector<bool>(data->CellNum,false));
+		data->cutTentacleJson.assign(data->CellNum, vector<bool>(data->CellNum, false));
+		data->cutTentacleInfoJson.resize(data->CellNum,vector<CutTentacleInfoJson>(data->CellNum));
+
 		DATA::Data dataCopyLastRound = *data;
 		DataSupplement dataSuppleMent;
 		{
@@ -27,7 +34,6 @@ namespace DAGAN
 
 			dataCopyLastRound.cells = new Cell[data->CellNum];
 			dataSuppleMent.cellTechPoint.resize(data->CellNum);
-			data->cutTentacleJson.assign(data->CellNum, vector<double>(data->CellNum, -1));
 			for (int i = 0; i != data->CellNum; i++)
 			{
 				dataCopyLastRound.cells[i] = Cell(data->cells[i]);

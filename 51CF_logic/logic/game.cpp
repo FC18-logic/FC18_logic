@@ -129,7 +129,7 @@ void Game::DebugPhase()
 	cout << "\n\n";
 }
 
-//每回合-==============================================================
+//每回合-========
 void Game::saveJson(DATA::Data & dataLastRound, DataSupplement & dataSuppleMent)
 {
 	//playerAction	
@@ -242,7 +242,6 @@ void Game::saveJson(DATA::Data & dataLastRound, DataSupplement & dataSuppleMent)
 		{
 			//tentacleActions			
 			{
-
 				/*
 				cout << "i " << i << " j " << j << endl;
 				if (dataLastRound.tentacles[i][j])  cout << " last has " << endl;
@@ -299,13 +298,35 @@ void Game::saveJson(DATA::Data & dataLastRound, DataSupplement & dataSuppleMent)
 				}
 
 
-				//缩短
-				if (dataLastRound.tentacles[i][j] && data.tentacles[i][j] &&
-					(
-					(dataLastRound.tentacles[i][j]->getResource() + dataLastRound.tentacles[i][j]->getBackResource())
-							>
-						(data.tentacles[i][j]->getResource() + data.tentacles[i][j]->getBackResource())
-						))
+				//第一次缩短
+				if (dataLastRound.tentacles[i][j] && data.tentacles[i][j]
+					&& (data.cutTentacleJson[i][j])
+					&& (data.tentacles[i][j]->getBackResource()>0.001)
+					&& (dataLastRound.tentacles[i][j]->getResource() > 0.001)
+					)
+				{
+					double backingResource = dataLastRound.tentacles[i][j]->getResource() - data.cutTentacleInfoJson[i][j].frontResource;
+					Json::Value tentacleBackJson;
+					tentacleBackJson["type"] = 3;
+					tentacleBackJson["id"] = data.tentacles[i][j]->getID();
+					double extendCoefficient = (data.tentacles[i][j]->getBackResource() - backingResource) / (data.tentacles[i][j]->getLength()*Density);
+					double xLengh = data.cells[j].getPos().m_x - data.cells[i].getPos().m_x;
+					double yLengh = data.cells[j].getPos().m_y - data.cells[i].getPos().m_y;
+					tentacleBackJson["movement"]["dx"] = extendCoefficient*xLengh;
+					tentacleBackJson["movement"]["dy"] = extendCoefficient*yLengh;
+					data.currentRoundJson["tentacleActions"].append(tentacleBackJson);
+
+				}
+
+
+				//缩短 普通缩短
+				if (dataLastRound.tentacles[i][j] && data.tentacles[i][j] 
+					&&(!data.cutTentacleJson[i][j]) //此回合没有切断
+					&& (data.tentacles[i][j]->getBackResource()>0.001)
+					&&((dataLastRound.tentacles[i][j]->getResource() + dataLastRound.tentacles[i][j]->getBackResource())
+					   >
+					  (data.tentacles[i][j]->getResource() + data.tentacles[i][j]->getBackResource()))
+					)
 				{
 					Json::Value tentacleBackJson;
 					tentacleBackJson["type"] = 3;
@@ -320,18 +341,11 @@ void Game::saveJson(DATA::Data & dataLastRound, DataSupplement & dataSuppleMent)
 					data.currentRoundJson["tentacleActions"].append(tentacleBackJson);
 				}
 
-				/*
-				//传输速度改变 可能需要更多的信息
-				if (dataLastRound.tentacles[i][j]&&data.tentacles[i][j]&&
-				dataLastRound.tentacles[i][j]->getstate()== Arrived &&
-				data.tentacles[i][j]->getstate() == Arrived)
-				{
-				}
-				*/
 
 				//切断 在tentacle.cpp cut()中
 
-				//消失 done
+				//消失 
+
 				if (dataLastRound.tentacles[i][j] &&
 					(!data.tentacles[i][j] ||
 					(data.tentacles[i][j]->getResource() + data.tentacles[i][j]->getBackResource())<0.001)
@@ -341,7 +355,13 @@ void Game::saveJson(DATA::Data & dataLastRound, DataSupplement & dataSuppleMent)
 					Json::Value tentacleBackJson;
 					tentacleBackJson["type"] = 3;
 					tentacleBackJson["id"] = dataLastRound.tentacles[i][j]->getID();
-					double r1 = dataLastRound.tentacles[i][j]->getResource() + dataLastRound.tentacles[i][j]->getBackResource();
+					double r1=0;
+					if (data.cutTentacleJson[i][j]) //如果本轮切断了
+						r1 = dataLastRound.tentacles[i][j]->getResource()
+						- data.cutTentacleInfoJson[i][j].frontResource;
+					else //已经切断过 
+						r1 = dataLastRound.tentacles[i][j]->getBackResource();
+
 					double extendCoefficient = -r1 / (dataLastRound.tentacles[i][j]->getLength()*Density);
 					double xLengh = data.cells[j].getPos().m_x - data.cells[i].getPos().m_x;
 					double yLengh = data.cells[j].getPos().m_y - data.cells[i].getPos().m_y;
@@ -363,10 +383,34 @@ void Game::saveJson(DATA::Data & dataLastRound, DataSupplement & dataSuppleMent)
 
 			//cutTentacleActions
 			{
-				//缩短
+
+				//新建时候的第一次缩短
+				if (data.tentacles[i][j]
+					&&data.tentacles[i][j]->getFrontResource()>0.001
+					&& data.cutTentacleBornJson[i][j]
+					)
+				{
+					int m_cutID = data.cutTentacleInfoJson[i][j].cutID;
+					double frontResource = data.cutTentacleInfoJson[i][j].frontResource;
+
+					Json::Value cutTentacleBackJson;
+					cutTentacleBackJson["type"] = 2;
+					cutTentacleBackJson["id"] = data.tentacles[i][j]->getCutID();
+					double backCoefficient = ( frontResource - data.tentacles[i][j]->getFrontResource() )  //#问题
+						/ (data.tentacles[i][j]->getLength()*Density);
+					double xLengh = data.cells[j].getPos().m_x - data.cells[i].getPos().m_x;
+					double yLengh = data.cells[j].getPos().m_y - data.cells[i].getPos().m_y;
+					cutTentacleBackJson["movement"]["dx"] = backCoefficient*xLengh;
+					cutTentacleBackJson["movement"]["dy"] = backCoefficient*yLengh;
+					data.currentRoundJson["cutTentacleActions"].append(cutTentacleBackJson);
+				}
+
+
+				//缩短  普通缩短，
 				if (dataLastRound.tentacles[i][j] && data.tentacles[i][j]
-					&& dataLastRound.tentacles[i][j]->getFrontResource()>0.0001&&data.tentacles[i][j]->getFrontResource()>0.0001 &&
-					(data.tentacles[i][j]->getFrontResource()<dataLastRound.tentacles[i][j]->getFrontResource()))
+					&&( dataLastRound.tentacles[i][j]->getFrontResource()>0.0001&&data.tentacles[i][j]->getFrontResource()>0.0001)
+					&&(!data.cutTentacleBornJson[i][j])
+					&&(data.tentacles[i][j]->getFrontResource()<dataLastRound.tentacles[i][j]->getFrontResource()))
 				{
 					Json::Value cutTentacleBackJson;
 					cutTentacleBackJson["type"] = 2;
@@ -381,16 +425,19 @@ void Game::saveJson(DATA::Data & dataLastRound, DataSupplement & dataSuppleMent)
 					data.currentRoundJson["cutTentacleActions"].append(cutTentacleBackJson);
 				}
 
-
 				//cut 消失
 				if (
-					(dataLastRound.tentacles[i][j] && (dataLastRound.tentacles[i][j]->getFrontResource() > 0.001))
+					(dataLastRound.tentacles[i][j] && (dataLastRound.tentacles[i][j]->getFrontResource() > 0.01))
 					&& ((!data.tentacles[i][j]) || (data.tentacles[i][j]->getFrontResource() < 0.0001)))
 				{
 					//先缩短
 					Json::Value cutTentacleBackJson;
 					cutTentacleBackJson["type"] = 2;
 					cutTentacleBackJson["id"] = dataLastRound.tentacles[i][j]->getCutID();
+					if (dataLastRound.tentacles[i][j]->getCutID() < 0)
+					{
+						system("pause");
+					}
 					double backCoefficient = (dataLastRound.tentacles[i][j]->getFrontResource())
 						/ (dataLastRound.tentacles[i][j]->getLength()*Density);
 					double xLengh = data.cells[j].getPos().m_x - data.cells[i].getPos().m_x;
@@ -410,17 +457,18 @@ void Game::saveJson(DATA::Data & dataLastRound, DataSupplement & dataSuppleMent)
 
 				//一个回合内完成新建、缩短、消失
 				if (    //条件：已经完成了新建，且上次还是有的兵线切，但是这次没有兵线了，或者断兵线没有了
-					(data.cutTentacleJson[i][j] != -1) && dataLastRound.tentacles[i][j] &&
-					(!data.tentacles[i][j] || data.tentacles[i][j]->getFrontResource() < 0.001)
+					(data.cutTentacleBornJson[i][j]) && dataLastRound.tentacles[i][j]
+					&&(dataLastRound.tentacles[i][j]->getFrontResource()<0.001)
+				    &&(!data.tentacles[i][j] || data.tentacles[i][j]->getFrontResource() < 0.001)
 					)
 				{
-					int m_cutID = int(data.cutTentacleJson[i][j] / 100000000);
-					double _position = data.cutTentacleJson[i][j] - m_cutID * 100000000;
+					int m_cutID = data.cutTentacleInfoJson[i][j].cutID;
+					double frontResource = data.cutTentacleInfoJson[i][j].frontResource;
 					//先缩短
 					Json::Value cutTentacleBackJson;
 					cutTentacleBackJson["type"] = 2;
 					cutTentacleBackJson["id"] = m_cutID;
-					double backCoefficient = _position
+					double backCoefficient = frontResource
 						/ (dataLastRound.tentacles[i][j]->getLength()*Density);
 					double xLengh = data.cells[j].getPos().m_x - data.cells[i].getPos().m_x;
 					double yLengh = data.cells[j].getPos().m_y - data.cells[i].getPos().m_y;
