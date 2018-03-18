@@ -3,7 +3,6 @@
 * Game <-- Player_Ai ---> AI
 *
 */
-
 #include <time.h>
 #include "player_code.h"
 #include <iostream>
@@ -11,11 +10,11 @@
 #ifdef __GNUC__
 unsigned long GetTickCount()
 {
-    struct timespec ts;
+	struct timespec ts;
 
-    clock_gettime(CLOCK_MONOTONIC, &ts);
+	clock_gettime(CLOCK_MONOTONIC, &ts);
 
-    return (ts.tv_sec * 1000 + ts.tv_nsec / 1000000);
+	return (ts.tv_sec * 1000 + ts.tv_nsec / 1000000);
 }
 #endif //__GNUC__
 
@@ -63,15 +62,7 @@ namespace DAGAN {
 		Valid = Valid && (NULL != player_ai);
 
 		if (NULL == hDLL)
-			
-			
-			
-			
-			
-			
-			
-			
-			<< "[ERROR] failed to load \"" << file_name << "\"" << endl;
+			cout << "[ERROR] failed to load \"" << file_name << "\"" << endl;
 		else
 			cout << "Succeed to load \"" << file_name << "\". ";
 		if (isValid())
@@ -86,7 +77,7 @@ namespace DAGAN {
 	{
 		int time_a = GetTickCount();
 		int time_b;
-		
+
 #if (!defined _MSC_VER) //|| (defined _DEBUG)
 		try {
 			player_ai(info);
