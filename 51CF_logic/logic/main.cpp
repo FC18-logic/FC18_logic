@@ -103,21 +103,9 @@ int main(int argc, char** argv)
 
 	Controller controller(G, players);
 
-	for (int i = 0; i < players_filename.size(); i++)
+	for (int i = 0; i < player_size; i++)
 	{
-		string name = players_filename[i];
-		if (name.rfind('/') != string::npos)
-		{
-			name = name.substr(name.rfind('/') + 1);
-		}
-		if (name.rfind('\\') != string::npos)
-		{
-			name = name.substr(name.rfind('\\') + 1);
-		}
-
-		name = name.substr(0, name.size() - 4);
-
-		controller.getData()->root["head"]["playerInfo"][i]["name"] = name;
+		controller.getData()->root["head"]["playerInfo"][i]["name"] = players[i].getName();
 	}
 	// main
 	while (controller.isValid())

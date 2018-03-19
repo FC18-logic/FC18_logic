@@ -36,8 +36,8 @@ typedef int    TTentacleNum;
 //±øÁ¦ÃÜ¶È
 const double       Density = 0.1;
 const TSpeed       BaseExtendSpeed = 3;
-const TSpeed       BaseFrontSpeed = 12;
-const TSpeed       BaseBackSpeed = 20;
+const TSpeed       BaseFrontSpeed = 20;
+const TSpeed       BaseBackSpeed = 12;
 const TLevel       STUDENT_LEVEL_COUNT = 5;
 const TResourceI   MAX_RESOURCE = 200;
 const TSpeed       BASE_REGENERETION_SPEED[STUDENT_LEVEL_COUNT]{ 1,1.5,2,2.5,3 };
