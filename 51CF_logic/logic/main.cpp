@@ -78,16 +78,21 @@ int main(int argc, char** argv)
 	}
 
 	// load players
-
+	int valid_cnt = 0; //有效ai的数量
 	for (size_t i = 0; i < players_filename.size(); ++i) {
 		Player_Code player(players_filename[i], i);
 		string player_name;
 		if (ifs >> player_name && !player_name.empty())
 			player.setName(player_name);
 		if (player.isValid())
+		{
 			players.push_back(player);
+			valid_cnt++;
+		}
 		else {
+			players.push_back(player); //压进去充数
 			cout << "[Warning] failed to load player_ai " << players_filename[i] << endl;
+			player.setName(player.getName() + "//NOT_VALID");
 #if (defined _MSC_VER && defined _DEBUG)
 			system("pause");
 #endif
@@ -97,13 +102,13 @@ int main(int argc, char** argv)
 		cout << "[Error] Not enough player_ais to start the game." << endl;
 		return 5;
 	}
-	cout << "[Info] " << players.size() << " players loaded." << endl;
+	cout << "[Info] " << valid_cnt << " players loaded." << endl;
 
 	// game and controller
 
 	Controller controller(G, players);
 
-	for (int i = 0; i < player_size; i++)
+	for (int i = 0; i < players.size(); i++)
 	{
 		controller.getData()->root["head"]["playerInfo"][i]["name"] = players[i].getName();
 	}
