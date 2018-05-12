@@ -218,8 +218,13 @@ void Cell::changeOwnerTo(TPlayerID newOwner)
 		data->players[newOwner].cells().insert(m_ID);
 	}
 	if(m_PlayerID != Neutral) //不是中立则重置到10
-		m_resource = 10;
+		m_resource = 20;
 	else
+	{
+		m_occupyOwner = Neutral;
+		m_occupyPoint = 0.0;
+	}
+	if (newOwner == Neutral)
 	{
 		m_occupyOwner = Neutral;
 		m_occupyPoint = 0.0;

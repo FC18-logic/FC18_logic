@@ -1,8 +1,9 @@
 #pragma once
 #ifndef DEFINITION_H
 #define DEFINITION_H
-//#define FC15_DEBUG
-
+#define FC15_DEBUG
+#define NO_SILENT_MODE
+#define NO_JSON
 
 #include <vector>
 #include <string>
@@ -96,10 +97,10 @@ const TPower CellConfrontPower[4][4] =
 const TPower CellSupressPower[4][4] =
 {
 	//TO        N    A    D    G
-	/*F  N */  1.5, 1.5, 1.5, 1.5,
-	/*R  A */  3.0, 1.5, 1.5, 6.0,
+	/*F  N */  1.5, 1.5, 1.0, 1.5,
+	/*R  A */  3.0, 1.5, 1.0, 6.0,
 	/*O  D */  1.0, 1.0, 1.0, 1.0,
-	/*M  G */  3.0, 1.5, 1.5, 1.5
+	/*M  G */  3.0, 1.5, 1.0, 1.5
 };
 
 //细胞资源生长倍率

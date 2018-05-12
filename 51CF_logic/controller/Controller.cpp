@@ -15,9 +15,9 @@ namespace DAGAN
 		data->cutTentacleInfoJson.clear();
 		data->cutTentacleBornJson.clear();
 		data->cutTentacleJson.clear();
-		data->cutTentacleBornJson.assign(data->CellNum,vector<bool>(data->CellNum,false));
+		data->cutTentacleBornJson.assign(data->CellNum, vector<bool>(data->CellNum, false));
 		data->cutTentacleJson.assign(data->CellNum, vector<bool>(data->CellNum, false));
-		data->cutTentacleInfoJson.resize(data->CellNum,vector<CutTentacleInfoJson>(data->CellNum));
+		data->cutTentacleInfoJson.resize(data->CellNum, vector<CutTentacleInfoJson>(data->CellNum));
 
 		DATA::Data dataCopyLastRound = *data;
 		DataSupplement dataSuppleMent;
@@ -56,12 +56,12 @@ namespace DAGAN
 				}
 			}
 		}
-		data->currentRoundJson["currentRound"] = Json::Value(game_.getRound() + 1 );
+		data->currentRoundJson["currentRound"] = Json::Value(game_.getRound() + 1);
 
 
 		int playerSize = game_.getPlayerSize();
 		volatile TRound round = game_.getRound();
-		
+
 		if (file_output_enabled_ && !ofs.is_open())
 		{
 			//char buffer[1024];
@@ -162,11 +162,11 @@ namespace DAGAN
 		//#json save
 		{
 			game_.saveJson(dataCopyLastRound, dataSuppleMent);
-			game_.roundTime.push_back(clock()); 
+			game_.roundTime.push_back(clock());
 			data->currentRoundJson["runDuration"] =
 				int(game_.roundTime[game_.roundTime.size() - 1] - game_.roundTime[game_.roundTime.size() - 2]);
 
-			data->root["head"]["totalRounds"] = round + 1; 
+			data->root["head"]["totalRounds"] = round + 1;
 			data->root["body"].append(data->currentRoundJson);
 
 			//输出到文件 #json 

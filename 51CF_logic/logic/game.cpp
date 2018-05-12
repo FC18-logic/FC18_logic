@@ -134,6 +134,41 @@ void Game::saveJson(DATA::Data & dataLastRound, DataSupplement & dataSuppleMent)
 {
 	//playerAction	
 	//#json add
+	{
+		//排名信息
+		vector<std::pair<TPlayerID, TResourceD> > playerpair;
+		for (int i = 0; i != data.PlayerNum; ++i)
+		{
+			if (data.players[i].isAlive())
+				playerpair.push_back({ i + 1,data.players[i].totalResource() });
+			else
+				playerpair.push_back({ i + 1,data.players[i].getdeadRound() - 1000 });
+		}
+
+		std::sort(playerpair.begin(), playerpair.end(),
+			[](const std::pair<TPlayerID, TResourceD>& a, std::pair<TPlayerID, TResourceD>& b) {return a.second > b.second; });
+
+
+
+		Json::Value RankJson;
+		for (int i = 0; i != playerpair.size(); i++)
+		{
+			RankJson["rank"].append(playerpair[i].first);
+			if (playerpair[i].second < 0)
+				RankJson["resources"].append(0);
+			else
+				RankJson["resources"].append(playerpair[i].second);
+		}
+		RankJson["rank"].append(0);
+		if (data.cells[12].getPlayerID() == Neutral)
+			RankJson["resources"].append(data.cells[12].totalResource());
+		else
+			RankJson["resources"].append(0);
+		data.currentRoundJson["rankInfo"]= RankJson;
+	}
+
+
+
 	for (int i = 0; i != data.PlayerNum; i++)
 	{
 
@@ -280,9 +315,9 @@ void Game::saveJson(DATA::Data & dataLastRound, DataSupplement & dataSuppleMent)
 				}
 
 				//伸长  done
-				if (dataLastRound.tentacles[i][j] && data.tentacles[i][j] && data.tentacles[i][j]->getResource()>0.001
-					&& (dataLastRound.tentacles[i][j]->getBackResource()+dataLastRound.tentacles[i][j]->getResource() <
-						data.tentacles[i][j]->getResource()+data.tentacles[i][j]->getBackResource()))
+				if (dataLastRound.tentacles[i][j] && data.tentacles[i][j] && data.tentacles[i][j]->getResource() > 0.001
+					&& (dataLastRound.tentacles[i][j]->getBackResource() + dataLastRound.tentacles[i][j]->getResource() <
+						data.tentacles[i][j]->getResource() + data.tentacles[i][j]->getBackResource()))
 				{
 					Json::Value tentacleExtendJson; 
 					tentacleExtendJson["type"] = 2;
@@ -322,7 +357,7 @@ void Game::saveJson(DATA::Data & dataLastRound, DataSupplement & dataSuppleMent)
 				//缩短 普通缩短
 				if (dataLastRound.tentacles[i][j] && data.tentacles[i][j] 
 					&&(!data.cutTentacleJson[i][j]) //此回合没有切断
-					&& (data.tentacles[i][j]->getBackResource()>0.001)
+					&& (data.tentacles[i][j]->getBackResource() + data.tentacles[i][j]->getResource()>0.001)
 					&&((dataLastRound.tentacles[i][j]->getResource() + dataLastRound.tentacles[i][j]->getBackResource())
 					   >
 					  (data.tentacles[i][j]->getResource() + data.tentacles[i][j]->getBackResource()))
@@ -699,13 +734,13 @@ void Game::movePhase()
 							//判定攻防
 							if (data.tentacles[i][j]->getResource() + distance / 2 > data.tentacles[i][j]->getLength() *Density / 2)//越过一半
 							{
-								data.tentacles[i][j]->setstate(Attacking);
-								data.tentacles[j][i]->setstate(Backing);
+								data.tentacles[i][j]->setstate(Backing);
+								data.tentacles[j][i]->setstate(Attacking);
 							}
 							else
 							{
-								data.tentacles[j][i]->setstate(Attacking);
-								data.tentacles[i][j]->setstate(Backing);
+								data.tentacles[j][i]->setstate(Backing);
+								data.tentacles[i][j]->setstate(Attacking);
 							}
 							takeEffect(TE[i][j]); takeEffect(TE[j][i]);
 						}
@@ -857,6 +892,8 @@ void Game::endPhase()
 	{
 		if (data.players[i].isAlive())
 			playerpair.push_back({ i,data.players[i].totalResource() });
+		else
+			playerpair.push_back({ i,data.players[i].getdeadRound() - 1000 });
 	}
 	std::sort(playerpair.begin(), playerpair.end(),
 		[](const std::pair<TPlayerID, TResourceD>& a, std::pair<TPlayerID, TResourceD>& b) {return a.second > b.second; });
@@ -926,6 +963,7 @@ void Game::commandPhase(vector<CommandList>& command_list)
 void Game::killPlayer(TPlayerID id)
 {
 	data.players[id].Kill();
+	data.players[id].setdeadRound(currentRound);
 	playerAlive--;
 }
 
