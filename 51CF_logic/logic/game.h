@@ -1,4 +1,4 @@
-//Git bashed file
+//Git bashed file here
 #ifndef GAME_H
 #define GAME_H
 
@@ -21,36 +21,36 @@ class Game
 public:
 	Game() {}
 	vector<time_t> roundTime; //#json
-	bool init(string filename, char* json_filename);//³õÊ¼»¯ĞÅÏ¢
+	bool init(string filename, char* json_filename);//åˆå§‹åŒ–ä¿¡æ¯
 	DATA::Data& getData() { return data; } //#json
 	vector<TPlayerID> getRank() { return Rank; }
 	int getPlayerSize() { return data.PlayerNum; }
 	TRound getRound() { return currentRound; }
 	void DebugPhase();
 	vector<Info> generateInfo();
-	bool isValid();//ÅĞ¶¨ÊÇ·ñ½áÊø
-	void regeneratePhase();    //»Ö¸´½×¶Î
-	void movePhase();          //´¥ÊÖÒÆ¶¯
-	void transPhase();         //´«Êä/¹¥»÷½×¶Î
-	void beginPhase();      //¼õĞ¡¸÷ÖÖ»ØºÏÊı
-	void endPhase();  //É¾³ıÎŞÓÃ´¥ÊÖ
-	void commandPhase(vector<CommandList>& command_list); //´¦ÀíÍæ¼ÒÖ¸Áî
-	void killPlayer(TPlayerID id); //É±ËÀÍæ¼Ò 
+	bool isValid();//åˆ¤å®šæ˜¯å¦ç»“æŸ
+	void regeneratePhase();    //æ¢å¤é˜¶æ®µ
+	void movePhase();          //è§¦æ‰‹ç§»åŠ¨
+	void transPhase();         //ä¼ è¾“/æ”»å‡»é˜¶æ®µ
+	void beginPhase();      //å‡å°å„ç§å›åˆæ•°
+	void endPhase();  //åˆ é™¤æ— ç”¨è§¦æ‰‹
+	void commandPhase(vector<CommandList>& command_list); //å¤„ç†ç©å®¶æŒ‡ä»¤
+	void killPlayer(TPlayerID id); //æ€æ­»ç©å®¶ 
 	bool isAlive(TPlayerID id) { return data.players[id].isAlive(); }
 	void saveJson(DATA::Data & dataLastRound, DataSupplement & dataSuppleMent);
 	void addRound() { currentRound++; }
 protected:
-	void takeEffect(TransEffect& te); //½«teÊ©ÓÃµ½Ä¿±êÉÏ
+	void takeEffect(TransEffect& te); //å°†teæ–½ç”¨åˆ°ç›®æ ‡ä¸Š
 	void handleExtending(TransEffect& t);
 	std::ofstream LogFile;
-	DATA::Data data;      //ËùÓĞµÄÊı¾İ´æ·Å´¦
-	TRound currentRound;  //µ±Ç°»ØºÏÊı
-	size_t playerSize;    //ÓÎÏ·¹æÄ£
-	size_t playerAlive;   //´æ»îÈËÊı
-	vector<TPlayerID> Rank;//¸ù¾İ×Ü×ÊÔ´ÊıÅÅÃû
-	TResourceI _MAX_RESOURCE_;//Ã¿¾ÖÌØ¶¨µÄ×î´ó×ÊÔ´
+	DATA::Data data;      //æ‰€æœ‰çš„æ•°æ®å­˜æ”¾å¤„
+	TRound currentRound;  //å½“å‰å›åˆæ•°
+	size_t playerSize;    //æ¸¸æˆè§„æ¨¡
+	size_t playerAlive;   //å­˜æ´»äººæ•°
+	vector<TPlayerID> Rank;//æ ¹æ®æ€»èµ„æºæ•°æ’å
+	TResourceI _MAX_RESOURCE_;//æ¯å±€ç‰¹å®šçš„æœ€å¤§èµ„æº
 	TRound _MAX_ROUND_;
-	vector<int> controlCount; //¼ÇÂ¼²Ù×÷Êı
+	vector<int> controlCount; //è®°å½•æ“ä½œæ•°
 	void OwnerChange(TransEffect** TE);
 };
 
