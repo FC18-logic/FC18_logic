@@ -1,4 +1,5 @@
-﻿#include "game.h"
+﻿//#2021-1-19 <JYP> 熟悉代码，添加注释
+#include "game.h"
 #include "player_code.h"
 #include "../controller/Controller.h"
 #include <time.h>
@@ -7,9 +8,9 @@ using namespace DAGAN;
 void outputResult(Game& game, vector<Player_Code>& players) {
 	ofstream ofs("../log_txt/result.txt");
 
-	vector<TPlayerID> rank = game.getRank();
+	vector<TPlayerID> rank = game.getRank();   //游戏结果排名(vector)
 	for (size_t i = 0; i < rank.size(); ++i) {
-		ofs << players[rank[i]].getName() << endl;
+		ofs << players[rank[i]].getName() << endl;   //按排名输出每个名次的玩家name
 	}
 }
 
@@ -53,6 +54,10 @@ int main(int argc, char** argv)
 	}
 
 	// read config file
+	//配置文件
+	//第一行：地图文件路径
+	//第二行：玩家数量
+	//第三行：每个玩家的ai路径
 	ifs >> map_filename >> player_size;
 	int cnt = 0;
 	while (!ifs.eof() && cnt < player_size) {
@@ -71,6 +76,7 @@ int main(int argc, char** argv)
 		return 3;
 	}
 	// load map
+	//初始化地图、玩家的势力区域、防御塔、兵团的作战关系表等等
 	Game G;
 	if (!G.init(map_filename, json_filename)) {
 		cout << "[Error] failed to load " << map_filename << endl;
@@ -78,6 +84,7 @@ int main(int argc, char** argv)
 	}
 
 	// load players
+	//读入玩家AI代码，应该也不需要修改
 	int valid_cnt = 0; //有效ai的数量
 	for (size_t i = 0; i < players_filename.size(); ++i) {
 		Player_Code player(players_filename[i], i);
@@ -113,6 +120,7 @@ int main(int argc, char** argv)
 		controller.getData()->root["head"]["playerInfo"][i]["name"] = players[i].getName();
 	}
 	// main
+	//一个回合一个回合的跑
 	while (controller.isValid())
 	{
 		controller.run(json_filename);

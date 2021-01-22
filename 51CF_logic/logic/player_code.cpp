@@ -89,7 +89,7 @@ namespace DAGAN {
 		}
 #else 
 		__try {
-			player_ai(info);
+			player_ai(info);//这是直接调用dll里的接口吗
 		}
 		__except (EXCEPTION_EXECUTE_HANDLER) {
 			cout << "[ERROR] Player " << (int)id << " raised an exception in run()." << endl;

@@ -1,3 +1,4 @@
+//#2021-1-19 <JYP> 熟悉代码，添加注释
 #include"map.h"
 #include<fstream>
 #include<iostream>
@@ -10,10 +11,10 @@
 bool Map::init(ifstream& inMap, TResourceI _MAX_RESOURCE_, bool enableOutput)  //通过文件流初始化信息
 {
 
-	//初始化地图
+	//初始化地图高度、宽度
 	inMap >> m_height;
 	inMap >> m_width;
-
+	//初始化地图上的障碍，FC18初始化地图上的塔和属于每个势力的地块
 	int barrierNum;
 	TPoint beginP, endP;
 	TBarrier _barrier;
@@ -24,6 +25,7 @@ bool Map::init(ifstream& inMap, TResourceI _MAX_RESOURCE_, bool enableOutput)  /
 	
 
 	//rankInfo
+	//更新当前回合的排名信息JSON
 	Json::Value rankInfoJson;
 	for (int i = 1; i < 5; i++) rankInfoJson["rank"].append(i);
 	rankInfoJson["rank"].append(0);
@@ -31,6 +33,8 @@ bool Map::init(ifstream& inMap, TResourceI _MAX_RESOURCE_, bool enableOutput)  /
 	rankInfoJson["resources"].append(50);
 	data->currentRoundJson["rankInfo"] = rankInfoJson;
 
+
+	//初始化地图上障碍物的信息JSON
 	Json::Value barrierAdditionJson;
 	for (int i = 0; i < barrierNum; i++)
 	{
@@ -68,6 +72,8 @@ bool Map::init(ifstream& inMap, TResourceI _MAX_RESOURCE_, bool enableOutput)  /
 	data->players = new Player[data->PlayerNum];
 
 	//#json add
+	//初始化玩家信息JSON
+	//初始化玩家操作JSON
 	Json::Value playerInfoJson;  //#json
 	Json::Value playerActionJson; //
 	for (int i = 0; i != data->PlayerNum; ++i)
@@ -90,11 +96,12 @@ bool Map::init(ifstream& inMap, TResourceI _MAX_RESOURCE_, bool enableOutput)  /
 	data->root["head"]["playerInfo"] = playerInfoJson;
 
 
-	//初始化细胞
+	//初始化塔
 	if (enableOutput)
 		cout << "init towers......" << endl;
 	inMap >> data->CellNum;
 	data->cells = new Cell[data->CellNum];
+	//防御塔的属性都列在下面
 	TCellID _id;
 	TPoint _point;   //位置
 	TPlayerID _camp; //阵营
@@ -105,13 +112,16 @@ bool Map::init(ifstream& inMap, TResourceI _MAX_RESOURCE_, bool enableOutput)  /
 	{
 		inMap >> _point.m_x;
 		inMap >> _point.m_y;
+		//设置塔的位置
 		m_studentPos.push_back(_point);
 
+		//从配置中读入某一个塔的每个属性值
 		inMap >> _id >> _camp >> _resource >> _techPower >> _maxResource;
+		//非过渡状态的塔
 		if (_camp != Neutral)
 		{
 			data->cells[i].init(_id, data, _point, _camp, _resource, _maxResource, _techPower);
-			data->players[_camp].cells().insert(i); //势力cells集合
+			data->players[_camp].cells().insert(i); //势力防御塔集合
 		}
 		else
 		{
@@ -137,7 +147,7 @@ bool Map::init(ifstream& inMap, TResourceI _MAX_RESOURCE_, bool enableOutput)  /
 	return true;
 }
 
-
+//这个函数看起来没什么用
 bool Map::init(const TMapID& filename,TResourceI _MAX_RESOURCE_)
 {
 	bool ret;

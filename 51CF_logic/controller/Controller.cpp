@@ -75,10 +75,10 @@ namespace DAGAN
 
 		if (debug_mode)
 			game_.DebugPhase();
-		game_.beginPhase();
-		game_.regeneratePhase();
+		game_.beginPhase();  //空的函数
+		game_.regeneratePhase();  //每个塔/兵团按照规则来恢复属性
 
-
+		//把玩家、塔和兵团的信息都集中收集起来
 		vector<Info> info_list = game_.generateInfo();
 		vector<CommandList> commands; //选手命令
 		for (TPlayerID id = 0; id < playerSize; ++id)
@@ -86,8 +86,9 @@ namespace DAGAN
 			Player_Code& player = players_[id];
 			if (player.isValid() && game_.isAlive(id))
 			{
-				// 单个玩家执行
+				// 单个玩家执行，运行玩家ai获取指令
 				if (!silent_mode_) cout << "Calling Player " << (int)id << "'s Run() method" << endl;
+				//run运行dll，然后把对应的myCommandList(由dll修改)回传到这里
 				players_[id].run(info_list[id]);
 				commands.push_back(info_list[id].myCommandList);
 			}
@@ -146,17 +147,21 @@ namespace DAGAN
 				}
 			}
 		}
+		//执行移动、势力转换和攻防结算的部分
 		else //isValid
 		{
+			//各种塔的操作在这里
 			game_.commandPhase(commands);
 			game_.movePhase();
 			game_.transPhase();
 			game_.endPhase();
 		}
 		// check if killed
+		//检查并判断玩家是否出局
 		for (TCellID i = 0; i < playerSize; ++i)
 			if (!game_.isAlive(i))
 				players_[i].kill();
+		//回合数增加1
 		game_.addRound();
 
 		//#json save

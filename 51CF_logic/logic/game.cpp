@@ -6,7 +6,7 @@
 #include <ctime>
 #include <cmath> 
 
-bool Game::init(string filename, char* json_filename)
+bool Game::init(string file, char* json_file)
 {
 	//#json
 	roundTime.push_back(clock());
@@ -22,13 +22,15 @@ bool Game::init(string filename, char* json_filename)
 	data.currentRoundJson["barrierActions"];
 
 	data.gameMap.setData(&data);
-	ifstream in(filename);
+	ifstream in(file);
 	if (!in)
 	{
 		cerr << "can't open the map file" << endl;
 		return false;
 	}
+	//地图文件读入最大资源数和最大回合数
 	in >> _MAX_RESOURCE_ >> _MAX_ROUND_;
+	//初始化data里的地图信息
 	if (!data.gameMap.init(in, _MAX_RESOURCE_, true))
 	{
 		cerr << "Something wrong when init the map infomation."<<endl;
@@ -39,6 +41,7 @@ bool Game::init(string filename, char* json_filename)
 	playerSize = playerAlive = data.PlayerNum;
 
 	data.tentacles = new Tentacle**[data.CellNum];
+	//Tentacle二维数组，[i][j]就对应着i号兵团与j号兵团的作战关系
 	for (int i = 0; i != data.CellNum; ++i)
 	{
 		data.tentacles[i] = new Tentacle*[data.CellNum];
@@ -60,7 +63,7 @@ bool Game::init(string filename, char* json_filename)
 	//输出到文件 #json 
 	Json::FastWriter sw;
 	ofstream json_os;
-	json_os.open(json_filename);
+	json_os.open(json_file);
 	json_os << sw.write(data.root);
 	json_os.close();
 	return true;
@@ -78,8 +81,8 @@ void Game::DebugPhase()
 			<< " 操作 " << data.players[i].getExtraControlLevel() << " 防御 " << data.players[i].getDefenceLevel() 
 			<< " 最大操作：" << data.players[i].maxControlNumber() << endl;
 		cout << "当前兵塔： ";
-		for (TCellID u : data.players[i].cells())
-			cout << u <<" ";
+		for (TCellID u : data.players[i].cells())   //这个for循环遍历i号玩家所有塔的信息，塔用u来存储
+			cout << u <<" ";  //塔的序号
 		cout << endl;
 		cout << "排名： " << std::find(Rank.begin(),Rank.end(),i) - Rank.begin() + 1;
 		cout << endl;
@@ -105,7 +108,7 @@ void Game::DebugPhase()
 	for (int i = 0; i != data.CellNum; ++i)
 	{
 		for (int j = 0; j != data.CellNum; ++j)
-			if (data.tentacles[i][j])
+			if (data.tentacles[i][j])  //存在对战关系
 				cout << 1;
 			else
 				cout << 0;
@@ -113,6 +116,8 @@ void Game::DebugPhase()
 	}
 	cout << endl;
 	vector<string> n2str{ "Extending","Attacking","Backing","Confrontation","Arrived","AfterCut" };
+	
+	//FC18是兵团作战，没有前方、后方、切断这些概念，这个输出回来可以调整一下
 	for (int i = 0; i != data.CellNum; ++i)
 		for (int j = 0; j != data.CellNum; ++j)
 			if (data.tentacles[i][j])
@@ -140,11 +145,13 @@ void Game::saveJson(DATA::Data & dataLastRound, DataSupplement & dataSuppleMent)
 		for (int i = 0; i != data.PlayerNum; ++i)
 		{
 			if (data.players[i].isAlive())
+				//玩家资源数应该是所有塔和兵团的资源数按规则描述进行求和
 				playerpair.push_back({ i + 1,data.players[i].totalResource() });
 			else
 				playerpair.push_back({ i + 1,data.players[i].getdeadRound() - 1000 });
 		}
 
+		//按最大资源数排序
 		std::sort(playerpair.begin(), playerpair.end(),
 			[](const std::pair<TPlayerID, TResourceD>& a, std::pair<TPlayerID, TResourceD>& b) {return a.second > b.second; });
 
@@ -155,6 +162,7 @@ void Game::saveJson(DATA::Data & dataLastRound, DataSupplement & dataSuppleMent)
 		{
 			RankJson["rank"].append(playerpair[i].first);
 			if (playerpair[i].second < 0)
+				//已经死亡，资源数清零
 				RankJson["resources"].append(0);
 			else
 				RankJson["resources"].append(playerpair[i].second);
@@ -415,7 +423,7 @@ void Game::saveJson(DATA::Data & dataLastRound, DataSupplement & dataSuppleMent)
 			}
 
 
-
+			//FC18没有切断这部分我们应该是不需要改了
 			//cutTentacleActions
 			{
 
@@ -535,11 +543,13 @@ vector<Info> Game::generateInfo()
 	//TentacleInfo tentacleInfo; //兵线信息
 	BaseMap* mapInfo;  //地图信息
 	//初始化其他信息
+	//info里的成员数PlayerNum个，记录所有玩家的属性、塔和兵团，也记录一些公共的信息
+	//这个是用来向玩家各自的ai提供信息的吗
 	for (int i = 0; i != data.PlayerNum; ++i)
 	{
 		Info I;
 		I.playerSize = data.PlayerNum;
-		int alive = 0;
+		int alive = 0;//统计存活势力个数
 		for (int j = 0; j != data.PlayerNum; ++j)
 		{
 			if (data.players[j].isAlive())
@@ -609,7 +619,7 @@ vector<Info> Game::generateInfo()
 	{
 		TentacleInfo temp;
 		Tentacle* curr = data.tentacles[i][j];
-		if (!curr)
+		if (!curr)  //i对j不存在攻击关系
 		{
 			temp.exist = false;
 			for (int k = 0; k != data.PlayerNum; ++k)
@@ -638,6 +648,7 @@ vector<Info> Game::generateInfo()
 	return info;
 }
 
+//存活玩家数不足2人或超过最大回合数，游戏结束
 bool Game::isValid()
 {
 	if (playerAlive == 1 || currentRound >= _MAX_ROUND_)
@@ -908,46 +919,47 @@ void Game::commandPhase(vector<CommandList>& command_list)
 {
 	for (int i = 0; i != playerSize; ++i)
 	{
-		controlCount[i] = 0;
+		controlCount[i] = 0;  //已经执行的操作个数
 		for (Command& c : command_list[i])
 		{
-			//操作数溢出
+			//操作数个数溢出
 			if (data.players[i].maxControlNumber() <= controlCount[i])
 				break;
 			switch (c.type)
 			{
 			case addTentacle: 
 			{
-				if (c.parameters.size() < 2)break;
+				if (c.parameters.size() < 2)break;//操作数过少
 				TCellID source = c.parameters[0];
 				TCellID target = c.parameters[1];
-				if (data.cells[source].getPlayerID() == i)
+				if (data.cells[source].getPlayerID() == i)//是己方细胞
 					data.cells[source].addTentacle(target);
 			}
 			break;
 			case cutTentacle:
 			{
-				if (c.parameters.size() < 3)break;
+				if (c.parameters.size() < 3)break;//操作数过少
 				TCellID source = c.parameters[0];
 				TCellID target = c.parameters[1];
 				TPosition pos = c.parameters[2];
-				if (data.cells[source].getPlayerID() == i)
+				if (data.cells[source].getPlayerID() == i)//是己方细胞
 					data.cells[source].cutTentacle(target, pos);
 			}
 			break;
 			case changeStrategy:
 			{
-				if (c.parameters.size() < 1)break;
+				if (c.parameters.size() < 1)break;//操作数过少
 				TCellID cell = c.parameters[0];
 				CellStrategy nextStg = static_cast<CellStrategy>(c.parameters[1]);
-				if (data.cells[cell].getPlayerID() == i)
+				if (data.cells[cell].getPlayerID() == i)//是己方细胞
 					data.cells[cell].changeStg(nextStg);
 			}
 			break;
 			case upgrade:
 			{
-				if (c.parameters.size() < 1)break;
+				if (c.parameters.size() < 1)break;//操作数过少
 				TPlayerProperty upgradeType = static_cast<TPlayerProperty>(c.parameters[0]);
+				//直接由player访问修改塔的等级，不需要判断是否己方细胞
 				data.players[i].upgrade(upgradeType);
 			}
 			break;

@@ -1,3 +1,4 @@
+//#2021-1-19 <JYP> 熟悉代码，添加注释
 #include "../logic/game.h"
 #include "../logic/player_code.h"
 #include <vector>
@@ -43,7 +44,7 @@ namespace DAGAN
 		std::ofstream ofs;
 		std::vector<Player_Code>& players_;
 		bool file_output_enabled_;
-		bool silent_mode_;
+		bool silent_mode_; //silent_mode_为true会输出回合数信息和每个玩家的操作信息
 		bool isValid_;
 	};
 }
