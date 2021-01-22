@@ -20,7 +20,7 @@ void outputResult(Game& game, vector<Player_Code>& players) {
 int main(int argc, char** argv)
 {
 	char buffer[1024];
-	time_t t = time(0);//记录时间
+	time_t t = time(0);//record time
 	strftime(buffer, sizeof(buffer), "../log_txt/log_%Y%m%d_%H%M%S.txt", localtime(&t));
 #ifdef FC15_DEBUG
 	freopen(buffer, "w", stdout);
