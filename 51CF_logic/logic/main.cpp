@@ -9,7 +9,7 @@
 
 using namespace DAGAN;
 void outputResult(Game& game, vector<Player_Code>& players) {
-	ofstream ofs("../log_txt/result.txt");
+	ofstream ofs("../log_txt/result.txt");//打开txt文件
 
 	vector<TPlayerID> rank = game.getRank();   //游戏结果排名(vector)
 	for (size_t i = 0; i < rank.size(); ++i) {
