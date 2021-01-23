@@ -151,10 +151,10 @@ namespace DAGAN
 		else //isValid
 		{
 			//各种塔的操作在这里
-			game_.commandPhase(commands);
-			game_.movePhase();
-			game_.transPhase();
-			game_.endPhase();
+			game_.commandPhase(commands);//读取玩家命令，然后有效命令写进JSON里面去，然后执行一些加兵线之类的操作
+			game_.movePhase();//兵线的推移和结算
+			game_.transPhase();//兵线的传输和结算
+			game_.endPhase();//兵线的切断和结算
 		}
 		// check if killed
 		//检查并判断玩家是否出局
