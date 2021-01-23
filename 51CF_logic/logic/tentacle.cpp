@@ -190,22 +190,22 @@ TransEffect Tentacle::move()
 		te.m_backChange = - min(m_backResource, getBackSpeed());
 		if (isTargetEnemy())//是敌人则采取压制算法
 		{
-			te.m_resourceToTarget = te.m_frontChange * (((CellSupressPower[srcStg()][tgtStg()]-1)*0.5)+1);
-			if (data->cells[m_target].getPlayerID() >= 0 && data->cells[m_target].getPlayerID() < data->PlayerNum)
+			te.m_resourceToTarget = te.m_frontChange * (((CellSupressPower[srcStg()][tgtStg()]-1)*0.5)+1);//考虑进攻方的伤害
+			if (data->cells[m_target].getPlayerID() >= 0 && data->cells[m_target].getPlayerID() < data->PlayerNum)//考虑被进攻方的防御
 			{
 				te.m_resourceToTarget =te.m_resourceToTarget*DefenceStage[data->players[data->cells[m_target].getPlayerID()].getDefenceLevel()]/1.5;
 			}
 		}
 		else
 		{
-			te.m_resourceToTarget = -te.m_frontChange;
+			te.m_resourceToTarget = -te.m_frontChange;//目标塔不是敌人，切断前方全部资源数用于对目标塔结算
 		}
-		te.m_resourceToSource = -te.m_backChange;
+		te.m_resourceToSource = -te.m_backChange;//对源塔资源数 结算
 		break;
 	default:
 		break;
 	}
-	te.m_type = moveE;
+	te.m_type = moveE;//修改触手这一次操作为移动
 	return te;
 }
 
@@ -219,10 +219,10 @@ TransEffect Tentacle::transport()
 		break;
 	case Attacking:
 	case Backing:
-	case Confrontation:
+	case Confrontation://对峙消耗源塔的资源数
 	{
 		Cell *s, *t; //源、目标
-		s = data->cells + m_source;
+		s = data->cells + m_source;//按基地址寻秩访问
 		t = data->cells + m_target;
 		TResourceD my = s->baseTransSpeed()*CellConfrontPower[s->getStg()][t->getStg()]; //我方造成伤害
 		TResourceD enemy = t->baseTransSpeed()*CellConfrontPower[t->getStg()][s->getStg()]; //对方造成伤害
@@ -237,7 +237,7 @@ TransEffect Tentacle::transport()
 		s = data->cells + m_source;
 		t = data->cells + m_target;
 		TResourceD my = s->baseTransSpeed();
-		te.m_resourceToSource = -my;
+		te.m_resourceToSource = -my;//消耗为基础传输速率
 		if (t->getPlayerID() == Neutral)//中立
 		{
 			te.m_resourceToTarget = -my*CellSupressPower[s->getStg()][t->getStg()];
@@ -250,7 +250,7 @@ TransEffect Tentacle::transport()
 			else
 				te.m_resourceToTarget = -my*CellSupressPower[s->getStg()][Normal];
 		}
-		else
+		else//给自己的，源塔输出多少，目标塔得到多少
 		{
 			te.m_resourceToTarget = my;
 		}

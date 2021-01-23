@@ -4,11 +4,13 @@
 //refresh test
 //test2
 //test3
+
 #include "game.h"
 #include "player_code.h"
 #include "../controller/Controller.h"
 #include <time.h>
-
+//test2_2
+//test3_2
 using namespace DAGAN;
 void outputResult(Game& game, vector<Player_Code>& players) {
 	ofstream ofs("../log_txt/result.txt");//打开txt文件

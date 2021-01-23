@@ -649,6 +649,7 @@ vector<Info> Game::generateInfo()
 }
 
 //存活玩家数不足2人或超过最大回合数，游戏结束
+//【不冲突】就只有player的操作
 bool Game::isValid()
 {
 	if (playerAlive == 1 || currentRound >= _MAX_ROUND_)
@@ -657,6 +658,7 @@ bool Game::isValid()
 		return true;
 }
 
+//【冲突】兵团移动或传输资源的结算（既有兵团又有塔）
 void Game::takeEffect(TransEffect& te)
 {
 	Tentacle& t = *data.tentacles[te.m_source][te.m_target];
@@ -688,6 +690,7 @@ void Game::takeEffect(TransEffect& te)
 #endif
 }
 
+//【不冲突】主要是访问塔，但regenerate()有对player属性的访问
 void Game::regeneratePhase()
 {
 	/*//回复科技点数
@@ -706,18 +709,19 @@ void Game::regeneratePhase()
 	}
 }
 
+//【可能冲突】主要是兵线的操作，但takeEffect()涉及塔属性的访问，主要OwnerChange既有兵线有有塔会冲突
 void Game::movePhase()
 {
 	TransEffect** TE = new TransEffect*[data.CellNum];
-	//得到TE表
+	//得到TE表，对应的触手先移动，然后对源塔和目标塔的资源数进行结算
 	for (int i = 0; i != data.CellNum; ++i)
 	{
-		TE[i] = new TransEffect[data.CellNum];
+		TE[i] = new TransEffect[data.CellNum];//这样调用的是默认构造函数，TE.handle=false不用处理（即无i->j的兵线）
 		for (int j = 0; j != data.CellNum; ++j)
 		{
 			if (!data.tentacles[i][j])
 				continue;
-			TE[i][j] = data.tentacles[i][j]->move();
+			TE[i][j] = data.tentacles[i][j]->move();//move只给出兵线、两头塔的资源数要变化多少，但是变化值还没加上去
 		}
 	}
 	//处理TE表
@@ -737,11 +741,11 @@ void Game::movePhase()
 						{
 							takeEffect(TE[i][j]); takeEffect(TE[j][i]);
 						}
-						else//聚在中间
+						else//聚在中间，两条兵线这一回合要碰头了
 						{
 							TResourceD distance = data.tentacles[i][j]->getLength() * Density - (data.tentacles[i][j]->getResource() + data.tentacles[j][i]->getResource());
 							TE[i][j].m_resourceChange = TE[j][i].m_resourceChange = distance / 2;
-							TE[i][j].m_resourceToSource = TE[j][i].m_resourceToSource = -distance / 2;
+							TE[i][j].m_resourceToSource = TE[j][i].m_resourceToSource = -distance / 2;//在两条兵线的中间碰头
 							//判定攻防
 							if (data.tentacles[i][j]->getResource() + distance / 2 > data.tentacles[i][j]->getLength() *Density / 2)//越过一半
 							{
@@ -757,13 +761,13 @@ void Game::movePhase()
 						}
 					}
 					else if (data.tentacles[i][j]->getstate() == Extending
-						&& data.tentacles[j][i]->getstate() == AfterCut)
+						&& data.tentacles[j][i]->getstate() == AfterCut)//我方在延伸，对方被切断
 					{
 						takeEffect(TE[j][i]);
 						handleExtending(TE[i][j]);
 					}
 					else if (data.tentacles[i][j]->getstate() == Attacking
-						&& data.tentacles[j][i]->getstate() == Backing)
+						&& data.tentacles[j][i]->getstate() == Backing)//我方在进攻，对方在后退
 					{
 						if (data.tentacles[i][j]->getResource() + TE[i][j].m_resourceChange > data.tentacles[i][j]->getLength()*Density / 2) //即将推到中点
 						{
@@ -797,24 +801,24 @@ void Game::movePhase()
 						}
 					}
 					else if (data.tentacles[i][j]->getstate() == Confrontation
-						&& data.tentacles[j][i]->getstate() == Confrontation)
+						&& data.tentacles[j][i]->getstate() == Confrontation)//双方在对峙
 					{
 						takeEffect(TE[i][j]); takeEffect(TE[j][i]);
 					}
 					else if (data.tentacles[i][j]->getstate() == AfterCut
-						&& data.tentacles[j][i]->getstate() == Extending)
+						&& data.tentacles[j][i]->getstate() == Extending)//我方被切断，对方在进攻
 					{
 						takeEffect(TE[i][j]);
 						handleExtending(TE[j][i]);
 					}
 					else if (data.tentacles[i][j]->getstate() == AfterCut
-						&& data.tentacles[j][i]->getstate() == AfterCut)
+						&& data.tentacles[j][i]->getstate() == AfterCut)//双方都被切断
 					{
 						takeEffect(TE[i][j]);
 						takeEffect(TE[j][i]);
 					}
 				}
-				else
+				else//对方塔没有兵线，扑了个空
 				{
 					switch (data.tentacles[i][j]->getstate())
 					{
@@ -841,6 +845,9 @@ void Game::movePhase()
 	delete[] TE;
 }
 
+
+//【冲突】transport()主要涉及塔的操作，但是这个transPhase()整体是兵线的操作
+//【冲突】takeEffect()有对塔属性的访问，应该没关系。但OwnerChange()中同时包含塔和兵线的操作，是冲突的
 void Game::transPhase()
 {
 	TransEffect** TE = new TransEffect*[data.CellNum];
@@ -870,8 +877,12 @@ void Game::beginPhase()
 
 }
 
+
+//【冲突】比较麻烦塔、兵线、player操作都有了
 void Game::endPhase()
 {
+	//前后都传输完的兵线直接从兵线表里去掉
+	//【不冲突】只有兵线的操作
 	for (int i = 0;i!=data.CellNum;++i)
 		for (int j = 0; j != data.CellNum; ++j)
 		{
@@ -886,18 +897,20 @@ void Game::endPhase()
 				data.TentacleNum--;
 			}
 		}
-
+	//【不冲突】只有player操作
 	for (int i = 0; i != data.PlayerNum; ++i)
 	{
 		if (data.players[i].isAlive() && data.players[i].cells().empty())
 			killPlayer(i);
 	}
 	//更新兵塔信息
+	//【冲突】这一部分涉及塔，也涉及兵线有关参数
 	for (int i = 0; i != data.CellNum; ++i)
 	{
 		data.cells[i].updateProperty();
 	}
 	//排名信息
+	//【不冲突】只有player操作
 	vector<std::pair<TPlayerID, TResourceD> > playerpair;
 	for (int i = 0;i!=data.PlayerNum;++i)
 	{
@@ -909,12 +922,17 @@ void Game::endPhase()
 	std::sort(playerpair.begin(), playerpair.end(),
 		[](const std::pair<TPlayerID, TResourceD>& a, std::pair<TPlayerID, TResourceD>& b) {return a.second > b.second; });
 	int i = 0;
+	//录入排名
+	//【不冲突】相当于只有player操作
 	for (auto &p : playerpair)
 	{
 		Rank[i++] = p.first;
 	}
 }
 
+
+//【冲突】既有player的操作也有cell的操作
+//【冲突】因为添加兵线则还有兵线操作
 void Game::commandPhase(vector<CommandList>& command_list)
 {
 	for (int i = 0; i != playerSize; ++i)
@@ -934,6 +952,7 @@ void Game::commandPhase(vector<CommandList>& command_list)
 				TCellID target = c.parameters[1];
 				if (data.cells[source].getPlayerID() == i)//是己方细胞
 					data.cells[source].addTentacle(target);
+				//写JSON
 			}
 			break;
 			case cutTentacle:
@@ -944,6 +963,7 @@ void Game::commandPhase(vector<CommandList>& command_list)
 				TPosition pos = c.parameters[2];
 				if (data.cells[source].getPlayerID() == i)//是己方细胞
 					data.cells[source].cutTentacle(target, pos);
+				//写JSON
 			}
 			break;
 			case changeStrategy:
@@ -953,6 +973,7 @@ void Game::commandPhase(vector<CommandList>& command_list)
 				CellStrategy nextStg = static_cast<CellStrategy>(c.parameters[1]);
 				if (data.cells[cell].getPlayerID() == i)//是己方细胞
 					data.cells[cell].changeStg(nextStg);
+				//写JSON
 			}
 			break;
 			case upgrade:
@@ -961,6 +982,7 @@ void Game::commandPhase(vector<CommandList>& command_list)
 				TPlayerProperty upgradeType = static_cast<TPlayerProperty>(c.parameters[0]);
 				//直接由player访问修改塔的等级，不需要判断是否己方细胞
 				data.players[i].upgrade(upgradeType);
+				//写JSON
 			}
 			break;
 			default:
@@ -972,6 +994,7 @@ void Game::commandPhase(vector<CommandList>& command_list)
 	}
 }
 
+//【不冲突】只涉及player
 void Game::killPlayer(TPlayerID id)
 {
 	data.players[id].Kill();
@@ -979,24 +1002,26 @@ void Game::killPlayer(TPlayerID id)
 	playerAlive--;
 }
 
-
+//【不冲突】应该是只涉及兵团操作，不过takeEffect()里面有对cell属性的访问
 void Game::handleExtending(TransEffect& te)
 {
 	//下面是通常的处理Extend的方法
 	int i = te.m_source;
 	int j = te.m_target;
-	if (data.tentacles[i][j]->getResource() + te.m_resourceChange > data.tentacles[i][j]->getLength()*Density)//即将抵达
+	//把兵线当做进度条处理，进度条满了就是抵达目标塔了
+	if (data.tentacles[i][j]->getResource() + te.m_resourceChange > data.tentacles[i][j]->getLength()*Density)//即将抵达，即在这一回合内进度条要满了，也就是要抵达了
 	{
 		TResourceD distance = data.tentacles[i][j]->getLength() *Density - data.tentacles[i][j]->getResource();//离目标的距离
-		te.m_resourceChange = distance;
+		te.m_resourceChange = distance;//进度条拉满，需要多少资源就给多少，不多也不少
 		te.m_resourceToSource = -distance;
-		data.tentacles[i][j]->setstate(Arrived);
-		takeEffect(te);
+		data.tentacles[i][j]->setstate(Arrived);//直接把进度条拉满，让兵线抵达目标塔
+		takeEffect(te);//兵线抵达目标塔结算效果
 	}
 	else
-		takeEffect(te);
+		takeEffect(te);//兵线没抵达目标塔结算效果，也就是兵线增加资源，源塔消耗资源
 }
 
+//【冲突】前一部分在访问兵线的属性(通过TE表)，后一部分在访问塔的属性
 void Game::OwnerChange(TransEffect** TE)
 {
 	for (int i = 0; i != data.CellNum; ++i)
@@ -1004,15 +1029,15 @@ void Game::OwnerChange(TransEffect** TE)
 		if (data.cells[i].getResource()!=Neutral && data.cells[i].getResource() <= 0 )
 		{
 			set<TPlayerID> Cuter, Arriver, Confrontationer;//对应切断、压制、对峙三种攻击优先等级
-			for (int j = 0; j != data.CellNum; ++j)
+			for (int j = 0; j != data.CellNum; ++j)//考虑所有到这个i号塔的兵线
 			{
 				if (data.tentacles[j][i]
-					&& data.cells[j].getPlayerID() != data.cells[i].getPlayerID())
+					&& data.cells[j].getPlayerID() != data.cells[i].getPlayerID())//存在兵线且不是自己到自己塔的兵线
 				{
 					switch (TE[j][i].m_currstate)
 					{
 					case AfterCut:
-						if(TE[j][i].m_resourceToTarget <= -0.01) //确实造成有效攻击的切断兵线
+						if(TE[j][i].m_resourceToTarget <= -0.01) //确实造成有效攻击的切断兵线，就是切断后兵线前方能向源塔输送资源数的情况
 							Cuter.insert(TE[j][i].m_currOwner);
 						break;
 					case Arrived:
@@ -1028,7 +1053,7 @@ void Game::OwnerChange(TransEffect** TE)
 					}
 				}
 			}
-			//依据攻击等级判定归属
+			//依据攻击等级判定归属，优先级切断>压制>对峙
 			if (!Cuter.empty())
 				if (Cuter.size() == 1)
 					data.cells[i].changeOwnerTo(*Cuter.begin());
@@ -1046,13 +1071,11 @@ void Game::OwnerChange(TransEffect** TE)
 					data.cells[i].changeOwnerTo(Neutral);
 			else//没有人在进攻,直接切断所有了事
 				for (int j = 0; j != data.CellNum; ++j)
-					data.cells[i].cutTentacle(j, 1000000/*一个很大的数*/);
+					data.cells[i].cutTentacle(j, 1000000/*一个很大的数*/);//直接切断都回收了
 		}
 		else if (data.cells[i].getPlayerID() == Neutral && data.cells[i].getOccupyPoint() > data.cells[i].getResource() / 3)//中立改变
 		{
 			data.cells[i].changeOwnerTo(data.cells[i].getOccupyOwner());
 		}
 	}
-
-
 }
