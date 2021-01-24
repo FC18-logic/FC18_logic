@@ -318,8 +318,8 @@ const TBattlePoint CorpsBattleGain[TERRAIN_TYPE_NUM + 1]
 	0,    //塔
 	0,    //平原
 	5,    //山地
-	3,   //森林
-	-3,    //沼泽
+	3,    //森林
+	-3,   //沼泽
 	0,    //道路
 	0     //多于的，用于后续扩展
 };
@@ -449,6 +449,8 @@ struct PlayerInfo
 
 	//@@@【FC18】其他需要添加的属性或接口
 
+
+	//FC15的
 	TResourceD technologyPoint;        //科技点数
 	TLevel RegenerationSpeedLevel;      //再生倍率等级
 	TLevel ExtendingSpeedLevel;         //延伸速度等级
@@ -457,6 +459,15 @@ struct PlayerInfo
 	size_t maxControlNumber;    //最大控制数
 };
 
+//类声明
+class CommandList;
+//常用数学运算
+//二维坐标减运算
+TPoint operator-(const TPoint& p1, const TPoint& p2);
+//计算欧式距离
+TLength getDistance(const TPoint& p1, const TPoint& p2);
+//输出玩家下达的指令集
+std::ostream& operator << (std::ostream& os, const CommandList& cl);
 
 struct TBarrier
 {
@@ -491,6 +502,7 @@ class BaseMap
 		//@@@【FC18】返回一个兵团信息结构体的vector引用，方便外部访问修改
 
 
+		//FC15的
 		vector<TBarrier>   m_barrier;                  //记录所有障碍的信息
 		const  vector<TBarrier>& getBarriar()    const { return m_barrier; }
 		bool   passable(TPoint p1, TPoint p2)          //判断触手能否连接这两个点
@@ -541,6 +553,7 @@ struct Command
 	vector<int> parameters;                                                  //【FC18】参数：注意所有参数是整型！
 
 
+	//FC15的
 	Command(CommandType _type, initializer_list<int> _parameters) :
 		type(_type), parameters(_parameters) {}
 	Command(CommandType _type, vector<int> _parameters) :
@@ -583,7 +596,7 @@ class CommandList
 		vector<Command>::const_iterator end() const { return m_commands.cend(); }      //【FC18】返回最后一条命令的常量迭代器
 
 
-
+		//FC15的
 		void addCommand(CommandType _type, initializer_list<int> _parameters)
 		{
 			m_commands.emplace_back(_type, _parameters);
@@ -622,19 +635,11 @@ struct Info
 	vector<vector<TentacleInfo> > tentacleInfo; //触手信息
 
 
+	//FC15的
 	TRound round;
 	int playerSize;
 	int cellNum;    //细胞总数量
 	int myMaxControl;    //最大操作数
 };
-
-//常用数学运算
-//二维坐标减运算
-TPoint operator-(const TPoint& p1, const TPoint& p2);
-
-//计算欧式距离
-TLength getDistance(const TPoint& p1, const TPoint& p2);
-//输出玩家下达的指令集
-std::ostream& operator<<(std::ostream& os, const CommandList& cl);
 
 #endif // DEFINITION_H

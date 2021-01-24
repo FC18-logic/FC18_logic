@@ -16,41 +16,55 @@ using std::cout;
 using std::cin;
 using std::endl;
 
-class Game
+class Game                                                            //【FC18】当前游戏进程类
 {
 public:
-	Game() {}
-	vector<time_t> roundTime; //#json
-	bool init(string filename, char* json_filename);//初始化信息
-	DATA::Data& getData() { return data; } //#json
-	vector<TPlayerID> getRank() { return Rank; }
-	int getPlayerSize() { return data.PlayerNum; }
-	TRound getRound() { return currentRound; }
-	void DebugPhase();
-	vector<Info> generateInfo();
-	bool isValid();//判定是否结束
+	Game() {}														  //【FC18】当前游戏进程类构造函数
+	vector<time_t> roundTime;                                         //【FC18】游戏每回合时间   #json
+	bool init(string filename, char* json_filename);                  //@@@【FC18】从文件读入信息，初始化游戏，并写第0轮的JSON
+	DATA::Data& getData() { return data; }                            //【FC18】从game类获取当前游戏信息   #json
+	vector<TPlayerID> getRank() { return Rank; }                      //【FC18】获取当前所有玩家的排名
+	int getTotalPlayerNum() { return data.totalPlayers; }             //【FC18】获取当前玩家数目
+	TRound getCurrentRound() { return totalRounds; }                  //【FC18】获取当前回合数
+	void DebugPhase();                                                //@@@【FC18】输出调试信息
+	vector<Info> generateInfo();                                      //@@@【FC18】得到分配给每个ai代码dll的参数info向量
+	bool isValid();                                                   //【FC18】判定是否结束
+	//@@@【FC18】根据规则每回合分过程的执行与结算函数
+	void commandPhase(vector<CommandList>& command_list);             //@@@【FC18】处理玩家指令
+	void killPlayer(TPlayerID id);                                    //@@@【FC18】杀死玩家 
+	bool isAlive(TPlayerID id) { return data.players[id].isAlive(); } //【FC18】判断玩家是否活着
+	void saveJson(DATA::Data & dataLastRound, DataSupplement & dataSuppleMent);//【FC18】写入这一轮的JSON文档
+	void addRound() { currentRound++;  totalRounds++; }               //@@@【FC18】回合数递增
+
+
+	//FC15的
+	TRound getRound() { return currentRound; }//获取回合数
+	int getPlayerSize() { return data.PlayerNum; }//获取玩家数量
 	void regeneratePhase();    //恢复阶段
 	void movePhase();          //触手移动
 	void transPhase();         //传输/攻击阶段
 	void beginPhase();      //减小各种回合数
 	void endPhase();  //删除无用触手
-	void commandPhase(vector<CommandList>& command_list); //处理玩家指令
-	void killPlayer(TPlayerID id); //杀死玩家 
-	bool isAlive(TPlayerID id) { return data.players[id].isAlive(); }
-	void saveJson(DATA::Data & dataLastRound, DataSupplement & dataSuppleMent);
-	void addRound() { currentRound++; }
+
 protected:
-	void takeEffect(TransEffect& te); //将te施用到目标上
-	void handleExtending(TransEffect& t);
+
 	std::ofstream LogFile;
-	DATA::Data data;      //所有的数据存放处
+	DATA::Data data;                                                  //【FC18】所有的数据存放处
+	TRound totalRounds;                                               //【FC18】当前回合数
+	size_t totalPlayers;                                              //【FC18】玩家总数
+	size_t playerAlive;                                               //【FC18】存活人数
+	vector<TPlayerID> Rank;                                           //【FC18】根据规则进行排名
+
+	TRound _MAX_ROUND_;                                               //【FC18】最大回合数
+	vector<int> controlCount;                                         //【FC18】记录玩家已执行的操作数
+
+
+	//FC15的
 	TRound currentRound;  //当前回合数
 	size_t playerSize;    //游戏规模
-	size_t playerAlive;   //存活人数
-	vector<TPlayerID> Rank;//根据总资源数排名
 	TResourceI _MAX_RESOURCE_;//每局特定的最大资源
-	TRound _MAX_ROUND_;
-	vector<int> controlCount; //记录操作数
+	void takeEffect(TransEffect& te); //将te施用到目标上
+	void handleExtending(TransEffect& t);
 	void OwnerChange(TransEffect** TE);
 };
 

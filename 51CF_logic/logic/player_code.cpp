@@ -28,7 +28,7 @@ namespace DAGAN {
 		: id(id), file_name(file_name)
 	{
 		name = file_name;
-		if (name.rfind('/') != string::npos) {
+		if (name.rfind('/') != string::npos) {          //rfind是返回待查字符的最后一次位置索引，即ai代码路径的最底层
 			name = name.substr(name.rfind('/') + 1);
 		}
 		if (name.rfind('\\') != string::npos) {
@@ -47,19 +47,19 @@ namespace DAGAN {
 
 	bool Player_Code::load()
 	{
-		if (NULL != hDLL)
+		if (NULL != hDLL)                                          //重新加载，删除原来已经加载的动态链接库
 		{
 			_CLOSEDLL(hDLL);
 			player_ai = NULL;
 		}
-		hDLL = _LOADDLL(file_name.c_str());
+		hDLL = _LOADDLL(file_name.c_str());                        //加载AI代码动态链接库（DLL）
 		if (NULL != hDLL)
 		{
-			player_ai = (TPlayerAi)_GETFUNC(hDLL, "player_ai");
+			player_ai = (TPlayerAi)_GETFUNC(hDLL, "player_ai");    //加载DLL成功，更新玩家ai代码的函数指针
 		}
 
 		Valid = true;
-		Valid = Valid && (NULL != player_ai);
+		Valid = Valid && (NULL != player_ai);                      //检查玩家ai代码的函数指针是否可用
 
 		if (NULL == hDLL)
 			cout << "[ERROR] failed to load \"" << file_name << "\"" << endl;
@@ -75,9 +75,9 @@ namespace DAGAN {
 
 	bool Player_Code::run(Info &info)
 	{
-		int time_a = GetTickCount();
+		int time_a = GetTickCount();              //运行某位玩家ai代码开始、结束时有时间戳
 		int time_b;
-
+		//运行某位玩家ai代码，如果接到异常，则gameover，并报出异常代码玩家的序号
 #if (!defined _MSC_VER) //|| (defined _DEBUG)
 		try {
 			player_ai(info);
@@ -89,7 +89,7 @@ namespace DAGAN {
 		}
 #else 
 		__try {
-			player_ai(info);//这是直接调用dll里的接口吗
+			player_ai(info);//通过函数指针直接运行玩家ai代码
 		}
 		__except (EXCEPTION_EXECUTE_HANDLER) {
 			cout << "[ERROR] Player " << (int)id << " raised an exception in run()." << endl;
