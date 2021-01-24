@@ -24,22 +24,22 @@ namespace DATA//名空间
 {
 	struct Data
 	{
-		Cell* cells;
-		int CellNum;
+		Cell* cells;//所有塔的指针
+		int CellNum;//塔数
 
-		Tentacle*** tentacles;
-		int TentacleNum;
+		Tentacle*** tentacles;//所有兵线的指针（兵线是由一个二位数组存的，每个兵线就是i->j）
+		int TentacleNum;//兵线数
 
-		Player* players;
-		int PlayerNum;
+		Player* players;//所有玩家的指针
+		int PlayerNum;//玩家数
 
-		Json::Value root;
-		Json::Value currentRoundJson;
-		vector<vector<CutTentacleInfoJson>>  cutTentacleInfoJson;
-		vector<vector<bool>> cutTentacleJson;  //触手切断标志
-		vector<vector<bool>> cutTentacleBornJson;  // 断触手生成标志
+		Json::Value root;//JSON根节点
+		Json::Value currentRoundJson;//当前回合JSON的根节点
+		vector<vector<CutTentacleInfoJson>>  cutTentacleInfoJson;//二维数组存储每条兵线的切断信息
+		vector<vector<bool>> cutTentacleJson;  //二维数组每条兵线切断标志
+		vector<vector<bool>> cutTentacleBornJson;  // 二维数组每条兵线生成标志
 
-		Map gameMap;
+		Map gameMap;//当前的地图
 	};
 }
 

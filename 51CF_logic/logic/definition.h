@@ -213,9 +213,9 @@ struct TBarrier
 class BaseMap
 {
 public:
-	void   setID(TMapID _id) { id = _id; }
-	TMap   getWidth()  const { return m_width; }
-	TMap   getHeigth() const { return m_height; }
+	void   setID(TMapID _id) { id = _id; }//设置地图的序号
+	TMap   getWidth()  const { return m_width; }//获取地图宽度
+	TMap   getHeigth() const { return m_height; }//获取地图高度
 	bool   passable(TPoint p1, TPoint p2)   //判断触手能否连接这两个点
 	{
 		for (auto b : m_barrier)
@@ -241,10 +241,10 @@ public:
 	const  vector<TBarrier>&  getBarriar()    const { return m_barrier; }
 //protected:
 	string             id;                  //记录地图的id，由game赋值，被init函数使用，选择对应的文件
-	TMap               m_width;
-	TMap               m_height;
+	TMap               m_width;             //地图宽度
+	TMap               m_height;            //地图高度
 	vector<TPoint>     m_studentPos;        //只设定细胞的坐标，之后的势力分配交给game
-	vector<TBarrier>   m_barrier;
+	vector<TBarrier>   m_barrier;           //记录所有障碍的信息
 private:
 	int cross(const TPoint& p1, const TPoint& p2) { return p1.m_x*p2.m_y - p1.m_y*p2.m_x; }//叉乘
 	int min(int a, int b) { return a < b ? a : b; }
