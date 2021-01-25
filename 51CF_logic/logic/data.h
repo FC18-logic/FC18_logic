@@ -14,8 +14,8 @@ class Tentacle;//原来的触手类
 
 //@@@【FC18】防御塔类，这里是声明，定义在类的头文件里，参考原来的class Cell
 
-//@@@【FC18】兵团类，这里是声明，定义在类的头文件里，参考原来的class Tentacle
-
+//【FC18】兵团类，这里是声明，定义在类的头文件里，参考原来的class Tentacle
+class Crops;//【FC18】兵团类
 class Player;//【FC18】玩家类
 
 
@@ -37,8 +37,9 @@ namespace DATA                                         //@@@【FC18】名空间
 		Cell* cells;//所有塔的指针
 		
 		TCorps totalCorps;                             //【FC18】总的兵团数
-		//@@@【FC18】指向所有兵团（数组/vector均可）的指针，可以参考原来的Tentacle*** tentacles
-		Tentacle*** tentacles;//所有兵线的指针（兵线是由一个二维数组存的，每个兵线就是i->j）
+		//【FC18】所有兵团的指针
+		Army corps;
+		
 		
 		TPlayer totalPlayers;                          //【FC18】玩家数
 		//@@@【FC18】指向所有玩家（数组/vector均可）的指针，可以参考原来的Player* players
@@ -58,6 +59,7 @@ namespace DATA                                         //@@@【FC18】名空间
 		vector<vector<CutTentacleInfoJson>>  cutTentacleInfoJson;//二维数组存储每条兵线的切断信息
 		vector<vector<bool>> cutTentacleJson;  //二维数组每条兵线切断标志
 		vector<vector<bool>> cutTentacleBornJson;  // 二维数组每条兵线生成标志
+		Tentacle*** tentacles;//【FC15】所有兵线的指针（兵线是由一个二维数组存的，每个兵线就是i->j）
 	};
 }
 

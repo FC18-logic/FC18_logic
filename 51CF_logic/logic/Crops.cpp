@@ -24,6 +24,10 @@ Crops::Crops(DATA::Data* _data, corpsType type, battleCorpsType battletype, cons
 	ID++;
 	m_PeaceNum = 0;
 	m_level = 0;
+
+	m_BuildPoint = 0;
+	m_HealthPoint = 0;
+
 	if(type == Battle)
 	{
 		m_MovePoint = battleMovePoint[battletype][m_level];
@@ -38,7 +42,7 @@ Crops::Crops(DATA::Data* _data, corpsType type, battleCorpsType battletype, cons
 	m_bStation = false;//兵团生产出来后默认驻守塔
 }
 
-/*@@@
+/*
 Move
 兵团在地图内进行移动，无法判断目标地点是否存在别的兵团
 dx：x坐标变化量 dy：y坐标变化量
@@ -48,16 +52,18 @@ bool Crops::Move(int dx, int dy)
 {
 	int curpos_x = m_position.m_x;
 	int curpos_y = m_position.m_y;
-	terrainType curtype = m_data->gameMap.map[curpos_x][curpos_y].type;
+	int next_x = curpos_x+dx;
+	int next_y = curpos_y+dy;
 	TPoint next_pos;
-	next_pos.m_x = curpos_x+dx;
-	next_pos.m_y = curpos_y+dy;
+	next_pos.m_x = next_x;
+	next_pos.m_y = next_y;
+	terrainType curtype = m_data->gameMap.map[curpos_x][curpos_y].type;
 	//越界
 	if(!m_data->gameMap.isPosValid(next_pos))
 	{
 		return false;
 	}
-	terrainType nexttype = m_data->gameMap.map[next_pos.m_x][next_pos.m_y].type;
+	terrainType nexttype = m_data->gameMap.map[next_x][next_y].type;
 	float dMP = (CorpsMoveCost[curtype]+CorpsMoveCost[nexttype])/2;
 	int temp = m_MovePoint - ceil(dMP);
 	//行动力不够

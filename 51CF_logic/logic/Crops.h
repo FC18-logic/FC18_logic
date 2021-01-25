@@ -32,7 +32,7 @@ public:
 	Crops(void);
 	~Crops(void);
 	Crops(DATA::Data* _data, corpsType type, battleCorpsType battletype, constructCorpsType buildtype, TPlayerID ID, TPoint pos);
-	//@@@作战兵团移动 返回是否成功移动
+	//作战兵团移动 返回是否成功移动
 	bool Move(int dx, int dy);
 	//作战兵团攻击 返回是否成功攻击 并减去生命值 如果死亡则在兵团数组中删除
 	bool AttackCrops(Crops* enemy);
@@ -50,7 +50,7 @@ public:
 	void ResetMP();
 	//兵团进入驻扎状态
 	bool GoStation();
-	//@@@建造兵修塔
+	//建造兵修塔
 	bool DoConstruct();
 	//建造兵更改地形
 	bool ChangeTerrain(terrainType target);

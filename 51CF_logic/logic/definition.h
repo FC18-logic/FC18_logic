@@ -45,6 +45,10 @@ const int TOWER_EXPER_GAIN_SCALE = 3;     //【FC18】塔的每回合经验值增加等级数
 const int OCCUPY_POINT_DIST_SCALE = 5;    //【FC18】塔对周围方格施加占有属性值的距离等级有几个
 const int CORPS_ACTION_TYPE_NUM = 10;    //【FC18】兵团能进行的操作种类数
 
+class Crops;
+typedef vector<Crops*>		CorpsUnit;	//【FC18】一个单元格上所有兵团
+typedef CorpsUnit**			Army;		//【FC18】整个地图上的所有兵团 [i][j]表示x=i,y=j位置的所有兵团
+typedef vector<CorpsInfo>	CorpsInfoUnit; //【FC18】一个单元格上所有兵团信息
 
 //以下来自FC15，我们应该用不到了
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -426,10 +430,22 @@ struct CellInfo
 	TPower techSpeed;    //科创点数是资源再生速率的几倍
 };
 
-//@@@【FC18】兵团结构体，struct TentacleInfo
+//@@@【FC18】兵团结构体，有需要的信息再加
+struct CorpsInfo
+{
+	bool	exist;		//是否存在
+	TPoint	pos;		//兵团坐标
+	int		level;		//兵团等级
+	TCorpsID		ID;	//兵团ID
+	THealthPoint	HealthPoint;	//生命值
+	TBuildPoint		BuildPoint;		//劳动力
+	TPlayerID		owner;			//所属玩家ID
+};
+
+//【FC15】
 struct TentacleInfo
 {
-	bool exist; //是否存在
+	bool	exist;		//是否存在
 	TCellID         sourceCell;              //源同学
 	TCellID         targetCell;              //目标同学
 	TentacleState   state;                     //触手状态
@@ -449,8 +465,8 @@ struct PlayerInfo
 	//@@@【FC18】玩家所有塔的序号，参照原来的set<TCellID> cells
 	set<TCellID> cells; //所有的细胞
 
-	//@@@【FC18】玩家所有兵团的序号，建议也用set这种数据结构，内部按兵团序号升序来排序
-
+	//【FC18】玩家所有兵团的序号，建议也用set这种数据结构，内部按兵团序号升序来排序
+	set<TCorpsID> corps; //所有兵团
 	//@@@【FC18】其他需要添加的属性或接口
 
 
@@ -497,16 +513,16 @@ class BaseMap
 		//@@@【FC18】存储地图上的所有防御塔信息的向量（元素为防御塔信息结构体），可以参照vector<TPoint> m_studentPos
 		vector<TPoint>     m_studentPos;               //只设定细胞的坐标，之后的势力分配交给game
 
-		//@@@【FC18】存储地图上的所有兵团信息的向量（元素为兵团信息结构体），可以参照vector<TPoint> m_studentPos
-		
+		//【FC18】存储地图上的所有兵团信息的向量（元素为兵团信息结构体），可以参照vector<TPoint> m_studentPos
+		vector<CorpsInfoUnit>     m_corpsinfo;
 
 		//@@@【FC18】获取地图上的所有防御塔信息函数，可以参照const  vector<TPoint>& getStudentPos() const
 		//@@@【FC18】返回一个防御塔信息结构体的vector引用，方便外部访问修改
 		const  vector<TPoint>& getStudentPos() const { return m_studentPos; }
 
-		//@@@【FC18】获取地图上的所有兵团信息函数，可以参照const  vector<TPoint>& getStudentPos() const
-		//@@@【FC18】返回一个兵团信息结构体的vector引用，方便外部访问修改
-
+		//【FC18】获取地图上的所有兵团信息函数，可以参照const  vector<TPoint>& getStudentPos() const
+		//【FC18】返回一个兵团信息结构体的vector引用，方便外部访问修改
+		const  vector<CorpsInfoUnit>& getCropsInfo() const { return m_corpsinfo; }
 
 		//FC15的
 		vector<TBarrier>   m_barrier;                  //记录所有障碍的信息
@@ -638,7 +654,7 @@ struct Info
 	vector<CellInfo> cellInfo; //同学信息
 
 	//@@@【FC18】返回所有兵团信息的vector，可以参照原来的vector<vector<TentacleInfo> > tentacleInfo;
-	vector<vector<TentacleInfo> > tentacleInfo; //触手信息
+	vector<vector<CorpsInfoUnit>> corpsInfo;//下标为ij的位置表示位置为x:i,y:j的兵团信息
 
 
 	//FC15的
@@ -646,6 +662,7 @@ struct Info
 	int playerSize;
 	int cellNum;    //细胞总数量
 	int myMaxControl;    //最大操作数
+	vector<vector<TentacleInfo> > tentacleInfo; //触手信息
 };
 
 #endif // DEFINITION_H
