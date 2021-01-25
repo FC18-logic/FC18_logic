@@ -44,9 +44,11 @@ const int TOWER_PRODUCT_TASK_NUM = 6;     //【FC18】塔的生产任务种类数
 const int TOWER_EXPER_GAIN_SCALE = 3;     //【FC18】塔的每回合经验值增加等级数
 const int OCCUPY_POINT_DIST_SCALE = 5;    //【FC18】塔对周围方格施加占有属性值的距离等级有几个
 const int CORPS_ACTION_TYPE_NUM = 10;    //【FC18】兵团能进行的操作种类数
+const int MAX_ROUND = 300;
 const int TOWER_SCORE = 10;              //【FC18】计算玩家得分时每个防御塔每个等级得分
 
 class Crops;
+struct CorpsInfo;
 typedef vector<Crops*>		CorpsUnit;	//【FC18】一个单元格上所有兵团
 typedef CorpsUnit**			Army;		//【FC18】整个地图上的所有兵团 [i][j]表示x=i,y=j位置的所有兵团
 typedef vector<CorpsInfo>	CorpsInfoUnit; //【FC18】一个单元格上所有兵团信息
@@ -96,7 +98,6 @@ const TResourceD ExtendingSpeedUpdateCost[MAX_EXTENDING_SPEED_LEVEL] = { 2,4,6,8
 const TResourceD ExtraControlStageUpdateCost[MAX_EXTRA_CONTROL_LEVEL] = { 3,5,7 };
 const TResourceD DefenceStageUpdateCost[MAX_DEFENCE_LEVEL] = { 3,5,7 };
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
 
 //【FC18】二维坐标点结构体
 struct TPoint

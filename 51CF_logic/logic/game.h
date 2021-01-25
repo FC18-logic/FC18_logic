@@ -57,7 +57,9 @@ protected:
 
 	TRound _MAX_ROUND_;                                               //【FC18】最大回合数
 	vector<int> controlCount;                                         //【FC18】记录玩家已执行的操作数
-
+	string cmd_json_filename;                                         //【FC18】指令JSON文件名
+	string info_json_filename;                                        //【FC18】信息JSON文件名
+	string mapinfo_json_filename;                                     //【FC18】地图信息JSON文件名
 
 	//FC15的
 	TRound currentRound;  //当前回合数

@@ -185,6 +185,8 @@ bool Map::readMap(ifstream& inMap, bool enableOutput) {
 		cout << "init map......" << endl;
 	inMap >> m_height;
 	inMap >> m_width;
+	data->mapInfoJsonRoot["head"]["height"] = m_height;
+	data->mapInfoJsonRoot["head"]["width"] = m_width;
 
 
 	//rankInfo
@@ -193,7 +195,7 @@ bool Map::readMap(ifstream& inMap, bool enableOutput) {
 	for (int i = 1; i < 5; i++) rankInfoJson["rank"].append(i);
 	rankInfoJson["rank"].append(0);
 	for (int i = 1; i < 5; i++) rankInfoJson["score"].append(1 * TOWER_SCORE);
-	rankInfoJson["resources"].append(INF);
+	rankInfoJson["score"].append(INF);
 	data->currentRoundPlayerJson["rankInfo"] = rankInfoJson;
 
 
@@ -201,7 +203,7 @@ bool Map::readMap(ifstream& inMap, bool enableOutput) {
 	if (enableOutput)
 		cout << "init team......" << endl;
 	inMap >> data->totalPlayers;
-	data->root["head"]["totalPlayers"] = data->totalPlayers; //#json
+	data->commandJsonRoot["head"]["totalPlayers"] = data->totalPlayers; //#json
 	data->players = new Player[data->totalPlayers];
 
 
@@ -401,7 +403,7 @@ bool Map::randomInitMap() {
 			Json::Value occupyPoint;
 			for (int k = 0; k < 4; k++) {
 				Json::Value occupyPointUnit;
-				occupyPointUnit["id"] = Json::Value(map[i][j].owner);
+				occupyPointUnit["id"] = Json::Value(k + 1);
 				occupyPointUnit["point"] = Json::Value(map[i][j].occupyPoint[k]);
 				occupyPoint.append(occupyPointUnit);
 			}

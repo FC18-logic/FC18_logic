@@ -26,7 +26,7 @@ const terrainType terrain[TERRAIN_TYPE_NUM + 1] =     //【FC18】地形：按占地面积
     Tower        //    0       6
 };
 
-TPoint paraOffset[8] =                                //【FC18】用于生成随机地图时增强连通性
+const TPoint paraOffset[8] =                                //【FC18】用于生成随机地图时增强连通性
 {
     {1 , 0},
     {1 , 1},

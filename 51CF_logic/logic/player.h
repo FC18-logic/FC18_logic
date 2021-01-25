@@ -25,7 +25,7 @@ public:
 
 
 	//@@@【FC18】获取玩家的所有兵团的set
-
+	std::set<Crops> getCrops() { return m_crops; }
 
 
 	//FC15的
@@ -53,8 +53,9 @@ private:
 	
 	
 	//@@@【FC18】玩家所有兵团的序号，建议也用set这种数据结构，内部按兵团序号升序来排序
+	std::set<Crops> m_crops;
 	
-	
+
 	//FC15的
 	std::set<TCellID> m_cells;//当前细胞
 	TResourceD m_techPoint;//科技点数

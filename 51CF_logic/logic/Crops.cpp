@@ -1,6 +1,6 @@
 #include "Crops.h"
 
-TCorpsID ID = 0;
+TCorpsID Crops::ID = 0;
 
 Crops::Crops():m_data(nullptr)
 {

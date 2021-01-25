@@ -6,10 +6,30 @@
 #include <ctime>
 #include <cmath> 
 
-bool Game::init(string file, char* json_file)
+bool Game::init(string file, char* json_file)   //[【FC18】接着用，改好了
 {
+	//【FC18】Json文件名
+	cmd_json_filename = file.append("cmd.json");
+	info_json_filename = file.append("info.json");
+	mapinfo_json_filename = file.append("map.info");
 	//#json
 	roundTime.push_back(clock());
+	Json::Value Head;     //【FC18】
+	Json::Value Body;     //【FC18】
+	data.commandJsonRoot["head"] = Head;   //【FC18】
+	data.commandJsonRoot["body"] = Body;   //【FC18】
+	data.infoJsonRoot["body"]    = Body;   //【FC18】
+	data.mapInfoJsonRoot["head"] = Head;   //【FC18】
+	data.mapInfoJsonRoot["body"] = Body;   //【FC18】
+	data.currentRoundCommandJson["round"] = Json::Value(0);   //【FC18】
+	data.currentRoundCorpsJson["round"]   = Json::Value(0);   //【FC18】
+	data.currentRoundTowerJson["round"]   = Json::Value(0);   //【FC18】
+	data.currentRoundPlayerJson["round"]  = Json::Value(0);   //【FC18】
+	data.currentRoundMapJson["round"]     = Json::Value(0);   //【FC18】
+
+
+
+	/****************************FC15的旧代码****************************
 	Json::Value head;
 	Json::Value body;
 	data.root["body"] = body;
@@ -20,6 +40,7 @@ bool Game::init(string file, char* json_file)
 	data.currentRoundJson["tentacleActions"];
 	data.currentRoundJson["cutTentacleActions"];
 	data.currentRoundJson["barrierActions"];
+	*********************************************************************/
 
 	data.gameMap.setData(&data);
 	ifstream in(file);
@@ -28,11 +49,14 @@ bool Game::init(string file, char* json_file)
 		cerr << "can't open the map file" << endl;
 		return false;
 	}
+
 	//地图文件读入最大资源数和最大回合数
 	//【FC18】读入地图文件并初始化
 	//读入地图宽、高，游戏中玩家数量
 	//写入第一回合玩家命令Json、塔和地图Json，以及玩家Json
-	in >> _MAX_RESOURCE_ >> _MAX_ROUND_;
+	
+	//旧代码//  in >> _MAX_RESOURCE_ >> _MAX_ROUND_;
+
 	if (!data.gameMap.readMap(in, true)) 
 	{
 		cerr << "Something wrong when reading the map file." << endl;
@@ -53,34 +77,62 @@ bool Game::init(string file, char* json_file)
 	}
 	*********************************************************************/
 	in.close();
-	currentRound = 0;
-	playerSize = playerAlive = data.PlayerNum;
+	//旧代码//currentRound = 0;
+	totalRounds = 0;
+	//旧代码//playerSize = playerAlive = data.PlayerNum;
+	totalPlayers = playerAlive = data.totalPlayers;
 
-	data.tentacles = new Tentacle**[data.CellNum];
+	//旧代码//data.tentacles = new Tentacle**[data.CellNum];
 	//Tentacle二维数组，[i][j]就对应着i号兵团与j号兵团的作战关系
-	for (int i = 0; i != data.CellNum; ++i)
-	{
-		data.tentacles[i] = new Tentacle*[data.CellNum];
-		for (int j = 0; j != data.CellNum; ++j)
-			data.tentacles[i][j] = nullptr;
-	}
+	//旧代码//for (int i = 0; i != data.CellNum; ++i)
+	//旧代码//{
+		//旧代码//data.tentacles[i] = new Tentacle*[data.CellNum];
+		//旧代码//for (int j = 0; j != data.CellNum; ++j)
+			//旧代码//data.tentacles[i][j] = nullptr;
+	//旧代码//}
 	//初始化排名
-	for (int i = 0; i != playerSize; ++i)
+	//旧代码//for (int i = 0; i != playerSize; ++i)
+		//旧代码//Rank.push_back(i);
+	for (int i = 0; i < totalPlayers; i++) {
 		Rank.push_back(i);
+	}
 
 	//初始化计数
-	for (int i = 0; i != playerSize; ++i)
+	//旧代码//for (int i = 0; i != playerSize; ++i)
+		//旧代码//controlCount.push_back(0);
+	for (int i = 0; i < totalPlayers; i++) {
 		controlCount.push_back(0);
+	}
 
-	data.root["head"]["totalRounds"] = currentRound + 1;
-	data.root["body"].append(data.currentRoundJson);
-	data.currentRoundJson.clear();
+	//旧代码//data.root["head"]["totalRounds"] = currentRound + 1;
+	//旧代码//data.root["body"].append(data.currentRoundJson);
+	//旧代码//data.currentRoundJson.clear();
+	data.commandJsonRoot["head"]["totalRounds"] = totalRounds + 1;
+	data.commandJsonRoot["body"].append(data.currentRoundCommandJson);
+	data.currentRoundCommandJson.clear();
+
+
+	data.gameMap.saveMapJson();
+	data.currentRoundMapJson.clear();
+	
+	data.infoJsonRoot["body"]["corpsInfo"] = data.currentRoundCorpsJson;
+	data.infoJsonRoot["body"]["towerInfo"] = data.currentRoundTowerJson;
+	data.mapInfoJsonRoot["body"]["playerInfo"] = data.currentRoundPlayerJson;
 
 	//输出到文件 #json 
 	Json::FastWriter sw;
 	ofstream json_os;
-	json_os.open(json_file);
-	json_os << sw.write(data.root);
+	json_os.open(cmd_json_filename);
+	//旧代码//json_os << sw.write(data.root);
+	json_os << sw.write(data.commandJsonRoot);
+	json_os.close();
+
+	json_os.open(info_json_filename);
+	json_os << sw.write(data.infoJsonRoot);
+	json_os.close();
+
+	json_os.open(mapinfo_json_filename);
+	json_os << sw.write(data.mapInfoJsonRoot);
 	json_os.close();
 	return true;
 }
