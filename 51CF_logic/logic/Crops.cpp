@@ -2,8 +2,9 @@
 
 TCorpsID ID = 0;
 
-Crops::Crops(void)
+Crops::Crops():m_data(nullptr)
 {
+	
 }
 
 
@@ -11,7 +12,8 @@ Crops::~Crops(void)
 {
 }
 
-Crops::Crops(corpsType type, battleCorpsType battletype, constructCorpsType buildtype, TPlayerID PlayerID, TPoint pos)
+Crops::Crops(DATA::Data* _data, corpsType type, battleCorpsType battletype, constructCorpsType buildtype, TPlayerID PlayerID, TPoint pos)
+	:m_data(_data)
 {
 	m_type = type;
 	m_BattleType = battletype;
@@ -33,27 +35,56 @@ Crops::Crops(corpsType type, battleCorpsType battletype, constructCorpsType buil
 			m_BuildPoint = 3;
 		}
 	}
+	m_bStation = false;//兵团生产出来后默认驻守塔
 }
+
+/*@@@
+Move
+兵团在地图内进行移动，无法判断目标地点是否存在别的兵团
+dx：x坐标变化量 dy：y坐标变化量
+返回是否移动成功，成功则更新位置
+*/
+bool Crops::Move(int dx, int dy)
+{
+	int curpos_x = m_position.m_x;
+	int curpos_y = m_position.m_y;
+	terrainType curtype = m_data->gameMap.map[curpos_x][curpos_y].type;
+	TPoint next_pos;
+	next_pos.m_x = curpos_x+dx;
+	next_pos.m_y = curpos_y+dy;
+	//越界
+	if(!m_data->gameMap.isPosValid(next_pos))
+	{
+		return false;
+	}
+	terrainType nexttype = m_data->gameMap.map[next_pos.m_x][next_pos.m_y].type;
+	float dMP = (CorpsMoveCost[curtype]+CorpsMoveCost[nexttype])/2;
+	int temp = m_MovePoint - ceil(dMP);
+	//行动力不够
+	if(temp<0)
+	{
+		return false;
+	}
+	m_MovePoint = temp;
+	return true;
+}
+
 
 /*
 AttackCrops
 该兵团对另一兵团发起攻击，负责计算攻击力、攻击兵团、并移动
-参数 enemyID 受攻击兵团ID
+参数 enemy 受攻击兵团指针
 返回值 bool 攻击成功返回true
 lmx
 等待进一步修改，和攻击塔合并
 */
-bool Crops::AttackCrops(TCorpsID enemyID)
+bool Crops::AttackCrops(Crops* enemy)
 {
 	if(m_MovePoint == 0)
 	{
 		return false;
 	}
 	m_MovePoint = 0;
-	Crops* enemy = NULL;//敌人指针
-	//根据ID寻找敌人
-	//等待添加代码
-	//
 	//如果没有该敌人
 	if(!enemy)
 	{
@@ -127,25 +158,43 @@ bool Crops::BeAttacked(int attack,Crops* enemy)
 
 bool Crops::bAlive()
 {
-	if(m_HealthPoint>0)
+	if(m_type == Battle)
+	{
+		if(m_HealthPoint>0)
+		{
+			return true;
+		}
+	}
+	else if(m_BuildType == Builder)
+	{
+		if(m_BuildPoint>0)
+		{
+			return true;
+		}
+	}
+	else
 	{
 		return true;
 	}
 	return false;
 }
 
-int Crops::getCE()
+/*
+getCE
+返回该兵团的战斗力
+*/
+TBattlePoint Crops::getCE()
 {
-	//没有战斗力增益
-	return ceil(
-		((float)corpsBattlePoint[m_BattleType][m_level]*m_HealthPoint)
+	//战斗力增益
+	terrainType type = m_data->gameMap.map[m_position.m_x][m_position.m_y].type;
+	TBattlePoint Attack = CorpsBattleGain[type];
+	//总战斗力
+	Attack += (TBattlePoint)ceil(
+		(float)(corpsBattlePoint[m_BattleType][m_level]*m_HealthPoint)
 		/(float)battleHealthPoint[m_BattleType][m_level]);
+	return Attack;
 }
 
-TPoint Crops::getPos()
-{
-	return m_position;
-}
 
 /*
 Recover
@@ -155,6 +204,10 @@ Recover
 void Crops::Recover()
 {
 	if(m_type == Construct)
+	{
+		return;
+	}
+	if(!m_bStation)
 	{
 		return;
 	}
@@ -176,17 +229,13 @@ MergeCrops
 参数：cropsID：对面兵团的ID
 返回是否整编成功
 */
-bool Crops::MergeCrops(TCorpsID cropsID)
+bool Crops::MergeCrops(Crops* targetCrops)
 {
 	//如果无行动力
 	if(m_MovePoint == 0)
 	{
 		return false;
 	}
-	Crops* targetCrops = NULL;
-	//根据ID寻找整编队伍
-	//等待添加代码
-	//
 	//如果目标队伍不存在
 	if(targetCrops == NULL)
 	{
@@ -228,10 +277,39 @@ bool Crops::MergeCrops(TCorpsID cropsID)
 	//
 }
 
+/*
+ResetMP
+回合开始时重置行动力
+*/
 void Crops::ResetMP()
 {
 	if(m_type == Battle)
 	{
 		m_MovePoint = battleMovePoint[m_BattleType][m_level];
 	}
+	else
+	{
+		m_MovePoint = constructMovePoint[m_BattleType];
+	}
+}
+
+
+bool Crops::ChangeTerrain(terrainType target)
+{
+	if(!bAlive())
+	{
+		return false;
+	}
+	if(m_type != Construct)
+		return false;
+	if(m_BuildType != Builder)
+		return false;
+	int curID = m_data->gameMap.map[m_position.m_x][m_position.m_y].owner;
+	if(curID != m_PlayerID)
+	{
+		return false;
+	}
+	m_data->gameMap.map[m_position.m_x][m_position.m_y].type = target;
+	m_BuildPoint--;
+	return true;
 }

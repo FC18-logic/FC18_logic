@@ -135,6 +135,8 @@ enum constructCorpsType
 };
 
 
+
+
 //【FC18】命令类型
 enum commandType {
 	corpsCommand = 0,         //兵团命令
@@ -191,15 +193,18 @@ enum terrainType
 
 
 //【FC18】作战兵团行动力（与作战兵团的枚举类在序号上对应，且考虑了等级）
-const TMovePoint battleMovePoint[BATTLE_CORPS_TYPE_NUM][MAX_CORPS_LEVEL]
+const TMovePoint battleMovePoint[BATTLE_CORPS_TYPE_NUM][MAX_CORPS_LEVEL] = 
 {
 	{2,   2,   2},    //战士
 	{2,   2,   2},    //弓箭手
 	{4,   4,   4}     //骑兵
 };
 
+//@@@【FC18】工程兵行动力，规则中没有，先假设这两个数
+const TMovePoint constructMovePoint[CONSTRUCT_CORPS_TYPE_NUM] = {2,2};
+
 //【FC18】作战兵团初始战斗力（与作战兵团的枚举类在序号上对应，且考虑了等级）
-const TBattlePoint corpsBattlePoint[BATTLE_CORPS_TYPE_NUM][MAX_CORPS_LEVEL]
+const TBattlePoint corpsBattlePoint[BATTLE_CORPS_TYPE_NUM][MAX_CORPS_LEVEL] = 
 {
 	{36,   44,   52},    //战士
 	{30,   38,   46},    //弓箭手
@@ -208,7 +213,7 @@ const TBattlePoint corpsBattlePoint[BATTLE_CORPS_TYPE_NUM][MAX_CORPS_LEVEL]
 
 
 //【FC18】作战兵团的战斗力增益系数（与作战兵团的枚举类在序号上对应，且考虑了等级）
-const TIntPara corpsBattleGain[BATTLE_CORPS_TYPE_NUM][MAX_CORPS_LEVEL]
+const TIntPara corpsBattleGain[BATTLE_CORPS_TYPE_NUM][MAX_CORPS_LEVEL] = 
 {
 	{2,   2,   2},    //战士
 	{2,   2,   2},    //弓箭手
@@ -217,7 +222,7 @@ const TIntPara corpsBattleGain[BATTLE_CORPS_TYPE_NUM][MAX_CORPS_LEVEL]
 
 
 //【FC18】作战兵团的攻城系数（与作战兵团的枚举类在序号上对应，且考虑了等级）
-const TDoublePara corpsAttackTowerGain[BATTLE_CORPS_TYPE_NUM][MAX_CORPS_LEVEL]
+const TDoublePara corpsAttackTowerGain[BATTLE_CORPS_TYPE_NUM][MAX_CORPS_LEVEL] = 
 {
 	{0.4,   0.4,   0.4},    //战士
 	{0.7,   0.7,   0.7},    //弓箭手
@@ -226,7 +231,7 @@ const TDoublePara corpsAttackTowerGain[BATTLE_CORPS_TYPE_NUM][MAX_CORPS_LEVEL]
 
 
 //【FC18】作战兵团初始生命值（与作战兵团的枚举类在序号上对应，且考虑了等级）
-const THealthPoint battleHealthPoint[BATTLE_CORPS_TYPE_NUM][MAX_CORPS_LEVEL]
+const THealthPoint battleHealthPoint[BATTLE_CORPS_TYPE_NUM][MAX_CORPS_LEVEL] = 
 {
 	{60,   80,   90},    //战士
 	{50,   70,   90},    //弓箭手
@@ -235,7 +240,7 @@ const THealthPoint battleHealthPoint[BATTLE_CORPS_TYPE_NUM][MAX_CORPS_LEVEL]
 
 
 //【FC18】工程建设兵团操作的劳动力消耗（与兵团操作的枚举类在序号上对应
-const TBuildPoint constructBuildCost[CORPS_ACTION_TYPE_NUM]
+const TBuildPoint constructBuildCost[CORPS_ACTION_TYPE_NUM] = 
 {
 	0,       //在地图上移动
 	0,       //驻扎在地图方格（无自己塔）
@@ -251,7 +256,7 @@ const TBuildPoint constructBuildCost[CORPS_ACTION_TYPE_NUM]
 
 
 //【FC18】塔的生产任务生产力消耗值
-const TProductPoint TowerProductCost[TOWER_PRODUCT_TASK_NUM]
+const TProductPoint TowerProductCost[TOWER_PRODUCT_TASK_NUM] = 
 {//                                 生产回报                                           特殊说明
 	40,       //生产战士         1star-战士兵团
 	60,       //生产弓箭手      1star-弓箭手兵团
@@ -265,7 +270,7 @@ const TProductPoint TowerProductCost[TOWER_PRODUCT_TASK_NUM]
 //【FC18】每回合塔的经验值增加与回合数的关系
 //【GC18】注意实际访问的时候，传入回合数/100下取整，300回合传入2,301回合起传入3
 //【FC18】或直接公式计算：5 + 5 * floor(currentRound / 100)，注意边界值要特殊对待
-const TExperPoint TowerExperGain[TOWER_EXPER_GAIN_SCALE + 1]
+const TExperPoint TowerExperGain[TOWER_EXPER_GAIN_SCALE + 1] = 
 {//               回合数
 	5,//          [0,100)
 	10,//         [100,200)
@@ -275,7 +280,7 @@ const TExperPoint TowerExperGain[TOWER_EXPER_GAIN_SCALE + 1]
 
 
 //【FC18】塔对周围方格施加的占有属性值，与距离的关系表
-const TOccupyPoint TowerOccupyPoint[OCCUPY_POINT_DIST_SCALE + 1]
+const TOccupyPoint TowerOccupyPoint[OCCUPY_POINT_DIST_SCALE + 1] = 
 {//                方格跟塔的距离
 	100,//              1格
 	80,//               2格
@@ -287,7 +292,7 @@ const TOccupyPoint TowerOccupyPoint[OCCUPY_POINT_DIST_SCALE + 1]
 
 
 //【FC18】塔每个等级最开始的时候各项属性的值，用于初始化配置
-const struct TowerConfig TowerInitConfig[MAX_TOWER_LEVEL]{
+const struct TowerConfig TowerInitConfig[MAX_TOWER_LEVEL] = {
 	{10,25,100,20,2},
 	{15,27,120,20,2},
 	{20,29,140,25,2},
@@ -300,7 +305,7 @@ const struct TowerConfig TowerInitConfig[MAX_TOWER_LEVEL]{
 
 
 //【FC18】行动力消耗（与地形的枚举类在序号上对应）
-const TMovePoint CorpsMoveCost[TERRAIN_TYPE_NUM + 1]
+const TMovePoint CorpsMoveCost[TERRAIN_TYPE_NUM + 1] = 
 {
 	0,    //塔
 	2,    //平原
@@ -313,7 +318,7 @@ const TMovePoint CorpsMoveCost[TERRAIN_TYPE_NUM + 1]
 
 
 //【FC18】战斗力增益（与地形的枚举类在序号上对应）
-const TBattlePoint CorpsBattleGain[TERRAIN_TYPE_NUM + 1]
+const TBattlePoint CorpsBattleGain[TERRAIN_TYPE_NUM + 1] = 
 {
 	0,    //塔
 	0,    //平原
