@@ -6,6 +6,11 @@
 #include "cell.h"
 #include "player.h"
 #include "tentacle.h"
+#include <utility>
+#include <vector>
+#include <algorithm>
+using std::pair;
+using std::vector;
 
 
 bool Map::init(ifstream& inMap, TResourceI _MAX_RESOURCE_, bool enableOutput)  //通过文件流初始化信息
@@ -161,4 +166,81 @@ bool Map::init(const TMapID& filename,TResourceI _MAX_RESOURCE_)
 	ret = init(filename,_MAX_RESOURCE_);
 	inMap.close();
 	return ret;
+}
+
+/***********************************************************************************************
+*函数名 :randomInitMap【FC18】随机地图产生器
+*函数功能描述 : 初始化确定地图长、宽之后，为每个地图方格分配地形，划分各势力的初始领土，分配塔
+                的初始位置
+*函数参数 : 无
+*函数返回值 : 无
+*作者 : 姜永鹏
+***********************************************************************************************/
+bool Map::randomInitMap() {
+	Perlin perlinNoiseGen;
+	int terrainArea[TERRAIN_TYPE_NUM] = { 0 };      //【FC18】统计每种地形生成了多少格
+	double** perlinNoise = new double* [m_height];  //【FC18】柏林噪声表
+	for (int i = 0; i < m_height; i++) {
+		perlinNoise[i] = new double[m_width];
+	}
+	int** typeOfTerrain = new int* [m_height];      //【FC18】地形预分配表
+	for (int i = 0; i < m_height; i++) {
+		typeOfTerrain[i] = new int[m_width];
+	}
+	double minNoise = 1, maxNoise = -1;
+	for (int i = 0; i < m_height; i++) {
+		for (int j = 0; j < m_width; j++) {
+			typeOfTerrain[i][j] = UNALLOCATED;
+			perlinNoise[i][j] = perlinNoiseGen.PerlinNoise(i, j);
+			if (perlinNoise[i][j] > maxNoise) maxNoise = perlinNoise[i][j];
+			if (perlinNoise[i][j] < minNoise) minNoise = perlinNoise[i][j];
+		}
+	}
+	double interval = (maxNoise - minNoise) / TERRAIN_TYPE_NUM;
+	for (int i = 0; i < m_height; i++) {
+		for (int j = 0; j < m_width; j++) {
+			for (int k = 0; k < TERRAIN_TYPE_NUM; k++) {
+				if (perlinNoise[i][j] - minNoise >= k * interval && perlinNoise[i][j] - minNoise < (k + 1) * interval) {
+					typeOfTerrain[i][j] = k;
+					break;
+				}
+			}
+			if (typeOfTerrain[i][j] < 0) typeOfTerrain[i][j] = TERRAIN_TYPE_NUM - 1;
+		}
+	}
+	for (int itercnt = 0; itercnt < perlinNoiseGen.iterRound; itercnt++) {
+		for (int i = 1; i < m_height - 1; i++) {
+			for (int j = 1; j < m_width - 1; j++) {
+				int nums[TERRAIN_TYPE_NUM] = { 0 };
+				for (int k = 0; k < 8; k++) {
+					int newPosX = i + paraOffset[k].m_x;
+					int newPosY = j + paraOffset[k].m_y;
+					int scaleValue = typeOfTerrain[newPosX][newPosY];
+					nums[scaleValue]++;
+				}
+				for (int cnt = 0; cnt < TERRAIN_TYPE_NUM; cnt++) {
+					if (nums[cnt] >= perlinNoiseGen.connectStandard) typeOfTerrain[i][j] = cnt;
+				}
+				if (itercnt == perlinNoiseGen.iterRound - 1) {
+					int currentType = typeOfTerrain[i][j];
+					terrainArea[currentType]++;
+				}
+			}
+		}
+	}
+	vector<pair<int, int>> areaRankPair;
+	for (int i = 0; i < TERRAIN_TYPE_NUM; i++) {
+		areaRankPair.push_back({i,terrainArea[i]});
+	}
+	std::sort(areaRankPair.begin(),areaRankPair.end(),
+		[](const pair<int, int>& a, pair<int, int>& b) {return a.second > b.second; });
+
+
+
+	for (int i = 0; i < m_height; i++) {
+		delete[] perlinNoise[i];
+		delete[] typeOfTerrain[i];
+	}
+	delete[] perlinNoise;
+	delete[] typeOfTerrain;
 }
