@@ -44,7 +44,7 @@ const int TOWER_PRODUCT_TASK_NUM = 6;     //【FC18】塔的生产任务种类数
 const int TOWER_EXPER_GAIN_SCALE = 3;     //【FC18】塔的每回合经验值增加等级数
 const int OCCUPY_POINT_DIST_SCALE = 5;    //【FC18】塔对周围方格施加占有属性值的距离等级有几个
 const int CORPS_ACTION_TYPE_NUM = 10;    //【FC18】兵团能进行的操作种类数
-const int MAX_ROUND = 300;
+const int MAX_ROUND = 300;               //【FC18】游戏全程的最大回合数，确定的，不像FC15从外部文件读入
 const int TOWER_SCORE = 10;              //【FC18】计算玩家得分时每个防御塔每个等级得分
 
 class Crops;
