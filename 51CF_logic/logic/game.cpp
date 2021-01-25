@@ -29,13 +29,29 @@ bool Game::init(string file, char* json_file)
 		return false;
 	}
 	//地图文件读入最大资源数和最大回合数
+	//【FC18】读入地图文件并初始化
+	//读入地图宽、高，游戏中玩家数量
+	//写入第一回合玩家命令Json、塔和地图Json，以及玩家Json
 	in >> _MAX_RESOURCE_ >> _MAX_ROUND_;
-	//初始化data里的地图信息
+	if (!data.gameMap.readMap(in, true)) 
+	{
+		cerr << "Something wrong when reading the map file." << endl;
+		return false;
+	}
+	if (!data.gameMap.randomInitMap())
+	{
+		cerr << "Something wrong when randomizing the game map." << endl;
+		return false;
+	}
+
+
+	/****************************FC15的旧代码****************************
 	if (!data.gameMap.init(in, _MAX_RESOURCE_, true))
 	{
 		cerr << "Something wrong when init the map infomation."<<endl;
 		return false;
 	}
+	*********************************************************************/
 	in.close();
 	currentRound = 0;
 	playerSize = playerAlive = data.PlayerNum;

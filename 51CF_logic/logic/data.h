@@ -46,10 +46,18 @@ namespace DATA                                         //@@@【FC18】名空间
 		Player* players;//所有玩家的指针
 
 		Map gameMap;                                   //@@@【FC18】当前的地图
+		TRound currentRound;                           //【FC18】当前的回合数
 
 		//关于写JSON文档
-		Json::Value root;                              //【FC18】JSON根节点
-		Json::Value currentRoundJson;                  //【FC18】当前回合JSON的根节点，saveJson()的时候插到总Json的根节点下
+		Json::Value commandJsonRoot;                   //【FC18】所有回合命令的Json根节点
+		Json::Value infoJsonRoot;                      //【FC18】所有回合玩家、防御塔和兵团Json的根节点
+		Json::Value mapInfoJsonRoot;                   //【FC18】所有回合地图信息的Json根节点
+		Json::Value currentRoundCommandJson;           //【FC18】当前回合命令的Json根节点
+		Json::Value currentRoundPlayerJson;            //【FC18】当前回合玩家的Json根节点
+		Json::Value currentRoundTowerJson;             //【FC18】当前回合防御塔的Json根节点
+		Json::Value currentRoundCorpsJson;             //【FC18】当前回合兵团的Json根节点
+		Json::Value currentRoundMapJson;               //【FC18】当前回合地图的Json根节点
+
 
 
 		//FC15的
@@ -60,6 +68,8 @@ namespace DATA                                         //@@@【FC18】名空间
 		vector<vector<bool>> cutTentacleJson;  //二维数组每条兵线切断标志
 		vector<vector<bool>> cutTentacleBornJson;  // 二维数组每条兵线生成标志
 		Tentacle*** tentacles;//【FC15】所有兵线的指针（兵线是由一个二维数组存的，每个兵线就是i->j）
+		Json::Value root;                              //JSON根节点
+		Json::Value currentRoundJson;                  //当前回合JSON的根节点，saveJson()的时候插到总Json的根节点下
 	};
 }
 

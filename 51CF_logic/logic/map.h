@@ -7,8 +7,8 @@
 #include <math.h>
 #include <cmath>
 #include <ctime>
-#define TRANSITION -2
-#define PUBLIC -1
+#define TRANSITION -1
+#define PUBLIC 0
 #define UNALLOCATED -1
 using namespace std;
 namespace DATA 
@@ -54,10 +54,14 @@ public:
 	void setData(DATA::Data* d) { data = d; }   //【FC18】map也可以修改全员共享的Data
 	vector<vector<mapBlock>> map;               //【FC18】游戏中实际存储的地图
 	//~Map();
-	bool randomInitMap();                        //@@@【FC18】随机生成一幅地图，分配势力和设定初始塔的位置
-	bool init(const TMapID& filename, TResourceI _MAX_RESOURCE_);             //@@@【FC18】通过文件初始化地图信息
-	bool init(ifstream& inMap, TResourceI _MAX_RESOURCE_, bool enableOutput); //@@@【FC18】通过文件流初始化信息;
-	void saveMapJson(string file_name);          //@@@【FC18】保存地图的json数据
+	bool randomInitMap();                          //【FC18】随机生成一幅地图，分配势力和设定初始塔的位置
+    bool readMap(ifstream& inMap, bool enableOutput);   //通过文件初始化地图信息，包括读入地图数据和初始化玩家数组
+	void saveMapJson();          //@@@【FC18】保存地图的json数据
+
+
+    //FC15的
+    bool init(const TMapID& filename, TResourceI _MAX_RESOURCE_);             //通过文件初始化地图信息
+    bool init(ifstream& inMap, TResourceI _MAX_RESOURCE_, bool enableOutput); //通过文件流初始化信息;
 private:
 	DATA::Data* data;                            //【FC18】用于游戏中的数据传输
 };

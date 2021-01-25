@@ -171,6 +171,72 @@ bool Map::init(const TMapID& filename,TResourceI _MAX_RESOURCE_)
 }
 
 /***********************************************************************************************
+*函数名 :【FC18】readMap读入地图函数
+*函数功能描述 : 通过文件读入当前游戏的地图数据、玩家数量数据，并初始化玩家数组，写入零回合命令
+                Json
+*函数参数 : inMap<ifstream&> 输入文件流对象，enableOutput<bool> 是否输出调试信息（true--允许，
+            false--不允许）
+*函数返回值 : false--读入地图失败，true--读入地图成功
+*作者 : 姜永鹏
+***********************************************************************************************/
+bool Map::readMap(ifstream& inMap, bool enableOutput) {
+	//初始化地图高度、宽度
+	if (enableOutput)
+		cout << "init map......" << endl;
+	inMap >> m_height;
+	inMap >> m_width;
+
+
+	//rankInfo
+	//更新当前回合的排名信息JSON，不知道第5名无名氏玩家为什么也在Json里，但是暂时照着FC15原码修改了
+	Json::Value rankInfoJson;
+	for (int i = 1; i < 5; i++) rankInfoJson["rank"].append(i);
+	rankInfoJson["rank"].append(0);
+	for (int i = 1; i < 5; i++) rankInfoJson["score"].append(1 * TOWER_SCORE);
+	rankInfoJson["resources"].append(INF);
+	data->currentRoundPlayerJson["rankInfo"] = rankInfoJson;
+
+
+	//初始化阵营
+	if (enableOutput)
+		cout << "init team......" << endl;
+	inMap >> data->totalPlayers;
+	data->root["head"]["totalPlayers"] = data->totalPlayers; //#json
+	data->players = new Player[data->totalPlayers];
+
+
+	//#json add
+	//初始化玩家信息JSON
+	//初始化玩家操作JSON
+	Json::Value playerActionJson; //
+	for (int i = 0; i != data->totalPlayers; ++i)
+	{
+		data->players[i].setdata(data);
+
+		Json::Value paj;
+		paj["id"] = Json::Value(int(i + 1));
+		paj["cmdType"] = Json::Value(-1);
+		paj["type"] = Json::Value(-1);
+		paj["productType"] = Json::Value(-1);
+		paj["dstEnemyCorps"] = Json::Value(-1);
+		paj["dstFriendCorps"] = Json::Value(-1);
+		paj["dstEnemyTower"] = Json::Value(-1);
+		paj["dstFriendTower"] = Json::Value(-1);
+		paj["dstTerrain"] = Json::Value(-1);
+		Json::Value move;
+		move["dx"] = Json::Value(0);
+		move["dy"] = Json::Value(0);
+		move["dir"] = Json::Value(-1);
+		paj["move"] = move;
+		data->currentRoundCommandJson["playerCommand"].append(paj);
+	}
+	data->totalTowers = 0;
+	data->totalCorps = 0;
+	data->currentRound = 0;        //初始化过程为第0回合
+	return true;
+}
+
+/***********************************************************************************************
 *函数名 :【FC18】randomInitMap随机地图产生器
 *函数功能描述 : 初始化确定地图长、宽之后，为每个地图方格分配地形，划分各势力的初始领土，分配塔
                 的初始位置
@@ -247,6 +313,9 @@ bool Map::randomInitMap() {
 		map.push_back(newVectorMapBlock);
 		for (int j = 0; j < m_width; j++) {
 			mapBlock newBlock;
+			for (int k = 0; k < 4; k++) {
+				newBlock.occupyPoint.push_back(0);    //各方格初始占有属性值均为0
+			}
 			map[i].push_back(newBlock);
 		}
 	}
@@ -277,60 +346,104 @@ bool Map::randomInitMap() {
 	Yinterval = (m_height % 2 == 0) ? 2 : 3;
 	for (int j = 0; j < m_height; j++) {
 		for (int i = 0; i < m_width; i++) {
-			if ((i < ((m_width - Xinterval) / 2)) && (j < ((m_height - Yinterval) / 2))) map[j][i].owner = 0;
-			else if ((i > ((m_width + Xinterval) / 2) - 1) && (j < ((m_height - Yinterval) / 2))) map[j][i].owner = 1;
-			else if ((i > ((m_width + Xinterval) / 2) - 1) && (j > ((m_height + Yinterval) / 2) - 1)) map[j][i].owner = 2;
-			else if ((i < ((m_width - Xinterval) / 2)) && (j > ((m_height + Yinterval) / 2 - 1))) map[j][i].owner = 3;
+			if ((i < ((m_width - Xinterval) / 2)) && (j < ((m_height - Yinterval) / 2))) map[j][i].owner = 1;
+			else if ((i > ((m_width + Xinterval) / 2) - 1) && (j < ((m_height - Yinterval) / 2))) map[j][i].owner = 2;
+			else if ((i > ((m_width + Xinterval) / 2) - 1) && (j > ((m_height + Yinterval) / 2) - 1)) map[j][i].owner = 3;
+			else if ((i < ((m_width - Xinterval) / 2)) && (j > ((m_height + Yinterval) / 2 - 1))) map[j][i].owner = 4;
 			else map[j][i].owner = PUBLIC;
 		}
 	}
-
-	//【FC18】为每个势力生成防御塔
-	if (((m_width - Xinterval) < 3 * 2) || ((m_height - Yinterval) < 3 * 2)) {      //判断是否有空间生成防御塔
+	////////////////////////////////////////////////////////
+	//【FC18】为每个势力生成防御塔                        //
+	//随机防御塔：每个势力的初始领地中随机生成一个防御塔  //
+	//每个防御塔周围的8格设置为道路Road                   //
+	//保证初始各势力的随机防御塔攻击范围不会覆盖到对方    //
+	////////////////////////////////////////////////////////
+	data->totalTowers = 0;
+	if (((m_width - Xinterval) < 3 * 2) || ((m_height - Yinterval) < 3 * 2)) {      //判断是否有空间生成防御塔，如果有空间，则每个势力的最初领地至少是3 * 3的方格
 		cout << "map size: (" << m_width << "*" << m_height << ") too small!\n";
 		return false;
 	}
+
+	vector<pair<TPoint, TPoint>> towerRegion;         //各玩家生成随机防御塔的位置范围
+	towerRegion.push_back({ {1,1},{(m_width - Xinterval) / 2 - 2,(m_height - Yinterval) / 2 - 2} });
+	towerRegion.push_back({ {(m_width + Xinterval) / 2 + 1,1},{m_width - 2,(m_height - Yinterval) / 2 - 2} });
+	towerRegion.push_back({ {(m_width + Xinterval) / 2 + 1,(m_height + Yinterval) / 2 + 1},{m_width - 2,m_height - 2} });
+	towerRegion.push_back({ {1,(m_height + Yinterval) / 2 + 1},{(m_width - Xinterval) / 2 - 2,m_height - 2} });
+	for (int i = 0; i < 4; i++) {
+		TPoint towerPoint;
+		towerPoint.m_x = generateRanInt(towerRegion[i].first.m_x, towerRegion[i].second.m_x);
+		towerPoint.m_y = generateRanInt(towerRegion[i].first.m_y, towerRegion[i].second.m_y);
+		map[towerPoint.m_y][towerPoint.m_x].type = Tower;     //更新地图类：当前方格的地形修改为防御塔
+		map[towerPoint.m_y][towerPoint.m_x].owner = i + 1;
+		data->totalTowers++;                      //更新data类：更新防御塔总数
+		//@@@【FC18】更新data类：向防御塔向量中添加新增的防御塔
+		//@@@【FC18】更新player类：向player的防御塔序号向量中添加新的防御塔序号
+		for (int j = 0; j < 8; j++) {
+			TPoint p;
+			p.m_x = towerPoint.m_x + paraOffset[j].m_x;
+			p.m_y = towerPoint.m_y + paraOffset[j].m_y;
+			map[p.m_y][p.m_x].occupyPoint[i] = TowerOccupyPoint[0];
+			map[p.m_y][p.m_x].type = Road;
+		}
+	}
 	
-	TPoint towerPoint;         //随机防御塔坐标
-	towerPoint.m_x = generateRanInt(1,(m_width - Xinterval) / 2 -2);
-	towerPoint.m_y = generateRanInt(1, (m_height - Yinterval) / 2 - 2);
-	map[towerPoint.m_y][towerPoint.m_x].type = Tower;
-	for (int i = 0; i < 8; i++) {
-		TPoint p;
-		p.m_x = towerPoint.m_x + paraOffset[i].m_x;
-		p.m_y = towerPoint.m_y + paraOffset[i].m_y;
-		map[p.m_y][p.m_x].type = Road;
-	}
-
-	towerPoint.m_x = generateRanInt((m_width + Xinterval) / 2 + 1, m_width - 2);
-	towerPoint.m_y = generateRanInt(1, (m_height - Yinterval) / 2 - 2);
-	map[towerPoint.m_y][towerPoint.m_x].type = Tower;
-	for (int i = 0; i < 8; i++) {
-		TPoint p;
-		p.m_x = towerPoint.m_x + paraOffset[i].m_x;
-		p.m_y = towerPoint.m_y + paraOffset[i].m_y;
-		map[p.m_y][p.m_x].type = Road;
-	}
-
-	towerPoint.m_x = generateRanInt((m_width + Xinterval) / 2 + 1, m_width - 2);
-	towerPoint.m_y = generateRanInt((m_height + Yinterval) / 2 + 1, m_height - 2);
-	map[towerPoint.m_y][towerPoint.m_x].type = Tower;
-	for (int i = 0; i < 8; i++) {
-		TPoint p;
-		p.m_x = towerPoint.m_x + paraOffset[i].m_x;
-		p.m_y = towerPoint.m_y + paraOffset[i].m_y;
-		map[p.m_y][p.m_x].type = Road;
-	}
-
-	towerPoint.m_x = generateRanInt(1, (m_width - Xinterval) / 2 - 2);
-	towerPoint.m_y = generateRanInt((m_height + Yinterval) / 2 + 1, m_height - 2);
-	map[towerPoint.m_y][towerPoint.m_x].type = Tower;
-	for (int i = 0; i < 8; i++) {
-		TPoint p;
-		p.m_x = towerPoint.m_x + paraOffset[i].m_x;
-		p.m_y = towerPoint.m_y + paraOffset[i].m_y;
-		map[p.m_y][p.m_x].type = Road;
+	int countRound = 0, countPlayer = 0;
+	for (int i = 0; i < m_height; i++) {
+		for (int j = 0; j < m_width; j++) {
+			Json::Value blockJson;
+			Json::Value position;
+			position["posx"] = Json::Value(j);
+			position["posy"] = Json::Value(i);
+			blockJson["position"] = position;
+			blockJson["type"] = Json::Value(int(map[i][j].type));
+			blockJson["owner"] = Json::Value(map[i][j].owner);
+			Json::Value occupyPoint;
+			for (int k = 0; k < 4; k++) {
+				Json::Value occupyPointUnit;
+				occupyPointUnit["id"] = Json::Value(map[i][j].owner);
+				occupyPointUnit["point"] = Json::Value(map[i][j].occupyPoint[k]);
+				occupyPoint.append(occupyPointUnit);
+			}
+			if (map[i][j].type == Tower) {
+				Json::Value towerJson;
+				towerJson["id"] = Json::Value(map[i][j].owner - 1);
+				towerJson["ownerId"] = Json::Value(map[i][j].owner); 
+				Json::Value towerPos;
+				towerPos["posx"] = Json::Value(j);
+				towerPos["posy"] = Json::Value(i);
+				towerJson["position"] = position;
+				towerJson["starLevel"] = Json::Value(1);
+				towerJson["productPoint"] = Json::Value(10);
+				towerJson["battlePoint"] = Json::Value(25);
+				towerJson["healthPoint"] = Json::Value(100);
+				towerJson["experience"] = Json::Value(0);
+				towerJson["battleRegion"] = Json::Value(2);
+				data->currentRoundTowerJson.append(towerJson);
+				Json::Value playerJson;
+				playerJson["rank"] = playerJson["team"] = playerJson["id"] = Json::Value(map[i][j].owner);
+				playerJson["score"] = 1 * TOWER_SCORE;
+				playerJson["corpsNum"] = Json::Value(0);
+				playerJson["towerNum"] = Json::Value(1);
+				playerJson["tower"].append(towerJson["id"]);
+				data->currentRoundPlayerJson.append(playerJson);
+			}
+			data->currentRoundMapJson.append(blockJson);
+		}
 	}
 
 	return true;
+}
+
+/***********************************************************************************************
+*函数名 :【FC18】saveMapJson保存地图Json函数
+*函数功能描述 : 将当前回合的地图Json数据保存到游戏所有回合的Json数据中，同时记录回合数
+*函数参数 : 无
+*函数返回值 : 无
+*作者 : 姜永鹏
+***********************************************************************************************/
+void Map::saveMapJson() {
+	int round = data->currentRound;      //更新地图Json前记录当前回合数
+	data->currentRoundMapJson["round"] = Json::Value(round);
+	data->mapInfoJsonRoot.append(data->currentRoundMapJson);
 }
