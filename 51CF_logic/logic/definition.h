@@ -292,7 +292,8 @@ const TOccupyPoint TowerOccupyPoint[OCCUPY_POINT_DIST_SCALE + 1] =
 
 
 //【FC18】塔每个等级最开始的时候各项属性的值，用于初始化配置
-const struct TowerConfig TowerInitConfig[MAX_TOWER_LEVEL]{
+const struct TowerConfig TowerInitConfig[MAX_TOWER_LEVEL] =
+{
 	{10,25,100,20, 2},
 	{15,27,120,20, 2},
 	{20,29,140,25, 2},
