@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup Label="ProjectConfigurations">
     <ProjectConfiguration Include="Debug|Win32">
@@ -35,6 +35,7 @@
     <ClInclude Include="lib_json\json_tool.h" />
     <ClInclude Include="logic\ai.h" />
     <ClInclude Include="logic\cell.h" />
+    <ClInclude Include="logic\Crops.h" />
     <ClInclude Include="logic\data.h" />
     <ClInclude Include="logic\definition.h" />
     <ClInclude Include="logic\game.h" />
@@ -49,6 +50,7 @@
     <ClCompile Include="lib_json\json_value.cpp" />
     <ClCompile Include="lib_json\json_writer.cpp" />
     <ClCompile Include="logic\cell.cpp" />
+    <ClCompile Include="logic\Crops.cpp" />
     <ClCompile Include="logic\definition.cpp" />
     <ClCompile Include="logic\game.cpp" />
     <ClCompile Include="logic\main.cpp" />

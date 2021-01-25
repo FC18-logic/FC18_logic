@@ -90,6 +90,9 @@
     <ClInclude Include="lib_json\json_tool.h">
       <Filter>头文件\json</Filter>
     </ClInclude>
+    <ClInclude Include="logic\Crops.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="logic\cell.cpp">
@@ -126,6 +129,9 @@
       <Filter>源文件\json_lib</Filter>
     </ClCompile>
     <ClCompile Include="logic\game.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="logic\Crops.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
   </ItemGroup>
