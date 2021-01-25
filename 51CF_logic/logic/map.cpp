@@ -4,10 +4,12 @@
 #include<iostream>
 #include "data.h"
 #include "cell.h"
+#include "Crops.h"
 #include "player.h"
 #include "tentacle.h"
 #include <utility>
 #include <vector>
+#include <map>
 #include <algorithm>
 using std::pair;
 using std::vector;
@@ -169,14 +171,15 @@ bool Map::init(const TMapID& filename,TResourceI _MAX_RESOURCE_)
 }
 
 /***********************************************************************************************
-*函数名 :randomInitMap【FC18】随机地图产生器
+*函数名 :【FC18】randomInitMap随机地图产生器
 *函数功能描述 : 初始化确定地图长、宽之后，为每个地图方格分配地形，划分各势力的初始领土，分配塔
                 的初始位置
 *函数参数 : 无
-*函数返回值 : 无
+*函数返回值 : false--随机地图初始化失败，true--随机地图初始化成功
 *作者 : 姜永鹏
 ***********************************************************************************************/
 bool Map::randomInitMap() {
+	//【FC18】利用柏林噪声方法产生随机地图
 	Perlin perlinNoiseGen;
 	int terrainArea[TERRAIN_TYPE_NUM] = { 0 };      //【FC18】统计每种地形生成了多少格
 	double** perlinNoise = new double* [m_height];  //【FC18】柏林噪声表
@@ -187,11 +190,12 @@ bool Map::randomInitMap() {
 	for (int i = 0; i < m_height; i++) {
 		typeOfTerrain[i] = new int[m_width];
 	}
+
 	double minNoise = 1, maxNoise = -1;
-	for (int i = 0; i < m_height; i++) {
+	for (int i = 0; i < m_height; i++) {             //生成柏林噪声表，并记录其中的最大、最小噪声值
 		for (int j = 0; j < m_width; j++) {
-			typeOfTerrain[i][j] = UNALLOCATED;
-			perlinNoise[i][j] = perlinNoiseGen.PerlinNoise(i, j);
+			typeOfTerrain[i][j] = UNALLOCATED;       //初始化所有格地形均为未分配
+			perlinNoise[i][j] = perlinNoiseGen.PerlinNoise(i, j);            //生成初始的柏林噪声
 			if (perlinNoise[i][j] > maxNoise) maxNoise = perlinNoise[i][j];
 			if (perlinNoise[i][j] < minNoise) minNoise = perlinNoise[i][j];
 		}
@@ -200,12 +204,12 @@ bool Map::randomInitMap() {
 	for (int i = 0; i < m_height; i++) {
 		for (int j = 0; j < m_width; j++) {
 			for (int k = 0; k < TERRAIN_TYPE_NUM; k++) {
-				if (perlinNoise[i][j] - minNoise >= k * interval && perlinNoise[i][j] - minNoise < (k + 1) * interval) {
+				if (((perlinNoise[i][j] - minNoise) >= k * interval) && ((perlinNoise[i][j] - minNoise) < (k + 1) * interval)) {
 					typeOfTerrain[i][j] = k;
 					break;
 				}
 			}
-			if (typeOfTerrain[i][j] < 0) typeOfTerrain[i][j] = TERRAIN_TYPE_NUM - 1;
+			if (typeOfTerrain[i][j] == UNALLOCATED) typeOfTerrain[i][j] = TERRAIN_TYPE_NUM - 1;
 		}
 	}
 	for (int itercnt = 0; itercnt < perlinNoiseGen.iterRound; itercnt++) {
@@ -213,9 +217,9 @@ bool Map::randomInitMap() {
 			for (int j = 1; j < m_width - 1; j++) {
 				int nums[TERRAIN_TYPE_NUM] = { 0 };
 				for (int k = 0; k < 8; k++) {
-					int newPosX = i + paraOffset[k].m_x;
-					int newPosY = j + paraOffset[k].m_y;
-					int scaleValue = typeOfTerrain[newPosX][newPosY];
+					int newPosX = j + paraOffset[k].m_x;
+					int newPosY = i + paraOffset[k].m_y;
+					int scaleValue = typeOfTerrain[newPosY][newPosX];
 					nums[scaleValue]++;
 				}
 				for (int cnt = 0; cnt < TERRAIN_TYPE_NUM; cnt++) {
@@ -234,13 +238,99 @@ bool Map::randomInitMap() {
 	}
 	std::sort(areaRankPair.begin(),areaRankPair.end(),
 		[](const pair<int, int>& a, pair<int, int>& b) {return a.second > b.second; });
-
-
-
+	std::map<int, int> areaRankMap;
+	for (int i = 0; i < TERRAIN_TYPE_NUM; i++) {
+		areaRankMap.insert(pair<int, int>(areaRankPair[i].first, i));
+	}
+	for (int i = 0; i < m_height; i++) {
+		vector<mapBlock> newVectorMapBlock;
+		map.push_back(newVectorMapBlock);
+		for (int j = 0; j < m_width; j++) {
+			mapBlock newBlock;
+			map[i].push_back(newBlock);
+		}
+	}
+	for (int i = 0; i < m_height; i++) {
+		for (int j = 0; j < m_width; j++) {
+			int type = typeOfTerrain[i][j];
+			int rank = areaRankMap[type];
+			map[i][j].type = terrain[rank];
+		}
+	}
 	for (int i = 0; i < m_height; i++) {
 		delete[] perlinNoise[i];
 		delete[] typeOfTerrain[i];
 	}
 	delete[] perlinNoise;
 	delete[] typeOfTerrain;
+
+	////////////////////////////////////////////////////////
+	//【FC18】分配各势力的初始领土，占据方形地图的四个角落//
+	//地图的样子                                          //
+	//      X(i=0)--------m_width---------                //
+	//Y(j=0)         0     PUB      1                     //
+	//  |           PUB    PUB     PUB                    //
+	//  |            3     PUB      2                     //
+	////////////////////////////////////////////////////////
+	int Xinterval, Yinterval;         //X方向和Y方向地图的公共区域条带宽度
+	Xinterval = (m_width % 2 == 0) ? 2 : 3;
+	Yinterval = (m_height % 2 == 0) ? 2 : 3;
+	for (int j = 0; j < m_height; j++) {
+		for (int i = 0; i < m_width; i++) {
+			if ((i < ((m_width - Xinterval) / 2)) && (j < ((m_height - Yinterval) / 2))) map[j][i].owner = 0;
+			else if ((i > ((m_width + Xinterval) / 2) - 1) && (j < ((m_height - Yinterval) / 2))) map[j][i].owner = 1;
+			else if ((i > ((m_width + Xinterval) / 2) - 1) && (j > ((m_height + Yinterval) / 2) - 1)) map[j][i].owner = 2;
+			else if ((i < ((m_width - Xinterval) / 2)) && (j > ((m_height + Yinterval) / 2 - 1))) map[j][i].owner = 3;
+			else map[j][i].owner = PUBLIC;
+		}
+	}
+
+	//【FC18】为每个势力生成防御塔
+	if (((m_width - Xinterval) < 3 * 2) || ((m_height - Yinterval) < 3 * 2)) {      //判断是否有空间生成防御塔
+		cout << "map size: (" << m_width << "*" << m_height << ") too small!\n";
+		return false;
+	}
+	
+	TPoint towerPoint;         //随机防御塔坐标
+	towerPoint.m_x = generateRanInt(1,(m_width - Xinterval) / 2 -2);
+	towerPoint.m_y = generateRanInt(1, (m_height - Yinterval) / 2 - 2);
+	map[towerPoint.m_y][towerPoint.m_x].type = Tower;
+	for (int i = 0; i < 8; i++) {
+		TPoint p;
+		p.m_x = towerPoint.m_x + paraOffset[i].m_x;
+		p.m_y = towerPoint.m_y + paraOffset[i].m_y;
+		map[p.m_y][p.m_x].type = Road;
+	}
+
+	towerPoint.m_x = generateRanInt((m_width + Xinterval) / 2 + 1, m_width - 2);
+	towerPoint.m_y = generateRanInt(1, (m_height - Yinterval) / 2 - 2);
+	map[towerPoint.m_y][towerPoint.m_x].type = Tower;
+	for (int i = 0; i < 8; i++) {
+		TPoint p;
+		p.m_x = towerPoint.m_x + paraOffset[i].m_x;
+		p.m_y = towerPoint.m_y + paraOffset[i].m_y;
+		map[p.m_y][p.m_x].type = Road;
+	}
+
+	towerPoint.m_x = generateRanInt((m_width + Xinterval) / 2 + 1, m_width - 2);
+	towerPoint.m_y = generateRanInt((m_height + Yinterval) / 2 + 1, m_height - 2);
+	map[towerPoint.m_y][towerPoint.m_x].type = Tower;
+	for (int i = 0; i < 8; i++) {
+		TPoint p;
+		p.m_x = towerPoint.m_x + paraOffset[i].m_x;
+		p.m_y = towerPoint.m_y + paraOffset[i].m_y;
+		map[p.m_y][p.m_x].type = Road;
+	}
+
+	towerPoint.m_x = generateRanInt(1, (m_width - Xinterval) / 2 - 2);
+	towerPoint.m_y = generateRanInt((m_height + Yinterval) / 2 + 1, m_height - 2);
+	map[towerPoint.m_y][towerPoint.m_x].type = Tower;
+	for (int i = 0; i < 8; i++) {
+		TPoint p;
+		p.m_x = towerPoint.m_x + paraOffset[i].m_x;
+		p.m_y = towerPoint.m_y + paraOffset[i].m_y;
+		map[p.m_y][p.m_x].type = Road;
+	}
+
+	return true;
 }

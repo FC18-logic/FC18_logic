@@ -37,7 +37,7 @@ typedef int    TRound;         //【FC18】回合数
 
 const int MAX_CORPS_LEVEL = 3;    //【FC18】最大的兵团等级
 const int MAX_TOWER_LEVEL = 8;    //【FC18】最大的防御塔等级
-const int TERRAIN_TYPE_NUM = 6;    //【FC18】地形的种类数
+const int TERRAIN_TYPE_NUM = 5;    //【FC18】地形的种类数
 const int BATTLE_CORPS_TYPE_NUM = 3;    //【FC18】作战兵团的种类数
 const int CONSTRUCT_CORPS_TYPE_NUM = 2;    //【FC18】工程兵团的种类数
 const int TOWER_PRODUCT_TASK_NUM = 6;     //【FC18】塔的生产任务种类数
@@ -292,15 +292,15 @@ const TOccupyPoint TowerOccupyPoint[OCCUPY_POINT_DIST_SCALE + 1] =
 
 
 //【FC18】塔每个等级最开始的时候各项属性的值，用于初始化配置
-const struct TowerConfig TowerInitConfig[MAX_TOWER_LEVEL] = {
-	{10,25,100,20,2},
-	{15,27,120,20,2},
-	{20,29,140,25,2},
-	{25,32,160,30,2},
-	{30,35,180,40,3},
-	{35,38,200,40,3},
-	{40,41,220,50,3},
-	{45,45,240,INF,3}
+const struct TowerConfig TowerInitConfig[MAX_TOWER_LEVEL]{
+	{10,25,100,20, 2},
+	{15,27,120,20, 2},
+	{20,29,140,25, 2},
+	{25,32,160,30, 2},
+	{30,35,180,40, 2},
+	{35,38,200,40, 2},
+	{40,41,220,50, 2},
+	{45,45,240,INF,2}
 };
 
 
@@ -313,7 +313,6 @@ const TMovePoint CorpsMoveCost[TERRAIN_TYPE_NUM + 1] =
 	3,    //森林
 	4,    //沼泽
 	1,    //道路
-	0     //多余的，用于后续扩展
 };
 
 
@@ -326,7 +325,6 @@ const TBattlePoint CorpsBattleGain[TERRAIN_TYPE_NUM + 1] =
 	3,    //森林
 	-3,   //沼泽
 	0,    //道路
-	0     //多于的，用于后续扩展
 };
 
 
@@ -471,6 +469,8 @@ class CommandList;
 TPoint operator-(const TPoint& p1, const TPoint& p2);
 //计算欧式距离
 TLength getDistance(const TPoint& p1, const TPoint& p2);
+//生成指定闭区间的随机整数
+int generateRanInt(int start, int end);
 //输出玩家下达的指令集
 std::ostream& operator << (std::ostream& os, const CommandList& cl);
 

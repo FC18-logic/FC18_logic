@@ -14,6 +14,10 @@ TLength getDistance(const TPoint& p1, const TPoint& p2)
 	return sqrt(distance.m_x*distance.m_x + distance.m_y*distance.m_y);
 }
 
+int generateRanInt(int start, int end) {
+	return rand() % (end - start + 1) + start;
+}
+
 std::ostream& operator<<(std::ostream& os, const CommandList& cl)
 {
 	vector<string> stg2str{ "Normal","Attack","Defend","Grow" };

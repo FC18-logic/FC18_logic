@@ -7,8 +7,8 @@
 #include <math.h>
 #include <cmath>
 #include <ctime>
-#define TRANSITION -1
-#define PUBLIC -2
+#define TRANSITION -2
+#define PUBLIC -1
 #define UNALLOCATED -1
 using namespace std;
 namespace DATA 
@@ -16,25 +16,26 @@ namespace DATA
 	struct Data;
 }
 
-const terrainType terrain[5] =                  //【FC18】地形：按占地面积大小排序
-{
-    Plain,
-    Road,
-    Mountain,
-    Forest,
-    Swamp
+const terrainType terrain[TERRAIN_TYPE_NUM + 1] =     //【FC18】地形：按占地面积大小排序，塔地形单独算，不放在这里面
+{//                  enum值   排序
+    Plain,       //    1       1
+    Road,        //    5       2
+    Mountain,    //    2       3
+    Forest,      //    3       4
+    Swamp,       //    4       5
+    Tower        //    0       6
 };
 
-TPoint paraOffset[8] =                          //【FC18】用于生成随机地图时增强连通性
+TPoint paraOffset[8] =                                //【FC18】用于生成随机地图时增强连通性
 {
-    {1,0},
-    {1,1},
-    {0,1},
-    {-1,1},
-    {-1,0},
+    {1 , 0},
+    {1 , 1},
+    {0 , 1},
+    {-1, 1},
+    {-1, 0},
     {-1,-1},
-    {0,-1},
-    {1,-1}
+    {0 ,-1},
+    {1 ,-1}
 };
 
 struct mapBlock                                 //【FC18】地图方格类
@@ -53,7 +54,7 @@ public:
 	void setData(DATA::Data* d) { data = d; }   //【FC18】map也可以修改全员共享的Data
 	vector<vector<mapBlock>> map;               //【FC18】游戏中实际存储的地图
 	//~Map();
-	bool randomInitMap();                          //@@@【FC18】随机生成一幅地图，分配势力和设定初始塔的位置
+	bool randomInitMap();                        //@@@【FC18】随机生成一幅地图，分配势力和设定初始塔的位置
 	bool init(const TMapID& filename, TResourceI _MAX_RESOURCE_);             //@@@【FC18】通过文件初始化地图信息
 	bool init(ifstream& inMap, TResourceI _MAX_RESOURCE_, bool enableOutput); //@@@【FC18】通过文件流初始化信息;
 	void saveMapJson(string file_name);          //@@@【FC18】保存地图的json数据
