@@ -52,6 +52,7 @@ int main(int argc, char** argv)
 	vector<Player_Code>  players;                       //【FC18】玩家AI代码类
 	string          map_filename;                       //【FC18】游戏地图文件名
 	vector<string>  players_filename;                   //【FC18】玩家AI文件名
+	vector<string>  players_name;                       //【FC18】玩家姓名，用于初始化
 	int player_size;                                    //【FC18】Game中的玩家数量
 
 	// load config file
@@ -83,13 +84,7 @@ int main(int argc, char** argv)
 		cout << "[Error]" << player_size << " player_ai file required." << endl;
 		return 3;
 	}
-	// load map
-	//初始化地图、玩家的势力区域、防御塔、兵团的作战关系表等等
-	Game G;
-	if (!G.init(map_filename, json_filename)) {
-		cout << "[Error] failed to load " << map_filename << endl;
-		return 4;
-	}
+
 
 	//读入玩家AI代码
 	int valid_cnt = 0; //有效ai的数量
@@ -102,12 +97,14 @@ int main(int argc, char** argv)
 		if (player.isValid())                //玩家ai的all加载成功会返回true
 		{
 			players.push_back(player);
+			players_name.push_back(player_name);
 			valid_cnt++;
 		}
 		else {
 			players.push_back(player); //压进去充数，此时玩家ai代码类的Valid为false
 			cout << "[Warning] failed to load player_ai " << players_filename[i] << endl;
 			player.setName(player.getName() + "//NOT_VALID");
+			players_name.push_back(player_name+"[N/A]");
 #if (defined _MSC_VER && defined _DEBUG)
 			system("pause");
 #endif
@@ -124,6 +121,16 @@ int main(int argc, char** argv)
 		return 5;
 	}
 	cout << "[Info] " << valid_cnt << " players loaded." << endl;
+
+
+	// load map
+	//初始化地图、玩家的势力区域、防御塔、兵团的作战关系表等等
+	Game G;
+	if (!G.init(map_filename, json_filename, players_name)) {
+		cout << "[Error] failed to load " << map_filename << endl;
+		return 4;
+	}
+
 
 	// game and controller
 

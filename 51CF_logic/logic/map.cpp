@@ -180,7 +180,7 @@ bool Map::init(const TMapID& filename,TResourceI _MAX_RESOURCE_)
 *函数返回值 : false--读入地图失败，true--读入地图成功
 *作者 : 姜永鹏
 ***********************************************************************************************/
-bool Map::readMap(ifstream& inMap, bool enableOutput) {
+bool Map::readMap(ifstream& inMap, bool enableOutput, std::vector<std::string> players_name) {
 	//初始化地图高度、宽度
 	if (enableOutput)
 		cout << "init map......" << endl;
@@ -210,6 +210,7 @@ bool Map::readMap(ifstream& inMap, bool enableOutput) {
 		Json::Value playerJson;
 		playerJson["id"] = Json::Value(i);
 		playerJson["team"] = Json::Value(i);
+		playerJson["name"] = Json::Value(players_name[i]);
 		data->commandJsonRoot["head"]["playerInfo"].append(playerJson);
 	}
 

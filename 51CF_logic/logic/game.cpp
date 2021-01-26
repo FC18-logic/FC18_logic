@@ -6,7 +6,7 @@
 #include <ctime>
 #include <cmath> 
 
-bool Game::init(string file, char* json_file)   //[【FC18】接着用，改好了
+bool Game::init(string file, char* json_file, vector<string> players_name)   //[【FC18】接着用，改好了
 {
 	//【FC18】Json文件名
 	cmd_json_filename = file.append("cmd.json");
@@ -57,7 +57,7 @@ bool Game::init(string file, char* json_file)   //[【FC18】接着用，改好�
 	
 	//旧代码//  in >> _MAX_RESOURCE_ >> _MAX_ROUND_;
 
-	if (!data.gameMap.readMap(in, true))                       //#Json 读入地图，写地图Json文件头，写0回合玩家指令Json
+	if (!data.gameMap.readMap(in, true, players_name))                       //#Json 读入地图，写地图Json文件头，写0回合玩家指令Json
 	{
 		cerr << "Something wrong when reading the map file." << endl;
 		return false;

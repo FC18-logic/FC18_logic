@@ -21,7 +21,7 @@ class Game                                                            //【FC18�
 public:
 	Game() {}														  //【FC18】当前游戏进程类构造函数
 	vector<time_t> roundTime;                                         //【FC18】游戏每回合时间   #json
-	bool init(string filename, char* json_filename);                  //@@@【FC18】从文件读入信息，初始化游戏，并写第0轮的JSON
+	bool init(string filename, char* json_filename,vector<string> players_name);                  //@@@【FC18】从文件读入信息，初始化游戏，并写第0轮的JSON
 	DATA::Data& getData() { return data; }                            //【FC18】从game类获取当前游戏信息   #json
 	vector<TPlayerID> getRank() { return Rank; }                      //【FC18】获取当前所有玩家的排名
 	int getTotalPlayerNum() { return data.totalPlayers; }             //【FC18】获取当前玩家数目

@@ -54,7 +54,7 @@ public:
 	vector<vector<mapBlock>> map;               //【FC18】游戏中实际存储的地图
 	//~Map();
 	bool randomInitMap();                          //【FC18】随机生成一幅地图，分配势力和设定初始塔的位置
-    bool readMap(ifstream& inMap, bool enableOutput);   //通过文件初始化地图信息，包括读入地图数据和初始化玩家数组
+    bool readMap(ifstream& inMap, bool enableOutput, vector<string> players_name);   //通过文件初始化地图信息，包括读入地图数据和初始化玩家数组
 	void saveMapJson();                       //【FC18】保存地图的json数据
 
 
