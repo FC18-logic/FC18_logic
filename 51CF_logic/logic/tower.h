@@ -48,6 +48,8 @@ public:
 	bool set_producttype(productType m_protype);
 	//显示所有者ID
 	const TPlayerID showPlayerID(){ return m_PlayerID; }
+	//显示位置
+	const TPoint showPosition(){ return m_position; }
     //抵御兵团的进攻
 	/*
 	待接收参数：

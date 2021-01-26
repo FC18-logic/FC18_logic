@@ -40,7 +40,8 @@ Crops::Crops(DATA::Data* _data, corpsType type, battleCorpsType battletype, cons
 			m_BuildPoint = 3;
 		}
 	}
-	m_bStation = true;//兵团生产出来后默认驻守塔
+	m_bResting = true;//兵团生产出来后默认驻守塔
+	m_data->corps[m_position.m_x][m_position.m_y].push_back(this);
 }
 
 /*
@@ -111,7 +112,9 @@ bool Crops::Move(int dx, int dy)
 		return false;
 	}
 	m_MovePoint = temp;
-	m_bStation = false;
+	m_bResting = false;
+	//修改data中的位置
+	UpdatePos(next_pos);
 	return true;
 }
 
@@ -126,55 +129,40 @@ lmx
 */
 bool Crops::AttackCrops(Crops* enemy)
 {
-	if(m_MovePoint == 0)
-	{
-		return false;
-	}
-	m_MovePoint = 0;
-	//如果没有该敌人
-	if(!enemy)
-	{
-		return false;
-	}
-	//敌人已阵亡
-	if(!enemy->bAlive())
-	{
-		return false;
-	}
-	//如果不是战斗兵
-	if(m_type!=Battle)
-	{
-		return false;
-	}
 	//如果敌人不在射程范围内
 	//添加代码
 	//
-	//计算战斗力
-	TBattlePoint myCE = getCE();
-	TBattlePoint enemyCE = enemy->getCE();
-	//计算损失
-	int deta = myCE-enemyCE;
-	int mylost = floor(28*pow(2.71828,-deta));
-	int enemylost = floor(30*pow(2.71828,deta));
-	//计算生命力
-	if(m_BattleType!= Archer)
+	int enemylost = 0;
+	//如果敌人是战斗兵
+	if(enemy->m_type == Battle)
 	{
-		m_HealthPoint -= mylost;
+		//计算战斗力
+		TBattlePoint myCE = getCE();
+		TBattlePoint enemyCE = enemy->getCE();
+		//计算损失
+		float deta = 0.04*((float)myCE-enemyCE);
+		int mylost = floor(28*pow(2.71828,-deta));
+		enemylost = floor(30*pow(2.71828,deta));
+		//计算生命力
+		if(m_BattleType!= Archer)
+		{
+			m_HealthPoint -= mylost;
+		}
+		if(m_HealthPoint < 0)
+		{
+			m_HealthPoint = 0;
+		}
 	}
-	if(m_HealthPoint < 0)
-	{
-		m_HealthPoint = 0;
-	}
+
 	//如果对方死亡 则移动位置
-	if(!enemy->BeAttacked(enemylost,this))
+	if(!enemy->BeAttacked(enemylost,m_PlayerID))
 	{
 		if(m_BattleType!= Archer)
 		{
 			//移动
-			m_position = enemy->m_position;
+			UpdatePos(enemy->m_position);
 		}
 	}
-	m_bStation = false;
 	return true;
 }
 
@@ -184,12 +172,12 @@ BeAttacked
 参数：attack 受到的伤害值，enemy 发动攻击的兵团指针
 返回值：是否存活 存活返回true
 */
-bool Crops::BeAttacked(int attack,Crops* enemy)
+bool Crops::BeAttacked(int attack,TPlayerID ID)
 {
 	//俘虏工程兵
 	if(m_type == Construct)
 	{
-		m_PlayerID = enemy->m_PlayerID;
+		m_PlayerID = ID;
 		return true;
 	}
 	//战斗兵
@@ -254,7 +242,7 @@ void Crops::Recover()
 	{
 		return;
 	}
-	if(!m_bStation)
+	if(!m_bResting)
 	{
 		return;
 	}
@@ -322,7 +310,7 @@ bool Crops::MergeCrops(Crops* targetCrops)
 	m_MovePoint = 0;
 	//对方兵团HP归零，等待删除
 	targetCrops->m_HealthPoint = 0;
-	m_bStation = false;
+	m_bResting = false;
 }
 
 /*
@@ -366,7 +354,7 @@ bool Crops::ChangeTerrain(terrainType target)
 	{
 		m_data->gameMap.map[m_position.m_x][m_position.m_y].type = target;
 		m_BuildPoint--;
-		m_bStation = false;
+		m_bResting = false;
 		return true;
 	}
 	return false;
@@ -377,18 +365,16 @@ void Crops::newRound()
 {
 	ResetMP();
 	Recover();
-	if(!m_bStation)
-		m_PeaceNum = 0;
-	m_bStation = true;
+	GoRest();
 }
 
-//进入驻扎状态
-void Crops::GoStation()
+//进入驻扎休整状态
+void Crops::GoRest()
 {
-	if(!m_bStation)
+	if(!m_bResting)
 	{
 		m_PeaceNum = 0;//开始计数
-		m_bStation = true;
+		m_bResting = true;
 	}
 }
 
@@ -408,4 +394,111 @@ struct CorpsInfo Crops::ShowInfo()
 	info.owner = m_PlayerID;
 	info.pos = m_position;
 	return info;
+}
+
+/*
+AttackTower
+*/
+bool Crops::AttackTower(class Tower *enemy)
+{
+	int TowerCE;//塔的战斗力
+	int myCE = getCE();//兵团战斗力
+	//敌人已阵亡或不在射程范围内
+	//添加代码
+	//
+	float deta = 0.04*((float)myCE-TowerCE);
+	int mylost = floor(28*pow(2.71828,-deta));
+	int enemylost = floor(30*pow(2.71828,deta))*corpsAttackTowerGain[m_BattleType][m_level];
+	if(m_BattleType == Archer)
+		mylost = 0;
+	m_HealthPoint -= mylost;
+	if(m_HealthPoint < 0)
+		m_HealthPoint = 0;
+	bool canmove = false;
+	//判断塔是否被摧毁
+	//添加代码
+	//
+	if(m_BattleType == Archer)
+		canmove = false;
+	if(canmove)
+	{
+		UpdatePos(enemy->showPosition());
+	}
+	return true;
+}
+
+/*
+Attack
+兵团发动攻击 返回是否攻击成功
+参数 type<CorpsCommandEnum> 攻击敌方兵团或塔， ID 敌方ID
+*/
+bool Crops::Attack(CorpsCommandEnum type, int ID)
+{
+	//如果不是战斗兵
+	if(m_type!=Battle)
+	{
+		return false;
+	}
+
+	m_bResting = false;
+	if(m_MovePoint == 0)
+	{
+		return false;
+	}
+	m_MovePoint = 0;
+	if(type == CAttackCorps)
+	{
+		Crops* enemy = NULL;
+		//寻找敌人
+		enemy = &m_data->myCorps[ID];
+		//敌人已阵亡
+		if(!enemy->bAlive())
+		{
+			return false;
+		}
+		//敌人同阵营
+		if(enemy->m_PlayerID == m_PlayerID)
+			return false;
+		//如果敌人所在位置存在敌方势力塔 优先与塔结算
+		int x = enemy->m_position.m_x;
+		int y = enemy->m_position.m_y;
+		int index = m_data->gameMap.map[x][y].TowerIndex;
+		if(index == NOTOWER)
+			return AttackCrops(enemy);
+		if(m_data->myTowers[index].showPlayerID() == enemy->m_PlayerID)
+			return AttackTower(&(m_data->myTowers[index]));
+		else
+			return AttackCrops(enemy);
+	}
+	else if(type == CAttackTower)
+	{
+		class Tower* enemy = NULL;
+		//寻找敌人
+		enemy = &m_data->myTowers[ID];
+		//敌人已阵亡
+		//添加代码
+		//
+		//敌人同阵营
+		if(enemy->showPlayerID() == m_PlayerID)
+			return false;
+		return AttackTower(enemy);
+	}
+	return false;
+}
+
+
+void Crops::UpdatePos(TPoint targetpos)
+{
+	CorpsUnit thisplace = m_data->corps[m_position.m_x][m_position.m_y];
+	CorpsUnit::iterator it;
+	for(it = thisplace.begin(); it!=thisplace.end(); it++)
+	{
+		if(*it == this)
+		{
+			thisplace.erase(it);
+			break;
+		}
+	}
+	m_data->corps[targetpos.m_x][targetpos.m_y].push_back(this);
+	m_position = targetpos;
 }

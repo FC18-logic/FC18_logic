@@ -159,7 +159,7 @@ enum commandType {
 
 
 //【FC18】兵团操作类型（C前缀表示Corps）
-enum corpsCommand
+enum CorpsCommandEnum
 {//                                                          作战兵团        工程兵团
 	CMove          = 0,       //在地图上移动                     √              √
 	CStation       = 1,       //驻扎在地图方格（无自己塔）       √              √

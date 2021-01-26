@@ -8,6 +8,8 @@
 #include "cell.h"
 #include "player.h"
 
+
+
 class Crops
 {
 private:
@@ -23,7 +25,7 @@ private:
 	THealthPoint			m_HealthPoint;//生命值 归0即死亡
 	int						m_level;//等级 从0开始
 	TBuildPoint				m_BuildPoint;//劳动力
-	bool					m_bStation;//兵团状态
+	bool					m_bResting;//是否在休整
 	TPoint					m_position;//位置
 	int						m_PeaceNum;//驻扎后多少个回合没有受到攻击
 	//
@@ -34,8 +36,7 @@ public:
 	Crops(DATA::Data* _data, corpsType type, battleCorpsType battletype, constructCorpsType buildtype, TPlayerID ID, TPoint pos);
 	//作战兵团移动 返回是否成功移动
 	bool Move(int dx, int dy);
-	//作战兵团攻击 返回是否成功攻击 并减去生命值 如果死亡则在兵团数组中删除
-	bool AttackCrops(Crops* enemy);
+	bool Attack(CorpsCommandEnum type, int ID);
 	//是否存活
 	bool bAlive();
 	//获取战斗力
@@ -43,7 +44,7 @@ public:
 	//整编兵团 返回是否整编成功
 	bool MergeCrops(Crops* targetCrops);
 	//兵团进入驻扎状态
-	void GoStation();
+	void GoRest();
 	//建造兵修塔
 	bool DoConstruct();
 	//建造兵更改地形
@@ -60,11 +61,17 @@ public:
 	int getLevel() { return m_level; }
 protected:
 	//作战兵团受到攻击 返回是否存活 如果死亡，会自动在兵团数组中删除
-	bool BeAttacked(int attack, Crops* enemy);
+	bool BeAttacked(int attack, TPlayerID ID);
 	//重置行动力
 	void ResetMP();
 	//回复HP
 	void Recover();
+	//作战兵团攻击 返回是否成功攻击 并减去生命值
+	bool AttackCrops(Crops* enemy);
+	//作战兵团攻击塔
+	bool AttackTower(class Tower *enemy);
+	//更新位置
+	void UpdatePos(TPoint targetpos);
 };
 
 #endif
