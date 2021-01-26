@@ -40,23 +40,25 @@ public:
 	bool bAlive();
 	//获取战斗力
 	TBattlePoint getCE();
-	//回复HP 每回合调用所有兵团该函数回复生命力
-	void Recover();
 	//整编兵团 返回是否整编成功
 	bool MergeCrops(Crops* targetCrops);
-	//该兵团灭亡，将该兵团从兵团集合中删除
-	void Delete();
-	//新回合开始，重置行动力
-	void ResetMP();
 	//兵团进入驻扎状态
-	bool GoStation();
+	void GoStation();
 	//建造兵修塔
 	bool DoConstruct();
 	//建造兵更改地形
 	bool ChangeTerrain(terrainType target);
+	//新回合开始
+	void newRound();
+	//提供兵团信息
+	struct CorpsInfo ShowInfo();
 protected:
 	//作战兵团受到攻击 返回是否存活 如果死亡，会自动在兵团数组中删除
 	bool BeAttacked(int attack, Crops* enemy);
+	//重置行动力
+	void ResetMP();
+	//回复HP
+	void Recover();
 };
 
 #endif

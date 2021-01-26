@@ -43,6 +43,7 @@ struct mapBlock                                 //【FC18】地图方格类
 	terrainType type;                           //【FC18】地块类型，对应terrainType枚举类
 	int owner;                                  //【FC18】所属玩家序号，-1为过渡TRANSITION，-2为公共PUBLIC
 	vector<int> occupyPoint;                    //【FC18】各玩家的占有属性值，秩为玩家下标
+	int TowerIndex;								//@@@【FC18】位于该单元格的塔的下标，对应在map的data里所有塔指针的下标vector<Tower*>
 };
 
 

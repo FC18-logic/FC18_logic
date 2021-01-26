@@ -206,7 +206,7 @@ const TMovePoint battleMovePoint[BATTLE_CORPS_TYPE_NUM][MAX_CORPS_LEVEL] =
 	{4,   4,   4}     //骑兵
 };
 
-//@@@【FC18】工程兵行动力，规则中没有，先假设这两个数
+//【FC18】工程兵行动力，规则中没有，先假设这两个数
 const TMovePoint constructMovePoint[CONSTRUCT_CORPS_TYPE_NUM] = {2,2};
 
 //【FC18】作战兵团初始战斗力（与作战兵团的枚举类在序号上对应，且考虑了等级）

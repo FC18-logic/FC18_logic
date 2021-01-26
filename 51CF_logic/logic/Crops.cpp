@@ -54,6 +54,33 @@ bool Crops::Move(int dx, int dy)
 	int curpos_y = m_position.m_y;
 	int next_x = curpos_x+dx;
 	int next_y = curpos_y+dy;
+	//判断目标位置是否寻找己方塔
+	bool haveTower = false;
+	int index = m_data->gameMap.map[next_x][next_y].TowerIndex;
+
+	if(!haveTower)
+	{
+		//目标位置是否存在别的兵团
+		CorpsUnit targetPos = m_data->corps[next_x][next_y];
+		//工程兵
+		if(m_type == Construct)
+		{
+			if(targetPos.size()!=0)
+				return false;
+		}
+		//战斗兵
+		else
+		{
+			for(int i = 0; i<targetPos.size(); i++)
+			{
+				if(targetPos[i]->m_type == Construct && targetPos[i]->m_PlayerID == m_PlayerID)
+				{
+					continue;
+				}
+				return false;
+			}
+		}
+	}
 	TPoint next_pos;
 	next_pos.m_x = next_x;
 	next_pos.m_y = next_y;
@@ -204,7 +231,7 @@ TBattlePoint Crops::getCE()
 
 /*
 Recover
-兵团回复生命力，驻扎后每回合调用，函数内部判断是否进行恢复
+兵团回复生命力，函数内部判断是否进行恢复
 无参数返回值
 */
 void Crops::Recover()
@@ -232,7 +259,7 @@ void Crops::Recover()
 /*
 MergeCrops
 兵团整编，发起整编的兵团调用，函数内部删除对方兵团
-参数：cropsID：对面兵团的ID
+参数：对方兵团指针，待定 也可以是位置或者ID
 返回是否整编成功
 */
 bool Crops::MergeCrops(Crops* targetCrops)
@@ -280,7 +307,6 @@ bool Crops::MergeCrops(Crops* targetCrops)
 	m_MovePoint = 0;
 	//对方兵团HP归零，等待删除
 	targetCrops->m_HealthPoint = 0;
-	//
 }
 
 /*
@@ -299,7 +325,12 @@ void Crops::ResetMP()
 	}
 }
 
-
+/*
+ChangeTerrain
+建筑兵改造所在单元地形
+参数：target 目标地形
+返回是否改造成功
+*/
 bool Crops::ChangeTerrain(terrainType target)
 {
 	if(!bAlive())
@@ -318,4 +349,35 @@ bool Crops::ChangeTerrain(terrainType target)
 	m_data->gameMap.map[m_position.m_x][m_position.m_y].type = target;
 	m_BuildPoint--;
 	return true;
+}
+
+//新回合开始
+void Crops::newRound()
+{
+	ResetMP();
+	Recover();
+}
+
+//进入驻扎状态
+void Crops::GoStation()
+{
+	m_bStation = true;
+}
+
+/*
+ShowInfo
+提供兵团信息
+返回兵团信息结构体
+*/
+struct CorpsInfo Crops::ShowInfo()
+{
+	struct CorpsInfo info;
+	info.BuildPoint = m_BuildPoint;
+	info.HealthPoint = m_HealthPoint;
+	info.exist = 1;
+	info.ID = m_myID;
+	info.level = m_level;
+	info.owner = m_PlayerID;
+	info.pos = m_position;
+	return info;
 }
