@@ -1,5 +1,5 @@
 #include "player.h"
-
+using std::vector;
 
 
 Player::Player()
@@ -10,14 +10,17 @@ Player::Player()
 //#json
 Player::Player(Player& _player)// copy构造player
 {
+	m_crops = _player.getCrops();
 	alive = _player.isAlive();
+	data = nullptr;   //避免浅复制
+
+	//FC15的
 	m_cells = _player.cells();
 	m_techPoint = _player.techPoint();
 	m_RegenerationLevel = _player.getRegenerationLevel();
 	m_ExtraControlLevel = _player.getExtraControlLevel();
 	m_DefenceLevel = _player.getDefenceLevel();
 	m_MoveLevel = _player.getMoveLevel();
-	data = nullptr;
 }
 
 
@@ -156,3 +159,27 @@ void Player::Kill()
 	alive = false;
 }
 
+/***********************************************************************************************
+*函数名 :【FC18】getPlayScore获取玩家得分
+*函数功能描述 : 根据玩家的防御塔和兵团信息，计算玩家当前得分，用于排名
+*函数参数 : 无，直接由Player类调用
+*函数返回值 : <int>分值
+*作者 : 姜永鹏
+***********************************************************************************************/
+int Player::getPlayerScore() {
+	TScore corpsScore, towerScore;
+	corpsScore = towerScore = 0;
+	for (TCorpsID i : m_crops)
+	{
+		if (data->myCorps[i].getType() == Battle)  //兵团星级从0开始[!!!反复确认]
+			corpsScore += BATTLE_CORP_SCORE * (data->myCorps[i].getLevel() + 1);
+		else if (data->myCorps[i].getType() == Construct)
+			corpsScore += CONSTRUCT_CORP_SCORE * 1;
+	}
+	//【FC18】补充所有防御塔得分计算公式
+	//for (TTowerID i : m_tower)
+	//{
+		//towerScore += TOWER_SCORE * data 1;             //防御塔等级从0开始[!!!反复确认]
+	//}
+	return corpsScore + towerScore;
+}

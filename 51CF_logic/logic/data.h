@@ -16,6 +16,7 @@ class Tentacle;//原来的触手类
 
 //【FC18】兵团类，这里是声明，定义在类的头文件里，参考原来的class Tentacle
 class Crops;//【FC18】兵团类
+class Tower;//【FC18】防御塔类
 class Player;//【FC18】玩家类
 
 
@@ -33,12 +34,13 @@ namespace DATA                                         //@@@【FC18】名空间
 	struct Data                                        //@@@【FC18】Data结构体，用于在内存中进行类与类的数据共享、存储
 	{
 		TTower totalTowers;                            //【FC18】总的防御塔数
-		//@@@【FC18】指向所有防御塔（数组/vector均可）的指针，可以参考原来的Cell* cells
-		Cell* cells;//所有塔的指针
+		//【FC18】指向所有防御塔（数组/vector均可）的指针，可以参考原来的Cell* cells
+		vector<class Tower> myTowers;                  //【FC18】所有防御塔的向量
+		
 		
 		TCorps totalCorps;                             //【FC18】总的兵团数
-		//【FC18】所有兵团的指针
-		Army corps;
+		vector<Crops> myCorps;                         //【FC18】所有兵团按序号排布
+		Army corps;                                    //【FC18】每个方格的兵团表
 		
 		
 		TPlayer totalPlayers;                          //【FC18】玩家数
@@ -46,7 +48,7 @@ namespace DATA                                         //@@@【FC18】名空间
 		Player* players;//所有玩家的指针
 
 		Map gameMap;                                   //@@@【FC18】当前的地图
-		TRound currentRound;                           //【FC18】当前的回合数
+		TRound totalRounds;                            //【FC18】当前的回合数
 
 		//关于写JSON文档
 		Json::Value commandJsonRoot;                   //【FC18】所有回合命令的Json根节点
@@ -64,6 +66,7 @@ namespace DATA                                         //@@@【FC18】名空间
 		int CellNum;//塔数
 		int TentacleNum;//兵线数
 		TPlayer PlayerNum;//玩家数
+		Cell* cells;//所有塔的指针
 		vector<vector<CutTentacleInfoJson>>  cutTentacleInfoJson;//二维数组存储每条兵线的切断信息
 		vector<vector<bool>> cutTentacleJson;  //二维数组每条兵线切断标志
 		vector<vector<bool>> cutTentacleBornJson;  // 二维数组每条兵线生成标志

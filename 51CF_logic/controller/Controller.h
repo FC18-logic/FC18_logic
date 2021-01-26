@@ -28,10 +28,11 @@ namespace DAGAN
 		false
 #endif
 			)
-			, players_(p){ }                   //【FC18】游戏主控的构造函数，传入参数为当前游戏进程对象，以及玩家ai的vector（代码及相关信息）
-											   //【FC18】默认输出文件，游戏下一回合可以运行
-		                                       //【FC18】NO_SILENT_MODE和FC15_DEBUG两个宏定义决定是否输出debug信息
-		void run(char* json_filename);         //@@@【FC18】游戏单回合运行的主要部分，同时向json_filename进行文件写入
+			, players_(p){ }                              //【FC18】游戏主控的构造函数，传入参数为当前游戏进程对象，以及玩家ai的vector（代码及相关信息）
+											              //【FC18】默认输出文件，游戏下一回合可以运行
+		                                                  //【FC18】NO_SILENT_MODE和FC15_DEBUG两个宏定义决定是否输出debug信息
+		void run(char* json_filename);                    //@@@【FC18】游戏单回合运行的主要部分，同时向json_filename进行文件写入
+		void run(TPlayerID id, char* json_filename);      //@@@【FC18】运行每个玩家当前的游戏回合（小回合），然后记录玩家指令Json和变化后的信息Json
 
 		inline void setSilentMode(bool flag) { silent_mode_ = flag; }                         //【FC18】重设silent_mode
 		inline void setFileOutputEnabled(bool flag) { file_output_enabled_ = flag; }          //【FC18】文件输出开关，重设file_output_enabled_

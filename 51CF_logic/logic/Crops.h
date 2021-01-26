@@ -52,6 +52,12 @@ public:
 	void newRound();
 	//提供兵团信息
 	struct CorpsInfo ShowInfo();
+	//获取当前兵团的id
+	TCorpsID getID() { return m_myID; }
+	//获取当前兵团的类型
+	corpsType getType() { return m_type; }
+	//获取当前兵团的星级（从0开始）
+	int getLevel() { return m_level; }
 protected:
 	//作战兵团受到攻击 返回是否存活 如果死亡，会自动在兵团数组中删除
 	bool BeAttacked(int attack, Crops* enemy);

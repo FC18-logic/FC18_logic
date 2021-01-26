@@ -7,9 +7,7 @@
 #include <math.h>
 #include <cmath>
 #include <ctime>
-#define TRANSITION -1
-#define PUBLIC 0
-#define UNALLOCATED -1
+#define UNALLOCATED -1   //未分配地形
 using namespace std;
 namespace DATA 
 {
@@ -41,9 +39,9 @@ const TPoint paraOffset[8] =                                //【FC18】用于生成随
 struct mapBlock                                 //【FC18】地图方格类
 {
 	terrainType type;                           //【FC18】地块类型，对应terrainType枚举类
-	int owner;                                  //【FC18】所属玩家序号，-1为过渡TRANSITION，-2为公共PUBLIC
-	vector<int> occupyPoint;                    //【FC18】各玩家的占有属性值，秩为玩家下标
-	int TowerIndex;								//@@@【FC18】位于该单元格的塔的下标，对应在map的data里所有塔指针的下标vector<Tower*>
+	vector<int> occupyPoint;                    //【FC18】各玩家的占有属性值，秩为玩家序号-1
+    int owner;                                  //【FC18】所属玩家序号，-1为过渡TRANSITION，-2为公共PUBLIC
+    int TowerIndex;								//@@@【FC18】位于该单元格的塔的下标，对应在map的data里所有塔指针的下标vector<Tower>
 };
 
 
@@ -57,7 +55,7 @@ public:
 	//~Map();
 	bool randomInitMap();                          //【FC18】随机生成一幅地图，分配势力和设定初始塔的位置
     bool readMap(ifstream& inMap, bool enableOutput);   //通过文件初始化地图信息，包括读入地图数据和初始化玩家数组
-	void saveMapJson();          //@@@【FC18】保存地图的json数据
+	void saveMapJson();                       //【FC18】保存地图的json数据
 
 
     //FC15的

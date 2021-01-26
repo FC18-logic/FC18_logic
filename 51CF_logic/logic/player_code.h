@@ -37,7 +37,7 @@ namespace DAGAN {
 
 	typedef void(*TPlayerAi)(Info& info);                   //【FC18】指向玩家ai代码的函数指针
 
-	class Player_Code
+	class Player_Code                                       //【FC18】玩家代码的类
 	{
 	public:
 		Player_Code();                                      //【FC18】玩家ai代码类的默认构造函数

@@ -7,10 +7,16 @@ namespace DAGAN
 {
 	using namespace std;
 
-	void Controller::run(char* json_filename)
+	void Controller::run(char* json_filename)  //@@@¡¾FC18¡¿
 	{
+		//#json getFC18InitData
+		data->currentRoundCommandJson.clear();
+		data->currentRoundPlayerJson.clear();
+		data->currentRoundTowerJson.clear();
+		data->currentRoundMapJson.clear();
 
 		//#json getInitdata 
+		/******************************************FC15¾É´úÂë**********************************************
 		data->currentRoundJson.clear();
 		data->cutTentacleInfoJson.clear();
 		data->cutTentacleBornJson.clear();
@@ -18,6 +24,7 @@ namespace DAGAN
 		data->cutTentacleBornJson.assign(data->CellNum, vector<bool>(data->CellNum, false));
 		data->cutTentacleJson.assign(data->CellNum, vector<bool>(data->CellNum, false));
 		data->cutTentacleInfoJson.resize(data->CellNum, vector<CutTentacleInfoJson>(data->CellNum));
+		***************************************************************************************************/
 
 		DATA::Data dataCopyLastRound = *data;
 		DataSupplement dataSuppleMent;

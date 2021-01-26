@@ -1,17 +1,15 @@
 ﻿//#2021-1-19 <JYP> 熟悉代码，添加注释
-//test git bash push
-//test git push
-//refresh test
-//test2
-//test3
+
 
 #include "game.h"
 #include "player_code.h"
 #include "../controller/Controller.h"
 #include <time.h>
-//test2_2
-//test3_2
+
+
 using namespace DAGAN;
+
+//【FC18】输出结果排名文件
 void outputResult(Game& game, vector<Player_Code>& players) {
 	ofstream ofs("../log_txt/result.txt");//打开txt文件
 
@@ -27,17 +25,19 @@ int main(int argc, char** argv)
 	time_t t = time(0);//记录时间
 	strftime(buffer, sizeof(buffer), "../log_txt/log_%Y%m%d_%H%M%S.txt", localtime(&t));
 #ifdef FC15_DEBUG
-	freopen(buffer, "w", stdout);
+	freopen(buffer, "w", stdout);  //Debug模式，写入新的txt空文件
 #endif // FC15_DEBUG
 	char json_filename[1024];
 	//旧代码//strftime(json_filename, sizeof(json_filename), "../log_json/log_%Y%m%d_%H%M%S.json", localtime(&t));
 	strftime(json_filename, sizeof(json_filename), "../log_json/log_%Y%m%d_%H%M%S", localtime(&t));
 	string  config_filename =
 #ifdef _MSC_VER
-		"../config_msvc.ini";
+		//旧代码//"../config_msvc.ini";
+		"../config18_msvc.ini";
 #endif
 #ifdef __GNUC__
-	"../config_gnu.ini";
+		//旧代码//"../config_gnu.ini";
+		"../config18_gnu.ini";
 #endif
 
 	if (argc == 2) {
@@ -49,10 +49,10 @@ int main(int argc, char** argv)
 	}
 
 
-	vector<Player_Code>  players;
-	string          map_filename;
-	vector<string>  players_filename;
-	int player_size;
+	vector<Player_Code>  players;                       //【FC18】玩家AI代码类
+	string          map_filename;                       //【FC18】游戏地图文件名
+	vector<string>  players_filename;                   //【FC18】玩家AI文件名
+	int player_size;                                    //【FC18】Game中的玩家数量
 
 	// load config file
 	ifstream ifs(config_filename.c_str());
@@ -91,21 +91,21 @@ int main(int argc, char** argv)
 		return 4;
 	}
 
-	// load players
-	//读入玩家AI代码，应该也不需要修改
+	//读入玩家AI代码
 	int valid_cnt = 0; //有效ai的数量
 	for (size_t i = 0; i < players_filename.size(); ++i) {
-		Player_Code player(players_filename[i], i);
+		//旧代码//Player_Code player(players_filename[i], i);
+		Player_Code player(players_filename[i], i + 1);                     //玩家序号从1 开始
 		string player_name;
 		if (ifs >> player_name && !player_name.empty())
 			player.setName(player_name);
-		if (player.isValid())
+		if (player.isValid())                //玩家ai的all加载成功会返回true
 		{
 			players.push_back(player);
 			valid_cnt++;
 		}
 		else {
-			players.push_back(player); //压进去充数
+			players.push_back(player); //压进去充数，此时玩家ai代码类的Valid为false
 			cout << "[Warning] failed to load player_ai " << players_filename[i] << endl;
 			player.setName(player.getName() + "//NOT_VALID");
 #if (defined _MSC_VER && defined _DEBUG)
@@ -113,8 +113,14 @@ int main(int argc, char** argv)
 #endif
 		}
 	}
-	if (players.size() <= 1) {
-		cout << "[Error] Not enough player_ais to start the game." << endl;
+	//旧代码//if (players.size() <= 1) {
+		//旧代码//cout << "[Error] Not enough player_ais to start the game." << endl;
+		//旧代码//return 5;
+	//旧代码//}
+	if (players.size() != 4) 
+	{
+		cout << "[Error] Player num not accord with requirements!\n";
+		cout << "Player num should be 4, however, there are" << players.size() << endl;
 		return 5;
 	}
 	cout << "[Info] " << valid_cnt << " players loaded." << endl;
@@ -125,7 +131,8 @@ int main(int argc, char** argv)
 
 	for (int i = 0; i < players.size(); i++)
 	{
-		controller.getData()->root["head"]["playerInfo"][i]["name"] = players[i].getName();
+		//旧代码//controller.getData()->root["head"]["playerInfo"][i]["name"] = players[i].getName();
+		controller.getData()->commandJsonRoot["head"]["playerInfo"][i]["name"] = players[i].getName();
 	}
 	// main
 	//一个回合一个回合的跑

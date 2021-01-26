@@ -57,12 +57,12 @@ bool Game::init(string file, char* json_file)   //[【FC18】接着用，改好�
 	
 	//旧代码//  in >> _MAX_RESOURCE_ >> _MAX_ROUND_;
 
-	if (!data.gameMap.readMap(in, true)) 
+	if (!data.gameMap.readMap(in, true))                       //#Json 读入地图，写地图Json文件头，写0回合玩家指令Json
 	{
 		cerr << "Something wrong when reading the map file." << endl;
 		return false;
 	}
-	if (!data.gameMap.randomInitMap())
+	if (!data.gameMap.randomInitMap())                         //#Json 保存塔和地图的Json
 	{
 		cerr << "Something wrong when randomizing the game map." << endl;
 		return false;
@@ -120,20 +120,21 @@ bool Game::init(string file, char* json_file)   //[【FC18】接着用，改好�
 	data.mapInfoJsonRoot["body"]["playerInfo"] = data.currentRoundPlayerJson;
 
 	//输出到文件 #json 
-	Json::FastWriter sw;
-	ofstream json_os;
-	json_os.open(cmd_json_filename);
+	Json::FastWriter sw_cmd,sw_info,sw_map;
+	ofstream json_cmd,json_info,json_map;
+	//写入指令Json
+	json_cmd.open(cmd_json_filename);
 	//旧代码//json_os << sw.write(data.root);
-	json_os << sw.write(data.commandJsonRoot);
-	json_os.close();
-
-	json_os.open(info_json_filename);
-	json_os << sw.write(data.infoJsonRoot);
-	json_os.close();
-
-	json_os.open(mapinfo_json_filename);
-	json_os << sw.write(data.mapInfoJsonRoot);
-	json_os.close();
+	json_cmd << sw_cmd.write(data.commandJsonRoot);
+	json_cmd.close();
+	//写入信息Json
+	json_info.open(info_json_filename);
+	json_info << sw_info.write(data.infoJsonRoot);
+	json_info.close();
+	//写入地图Json
+	json_map.open(mapinfo_json_filename);
+	json_map << sw_map.write(data.mapInfoJsonRoot);
+	json_map.close();
 	return true;
 }
 

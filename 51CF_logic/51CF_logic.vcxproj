@@ -43,6 +43,7 @@
     <ClInclude Include="logic\player.h" />
     <ClInclude Include="logic\player_code.h" />
     <ClInclude Include="logic\tentacle.h" />
+    <ClInclude Include="logic\tower.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="controller\Controller.cpp" />
@@ -58,6 +59,7 @@
     <ClCompile Include="logic\player.cpp" />
     <ClCompile Include="logic\player_code.cpp" />
     <ClCompile Include="logic\tentacle.cpp" />
+    <ClCompile Include="logic\tower.cpp" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>15.0</VCProjectVersion>

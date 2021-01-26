@@ -5,6 +5,7 @@
 #include "data.h"
 #include "cell.h"
 #include "Crops.h"
+#include "tower.h"
 #include "player.h"
 #include "tentacle.h"
 #include <utility>
@@ -205,6 +206,12 @@ bool Map::readMap(ifstream& inMap, bool enableOutput) {
 	inMap >> data->totalPlayers;
 	data->commandJsonRoot["head"]["totalPlayers"] = data->totalPlayers; //#json
 	data->players = new Player[data->totalPlayers];
+	for (int i = 1; i < 5; i++) {
+		Json::Value playerJson;
+		playerJson["id"] = Json::Value(i);
+		playerJson["team"] = Json::Value(i);
+		data->commandJsonRoot["head"]["playerInfo"].append(playerJson);
+	}
 
 
 	//#json add
@@ -234,7 +241,7 @@ bool Map::readMap(ifstream& inMap, bool enableOutput) {
 	}
 	data->totalTowers = 0;
 	data->totalCorps = 0;
-	data->currentRound = 0;        //初始化过程为第0回合
+	data->totalRounds = 0;        //初始化过程为第0回合
 	return true;
 }
 
@@ -314,14 +321,17 @@ bool Map::randomInitMap() {
 		vector<mapBlock> newVectorMapBlock;
 		map.push_back(newVectorMapBlock);
 		for (int j = 0; j < m_width; j++) {
-			mapBlock newBlock;
+			mapBlock newBlock;               //地块初始化，无塔，平原，没有主人，占有属性值为0
+			newBlock.TowerIndex = NOTOWER;
+			newBlock.owner = -1;
+			newBlock.type = Plain;
 			for (int k = 0; k < 4; k++) {
 				newBlock.occupyPoint.push_back(0);    //各方格初始占有属性值均为0
 			}
 			map[i].push_back(newBlock);
 		}
 	}
-	for (int i = 0; i < m_height; i++) {
+	for (int i = 0; i < m_height; i++) {      //生成地形
 		for (int j = 0; j < m_width; j++) {
 			int type = typeOfTerrain[i][j];
 			int rank = areaRankMap[type];
@@ -376,11 +386,14 @@ bool Map::randomInitMap() {
 		TPoint towerPoint;
 		towerPoint.m_x = generateRanInt(towerRegion[i].first.m_x, towerRegion[i].second.m_x);
 		towerPoint.m_y = generateRanInt(towerRegion[i].first.m_y, towerRegion[i].second.m_y);
-		map[towerPoint.m_y][towerPoint.m_x].type = Tower;     //更新地图类：当前方格的地形修改为防御塔
+		map[towerPoint.m_y][towerPoint.m_x].type = Tower;     //更新data的地图类：当前方格的地形修改为防御塔
 		map[towerPoint.m_y][towerPoint.m_x].owner = i + 1;
 		data->totalTowers++;                      //更新data类：更新防御塔总数
-		//@@@【FC18】更新data类：向防御塔向量中添加新增的防御塔
-		//@@@【FC18】更新player类：向player的防御塔序号向量中添加新的防御塔序号
+		//@@@【FC18】[！！！这个塔的构造函数可能会改]更新data类：向防御塔向量中添加新增的防御塔
+		class Tower newTower(i + 1, towerPoint);
+		data->myTowers.push_back(newTower);
+		//【FC18】更新player类：向player的防御塔序号向量中添加新的防御塔序号
+		data->players[i].getTower().insert(i);
 		for (int j = 0; j < 8; j++) {
 			TPoint p;
 			p.m_x = towerPoint.m_x + paraOffset[j].m_x;
@@ -445,7 +458,7 @@ bool Map::randomInitMap() {
 *作者 : 姜永鹏
 ***********************************************************************************************/
 void Map::saveMapJson() {
-	int round = data->currentRound;      //更新地图Json前记录当前回合数
+	int round = data->totalRounds;      //更新地图Json前记录当前回合数
 	data->currentRoundMapJson["round"] = Json::Value(round);
 	data->mapInfoJsonRoot.append(data->currentRoundMapJson);
 }

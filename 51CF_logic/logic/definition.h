@@ -5,6 +5,10 @@
 #define NO_SILENT_MODE
 #define NO_JSON
 #define INF 100000000
+#define TRANSITION -1   //过渡地形区域
+#define PUBLIC 0      //公共地形区域
+#define NOTOWER -1    //当前方格没有防御塔
+
 
 #include <vector>
 #include <string>
@@ -33,6 +37,8 @@ typedef int    TCorpsID;       //【FC18】兵团ID号
 typedef string TMapID;         //【FC18】地图ID号
 typedef int    TMap;           //【FC18】地图参数（高度/宽度）
 typedef int    TRound;         //【FC18】回合数
+typedef int    TScore;         //【FC18】玩家得分
+typedef int    TDist;          //【FC18】游戏中距离的定义
 
 
 const int MAX_CORPS_LEVEL = 3;    //【FC18】最大的兵团等级
@@ -46,6 +52,8 @@ const int OCCUPY_POINT_DIST_SCALE = 5;    //【FC18】塔对周围方格施加占有属性值的
 const int CORPS_ACTION_TYPE_NUM = 10;    //【FC18】兵团能进行的操作种类数
 const int MAX_ROUND = 300;               //【FC18】游戏全程的最大回合数，确定的，不像FC15从外部文件读入
 const int TOWER_SCORE = 10;              //【FC18】计算玩家得分时每个防御塔每个等级得分
+const int BATTLE_CORP_SCORE = 2;         //【FC18】战斗兵团每个星级得分
+const int CONSTRUCT_CORP_SCORE = 4;      //【FC18】工程兵团每个得分
 
 class Crops;
 struct CorpsInfo;
@@ -159,18 +167,28 @@ enum corpsCommand
 	CAttackCorps   = 3,       //攻击对方势力的兵团               √
 	CAttackTower   = 4,       //攻击对方势力的塔                 √
 	CRegroup       = 5,       //兵团整编                         √
-	CDissolve      = 6,       //兵团解散                         √              √
+	CDissolve      = 6,       //兵团解散                         ×              ×
 	CBuild         = 7,       //修建新防御塔                                     √
 	CRepair        = 8,       //修理原防御塔                                     √
 	CChangeTerrain = 9,       //改变方格地形                                     √
 };
 
 
+//【FC18】兵团移动的方向
+enum corpsMoveDir
+{
+	CUp            = 0,         //向上移动1格
+	CDown          = 1,         //向下移动1格
+	CLeft          = 2,         //向左移动1格
+	CRight         = 3          //向右移动1格
+};
+
 //【FC18】塔的操作类型（T前缀表示tower）
 enum towerCommand
 {
 	TProduct       = 0,       //生产任务
-	TAttack        = 1        //攻击任务
+	TAttackCorps   = 1,       //攻击兵团任务
+	TAttackTower   = 2        //攻击塔任务
 };
 
 
@@ -481,6 +499,14 @@ struct PlayerInfo
 	size_t maxControlNumber;    //最大控制数
 };
 
+//【FC18】地图单元格信息结构体
+struct mapBlockInfo
+{
+	terrainType type;                           //【FC18】地块类型，对应terrainType枚举类
+	int owner;                                  //【FC18】所属玩家序号，-1为过渡TRANSITION，-2为公共PUBLIC
+	vector<int> occupyPoint;                    //【FC18】各玩家的占有属性值，秩为玩家序号-1
+};
+
 //类声明
 class CommandList;
 //常用数学运算
@@ -488,6 +514,9 @@ class CommandList;
 TPoint operator-(const TPoint& p1, const TPoint& p2);
 //计算欧式距离
 TLength getDistance(const TPoint& p1, const TPoint& p2);
+//计算FC18中塔攻击范围的距离（FC18距离）
+TDist getDist(const TPoint& p1, const TPoint& p2);
+TDist getDist(const int p1_x, const int p1_y, const int p2_x, const int p2_y);
 //生成指定闭区间的随机整数
 int generateRanInt(int start, int end);
 //输出玩家下达的指令集
@@ -658,6 +687,8 @@ struct Info
 	//@@@【FC18】返回所有兵团信息的vector，可以参照原来的vector<vector<TentacleInfo> > tentacleInfo;
 	vector<vector<CorpsInfoUnit>> corpsInfo;//下标为ij的位置表示位置为x:i,y:j的兵团信息
 
+	//【FC18】地图信息
+	vector<vector<mapBlockInfo>> mapInfo;
 
 	//FC15的
 	TRound round;

@@ -3,6 +3,7 @@
 #include "definition.h"
 #include "cell.h"
 #include "tentacle.h"
+#include "Crops.h"
 #include <set>
 #include "data.h"
 class Player                                                                //@@@【FC18】玩家类
@@ -19,19 +20,19 @@ public:
 	int getdeadRound() { return deadRound; }                                //【FC18】读取死亡回合
 	void setdeadRound(int d) { deadRound = d; }                             //【FC18】设置死亡回合
 	//@@@【FC18】获取玩家当前得分（按照规则来，建议考虑到同名次时按什么指标来比较等）
+	int getPlayerScore();
 
+	//【FC18】获取玩家的所有防御塔set
+	std::set<TTowerID>& getTower() { return m_tower; }
 
-	//@@@【FC18】获取玩家的所有防御塔set
-
-
-	//@@@【FC18】获取玩家的所有兵团的set
-	std::set<Crops> getCrops() { return m_crops; }
+	//【FC18】获取玩家的所有兵团的set
+	std::set<TCorpsID>& getCrops() { return m_crops; }
 
 
 	//FC15的
 	TResourceD totalResource();//获取所有塔资源数的总和
 	TResourceD techPoint() { return m_techPoint; }//获取玩家的科技点数
-	std::set<TCellID>& cells() { return m_cells; }//获取玩家的所有塔set
+	std::set<TCellID>& cells() { return m_cells; }//获取玩家的所有细胞set
 	void addTechPoint(TResourceD _techPoint);//增加科技点数
 	void regenerateTechPoint();//科技点数恢复
 	bool upgrade(TPlayerProperty kind);//玩家升级
@@ -50,10 +51,10 @@ private:
 	int deadRound;                                                          //【FC18】死掉的回合
 	DATA::Data* data;                                                       //【FC18】数据的存储与共享
 	//@@@【FC18】指向当前玩家所有防御塔的set数据结构，参考原来的std::set<TCellID> m_cells
-	
+	std::set<TTowerID> m_tower;
 	
 	//@@@【FC18】玩家所有兵团的序号，建议也用set这种数据结构，内部按兵团序号升序来排序
-	std::set<Crops> m_crops;
+	std::set<TCorpsID> m_crops;
 	
 
 	//FC15的
