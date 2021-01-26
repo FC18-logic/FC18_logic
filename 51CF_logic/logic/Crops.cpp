@@ -1,4 +1,5 @@
 #include "Crops.h"
+#include "tower.h"
 
 TCorpsID Crops::ID = 0;
 
@@ -39,7 +40,7 @@ Crops::Crops(DATA::Data* _data, corpsType type, battleCorpsType battletype, cons
 			m_BuildPoint = 3;
 		}
 	}
-	m_bStation = false;//兵团生产出来后默认驻守塔
+	m_bStation = true;//兵团生产出来后默认驻守塔
 }
 
 /*
@@ -57,7 +58,18 @@ bool Crops::Move(int dx, int dy)
 	//判断目标位置是否寻找己方塔
 	bool haveTower = false;
 	int index = m_data->gameMap.map[next_x][next_y].TowerIndex;
-
+	if(index != HAVE_NO_TOWER)
+	{
+		class Tower targettower = m_data->myTowers[index];
+		if(targettower.showPlayerID() != m_PlayerID)
+		{
+			return false;
+		}
+		else
+		{
+			haveTower = true;
+		}
+	}
 	if(!haveTower)
 	{
 		//目标位置是否存在别的兵团
@@ -99,6 +111,7 @@ bool Crops::Move(int dx, int dy)
 		return false;
 	}
 	m_MovePoint = temp;
+	m_bStation = false;
 	return true;
 }
 
@@ -161,6 +174,7 @@ bool Crops::AttackCrops(Crops* enemy)
 			m_position = enemy->m_position;
 		}
 	}
+	m_bStation = false;
 	return true;
 }
 
@@ -301,12 +315,14 @@ bool Crops::MergeCrops(Crops* targetCrops)
 	}
 	//整编
 	float HPSum = m_HealthPoint+targetCrops->m_HealthPoint;
-	float TotalSum = battleHealthPoint[m_BattleType][m_level]+battleHealthPoint[m_BattleType][targetCrops->m_level];
+	float TotalSum = battleHealthPoint[m_BattleType][m_level]
+					+battleHealthPoint[m_BattleType][targetCrops->m_level];
 	m_level = level1+level2-1;
 	m_HealthPoint = battleHealthPoint[m_BattleType][m_level]*HPSum/TotalSum;
 	m_MovePoint = 0;
 	//对方兵团HP归零，等待删除
 	targetCrops->m_HealthPoint = 0;
+	m_bStation = false;
 }
 
 /*
@@ -346,9 +362,14 @@ bool Crops::ChangeTerrain(terrainType target)
 	{
 		return false;
 	}
-	m_data->gameMap.map[m_position.m_x][m_position.m_y].type = target;
-	m_BuildPoint--;
-	return true;
+	if(m_data->gameMap.map[m_position.m_x][m_position.m_y].TowerIndex == HAVE_NO_TOWER)
+	{
+		m_data->gameMap.map[m_position.m_x][m_position.m_y].type = target;
+		m_BuildPoint--;
+		m_bStation = false;
+		return true;
+	}
+	return false;
 }
 
 //新回合开始
@@ -356,12 +377,19 @@ void Crops::newRound()
 {
 	ResetMP();
 	Recover();
+	if(!m_bStation)
+		m_PeaceNum = 0;
+	m_bStation = true;
 }
 
 //进入驻扎状态
 void Crops::GoStation()
 {
-	m_bStation = true;
+	if(!m_bStation)
+	{
+		m_PeaceNum = 0;//开始计数
+		m_bStation = true;
+	}
 }
 
 /*

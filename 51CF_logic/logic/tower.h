@@ -46,6 +46,8 @@ public:
 	Tower(TPlayerID ID, TPoint pos);
 	//每一回合开始时，结算上轮生产任务完成情况，并设置新的生产任务
 	bool set_producttype(productType m_protype);
+	//显示所有者ID
+	const TPlayerID showPlayerID(){ return m_PlayerID; }
     //抵御兵团的进攻
 	/*
 	待接收参数：
