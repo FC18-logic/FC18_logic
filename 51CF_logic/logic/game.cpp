@@ -114,11 +114,14 @@ bool Game::init(string file, char* json_file, vector<string> players_name)   //[
 
 
 	data.gameMap.saveMapJson();
-	data.currentRoundMapJson.clear();
 	
-	data.infoJsonRoot["body"]["corpsInfo"] = data.currentRoundCorpsJson;
-	data.infoJsonRoot["body"]["towerInfo"] = data.currentRoundTowerJson;
-	data.mapInfoJsonRoot["body"]["playerInfo"] = data.currentRoundPlayerJson;
+	data.infoJsonRoot["body"]["corpsInfo"].append(data.currentRoundCorpsJson);
+	data.currentRoundCorpsJson.clear();
+	data.infoJsonRoot["body"]["towerInfo"].append(data.currentRoundTowerJson);
+	data.currentRoundTowerJson.clear();
+	data.infoJsonRoot["body"]["playerInfo"].append(data.currentRoundPlayerJson);
+	data.currentRoundPlayerJson.clear();
+	
 
 	//输出到文件 #json 
 	Json::FastWriter sw_cmd,sw_info,sw_map;
@@ -1195,25 +1198,25 @@ Info Game::generatePlayerInfo(TPlayerID id) {
 
 	//info中的防御塔
 	for (int i = 0; i < data.myTowers.size(); i++) {
-
+		TowerInfo newTower = data.myTowers[i].ShowInfo();
+		info.towerInfo.push_back(newTower);
 	}
+
+
 	//info中的兵团信息
 	for (int i = 0; i < data.myCorps.size(); i++) {
-
+		CorpsInfo newCorps = data.myCorps[i].ShowInfo();
+		info.corpsInfo.push_back(newCorps);
 	}
 
 	for (int i = 0; i < data.gameMap.getHeigth(); i++) {
 		vector<mapBlockInfo> newMapRow;
 		info.mapInfo.push_back(newMapRow);
 		for (int j = 0; j < data.gameMap.getWidth(); j++) {
-			mapBlockInfo newBlock;
-			newBlock.owner = data.gameMap.map[i][j].owner;
-			newBlock.type = data.gameMap.map[i][j].type;
-			newBlock.occupyPoint = data.gameMap.map[i][j].occupyPoint;
+			mapBlockInfo newBlock = data.gameMap.ShowInfo(i,j);
 			info.mapInfo[i].push_back(newBlock);
 		}
 	}
-
 
 	return info;
 }
@@ -1226,8 +1229,116 @@ Info Game::generatePlayerInfo(TPlayerID id) {
 *函数返回值 : 无
 *作者 : 姜永鹏
 ***********************************************************************************************/
-void saveJson() {
+void Game::saveJson() {
+	//保存这一轮的用户命令数据
+	data.commandJsonRoot["body"].append(data.currentRoundCommandJson);
+	data.currentRoundCommandJson.clear();
 
+	//保存这一轮结束的玩家数据
+	for (int i = 0; i < 4; i++) {
+		Json::Value playerJson;
+		Player currentPlayer = data.players[i];
+		playerJson["id"] = Json::Value(currentPlayer.getId());
+		playerJson["tm"] = Json::Value(currentPlayer.getId());
+		playerJson["rk"] = Json::Value(std::find(Rank.begin(), Rank.end(), i) - Rank.begin() + 1);
+		playerJson["scr"] = Json::Value(currentPlayer.getPlayerScore());
+		playerJson["cpN"] = Json::Value(currentPlayer.getCrops().size());
+		playerJson["twN"] = Json::Value(currentPlayer.getTower().size());
+		for (TCorpsID i : currentPlayer.getCrops()) {
+			playerJson["cp"].append(Json::Value(i));
+		}
+		for (TTowerID i : currentPlayer.getTower()) {
+			playerJson["tw"].append(Json::Value(i));
+		}
+		data.currentRoundPlayerJson["player"].append(playerJson);
+	}
+	data.infoJsonRoot["body"]["playerInfo"].append(data.currentRoundPlayerJson);
+	data.currentRoundPlayerJson.clear();
+
+	//保存这一轮结束的防御塔数据
+	for (int i = 0; i < data.myTowers.size(); i++) {
+		Json::Value towerJson;
+		TowerInfo currentTowerInfo = data.myTowers[i].ShowInfo();
+		towerJson["id"] = Json::Value(currentTowerInfo.ID);
+		towerJson["oId"] = Json::Value(currentTowerInfo.ownerID);
+		Json::Value towerPos;
+		TPoint position = currentTowerInfo.position;
+		towerPos["x"] = Json::Value(position.m_x);
+		towerPos["y"] = Json::Value(position.m_y);
+		towerJson["pos"] = towerPos;
+		towerJson["sL"] = Json::Value(currentTowerInfo.level);
+		towerJson["pP"] = Json::Value(currentTowerInfo.productPoint);
+		towerJson["bP"] = Json::Value(currentTowerInfo.battlePoint);
+		towerJson["hP"] = Json::Value(currentTowerInfo.healthPoint);
+		towerJson["exp"] = Json::Value(currentTowerInfo.experPoint);
+		if (currentTowerInfo.pdtType != NOTASK) {    
+			Json::Value production;
+			production["pT"] = Json::Value(currentTowerInfo.pdtType);
+			production["pC"] = Json::Value(currentTowerInfo.productConsume);
+			towerJson["pdt"] = production;
+		}
+		data.currentRoundTowerJson["tower"] .append(towerJson);
+	}
+	data.infoJsonRoot["body"]["towerInfo"].append(data.currentRoundTowerJson);
+	data.currentRoundTowerJson.clear();
+	//保存这一轮结束的兵团数据
+	for (int i = 0; i < data.myCorps.size(); i++) {
+		Json::Value corpsJson;
+		CorpsInfo currentCorpsInfo = data.myCorps[i].ShowInfo();
+		corpsJson["id"] = Json::Value(currentCorpsInfo.ID);
+		corpsJson["oId"] = Json::Value(currentCorpsInfo.owner);
+		Json::Value corpsPos;
+		TPoint position = currentCorpsInfo.pos;
+		corpsPos["x"] = Json::Value(position.m_x);
+		corpsPos["y"] = Json::Value(position.m_y);
+		corpsJson["pos"] = corpsPos;
+		corpsJson["sL"] = Json::Value(currentCorpsInfo.level);
+		corpsJson["mp"] = Json::Value(currentCorpsInfo.movePoint);
+		if (currentCorpsInfo.type == Battle) {
+			corpsJson["hP"] = currentCorpsInfo.HealthPoint;
+		}
+		else if (currentCorpsInfo.type == Construct) {
+			corpsJson["bP"] = currentCorpsInfo.BuildPoint;
+		}
+		data.currentRoundCorpsJson["corps"].append(corpsJson);
+	}
+	data.infoJsonRoot["body"]["corpsInfo"].append(data.currentRoundCorpsJson);
+	data.currentRoundCorpsJson.clear();
+
+	//保存这一轮的地图数据
+	for (int i = 0; i < data.gameMap.getHeigth(); i++) {
+		for (int j = 0; j < data.gameMap.getWidth(); j++) {
+			Json::Value blockJson;
+			mapBlockInfo currentBlockInfo = data.gameMap.ShowInfo(j, i);
+			Json::Value blockPos;
+			blockPos["x"] = Json::Value(j);
+			blockPos["y"] = Json::Value(i);
+			blockJson["tp"] = currentBlockInfo.type;
+			blockJson["oId"] = currentBlockInfo.owner;
+			data.currentRoundMapJson["map"].append(blockJson);
+		}
+	}
+	data.mapInfoJsonRoot["body"].append(data.currentRoundMapJson);
+	data.currentRoundMapJson.clear();
+
+	//输出到文件 #json 
+	Json::FastWriter sw_cmd, sw_info, sw_map;
+	ofstream json_cmd, json_info, json_map;
+	//写入指令Json
+	json_cmd.open(cmd_json_filename);
+	//旧代码//json_os << sw.write(data.root);
+	json_cmd << sw_cmd.write(data.commandJsonRoot);
+	json_cmd.close();
+	//写入信息Json
+	json_info.open(info_json_filename);
+	json_info << sw_info.write(data.infoJsonRoot);
+	json_info.close();
+	//写入地图Json
+	json_map.open(mapinfo_json_filename);
+	json_map << sw_map.write(data.mapInfoJsonRoot);
+	json_map.close();
+
+	return;
 }
 
 

@@ -393,6 +393,8 @@ struct CorpsInfo Crops::ShowInfo()
 	info.level = m_level;
 	info.owner = m_PlayerID;
 	info.pos = m_position;
+	info.type = m_type;
+	info.movePoint = m_MovePoint;
 	return info;
 }
 

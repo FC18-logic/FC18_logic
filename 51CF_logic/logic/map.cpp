@@ -231,20 +231,17 @@ bool Map::readMap(ifstream& inMap, bool enableOutput, std::vector<std::string> p
 
 		Json::Value paj;
 		paj["id"] = Json::Value(int(i + 1));
-		paj["cmdType"] = Json::Value(-1);
-		paj["type"] = Json::Value(-1);
-		paj["productType"] = Json::Value(-1);
-		paj["dstEnemyCorps"] = Json::Value(-1);
-		paj["dstFriendCorps"] = Json::Value(-1);
-		paj["dstEnemyTower"] = Json::Value(-1);
-		paj["dstFriendTower"] = Json::Value(-1);
-		paj["dstTerrain"] = Json::Value(-1);
-		Json::Value move;
-		move["dx"] = Json::Value(0);
-		move["dy"] = Json::Value(0);
-		move["dir"] = Json::Value(-1);
-		paj["move"] = move;
-		data->currentRoundCommandJson["playerCommand"].append(paj);
+		paj["cT"] = Json::Value(-1);
+		paj["tp"] = Json::Value(-1);
+		paj["pT"] = Json::Value(-1);
+		paj["dEC"] = Json::Value(-1);
+		paj["dFC"] = Json::Value(-1);
+		paj["dET"] = Json::Value(-1);
+		paj["dFT"] = Json::Value(-1);
+		paj["dT"] = Json::Value(-1);
+		paj["dir"] = Json::Value(0);
+		paj["mv"] = Json::Value(-1);
+		data->currentRoundCommandJson["command"].append(paj);
 	}
 
 	return true;
@@ -439,37 +436,36 @@ bool Map::randomInitMap() {
 			blockJson["position"] = position;
 			blockJson["type"] = Json::Value(int(map[i][j].type));
 			blockJson["owner"] = Json::Value(map[i][j].owner);
-			Json::Value occupyPoint;
+			/*Json::Value occupyPoint;
 			for (int k = 0; k < 4; k++) {
 				Json::Value occupyPointUnit;
 				occupyPointUnit["id"] = Json::Value(k + 1);
 				occupyPointUnit["point"] = Json::Value(map[i][j].occupyPoint[k]);
 				occupyPoint.append(occupyPointUnit);
-			}
+			}*/
 			if (map[i][j].type == TRTower) {
 				Json::Value towerJson;
 				towerJson["id"] = Json::Value(map[i][j].owner - 1);
-				towerJson["ownerId"] = Json::Value(map[i][j].owner); 
+				towerJson["oId"] = Json::Value(map[i][j].owner); 
 				Json::Value towerPos;
-				towerPos["posx"] = Json::Value(j);
-				towerPos["posy"] = Json::Value(i);
-				towerJson["position"] = position;
-				towerJson["starLevel"] = Json::Value(1);
-				towerJson["productPoint"] = Json::Value(10);
-				towerJson["battlePoint"] = Json::Value(25);
-				towerJson["healthPoint"] = Json::Value(100);
-				towerJson["experience"] = Json::Value(0);
-				towerJson["battleRegion"] = Json::Value(2);
-				data->currentRoundTowerJson.append(towerJson);
+				towerPos["x"] = Json::Value(j);
+				towerPos["y"] = Json::Value(i);
+				towerJson["pos"] = towerPos;
+				towerJson["sL"] = Json::Value(1);
+				towerJson["pP"] = Json::Value(10);
+				towerJson["bP"] = Json::Value(25);
+				towerJson["hP"] = Json::Value(100);
+				towerJson["exp"] = Json::Value(0);
+				data->currentRoundTowerJson["tower"].append(towerJson);
 				Json::Value playerJson;
-				playerJson["rank"] = playerJson["team"] = playerJson["id"] = Json::Value(map[i][j].owner);
-				playerJson["score"] = 1 * TOWER_SCORE;
-				playerJson["corpsNum"] = Json::Value(0);
-				playerJson["towerNum"] = Json::Value(1);
-				playerJson["tower"].append(towerJson["id"]);
-				data->currentRoundPlayerJson.append(playerJson);
+				playerJson["rk"] = playerJson["tm"] = playerJson["id"] = Json::Value(map[i][j].owner);
+				playerJson["scr"] = 1 * TOWER_SCORE;
+				playerJson["cpN"] = Json::Value(0);
+				playerJson["twN"] = Json::Value(1);
+				playerJson["tw"].append(towerJson["id"]);
+				data->currentRoundPlayerJson["player"].append(playerJson);
 			}
-			data->currentRoundMapJson.append(blockJson);
+			data->currentRoundMapJson["map"].append(blockJson);
 		}
 	}
 
@@ -486,5 +482,22 @@ bool Map::randomInitMap() {
 void Map::saveMapJson() {
 	TRound round = data->getRound();      //更新地图Json前记录当前回合数
 	data->currentRoundMapJson["round"] = Json::Value(round);
-	data->mapInfoJsonRoot.append(data->currentRoundMapJson);
+	data->mapInfoJsonRoot["body"].append(data->currentRoundMapJson);
+	data->currentRoundMapJson.clear();
+}
+
+
+/***********************************************************************************************
+*函数名 :【FC18】ShowInfo保存地图Json函数
+*函数功能描述 : 将当前回合的地图Json数据保存到游戏所有回合的Json数据中，同时记录回合数
+*函数参数 : x<int>--横坐标，y<int>--纵坐标
+*函数返回值 : <mapBlockInfo>--地图方格信息
+*作者 : 姜永鹏
+***********************************************************************************************/
+mapBlockInfo Map::ShowInfo(int x, int y) {
+	mapBlockInfo info;
+	info.type = map[y][x].type;
+	info.owner = map[y][x].owner;
+	info.occupyPoint = map[y][x].occupyPoint;
+	return info;
 }

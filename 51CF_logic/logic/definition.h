@@ -8,6 +8,7 @@
 #define TRANSITION -1   //过渡地形区域
 #define PUBLIC 0      //公共地形区域
 #define NOTOWER -1    //当前方格没有防御塔
+#define NOTASK  -1    //当前防御塔无生产任务
 
 
 #include <vector>
@@ -430,11 +431,20 @@ enum CellType  //细胞种类的枚举
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 
-//@@@【FC18】防御塔结构体，struct CellInfo
-
+//@@@【FC18】防御塔结构体，有需要的信息再加
 
 struct TowerInfo {
-
+	bool    exist;      //防御塔是否存在
+	TTowerID      ID;   //防御塔ID
+	TPlayerID     ownerID;  //所属玩家ID
+	TPoint        position;    //位置
+	TProductPoint productPoint;  //生产力
+	TProductPoint productConsume;  //当前生产任务对应得生产力消耗值	*补充定义
+	TBattlePoint  battlePoint;   //战斗力
+	THealthPoint  healthPoint;   //生命值
+	TExperPoint   experPoint;    //经验值
+	TLevel        level;       //等级
+	productType   pdtType;    //生产任务类型
 };
 
 
@@ -448,6 +458,8 @@ struct CorpsInfo
 	THealthPoint	HealthPoint;	//生命值
 	TBuildPoint		BuildPoint;		//劳动力
 	TPlayerID		owner;			//所属玩家ID
+	corpsType       type;           //兵团种类
+	TMovePoint      movePoint;      //行动力
 };
 
 
@@ -692,7 +704,7 @@ struct Info
 	vector<PlayerInfo> playerInfo;   //势力信息
 
 	//@@@【FC18】返回所有防御塔信息的vector，可以参照原来的vector<CellInfo> cellInfo;
-
+	vector<TowerInfo> towerInfo;
 
 	//@@@【FC18】返回所有兵团信息的vector，可以参照原来的vector<vector<TentacleInfo> > tentacleInfo;
 	//vector<vector<CorpsInfoUnit>> corpsInfo;//下标为ij的位置表示位置为x:i,y:j的兵团信息

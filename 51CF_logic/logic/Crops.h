@@ -59,6 +59,8 @@ public:
 	corpsType getType() { return m_type; }
 	//获取当前兵团的星级（从0开始）
 	int getLevel() { return m_level; }
+	//获取当前兵团的位置
+	TPoint getPos() { return m_position; }
 protected:
 	//作战兵团受到攻击 返回是否存活 如果死亡，会自动在兵团数组中删除
 	bool BeAttacked(int attack, TPlayerID ID);

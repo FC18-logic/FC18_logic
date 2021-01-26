@@ -24,7 +24,6 @@ public:
 	int getPlayerScore();
 	void setID(TPlayerID id) { m_id = id; }
 	TPlayerID getId() { return m_id; }                                      //【FC18】获取玩家ID
-
 	//【FC18】获取玩家的所有防御塔set
 	std::set<TTowerID>& getTower() { return m_tower; }
 

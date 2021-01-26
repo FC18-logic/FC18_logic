@@ -65,5 +65,22 @@ public:
 	TPoint getPosition() { return m_position; }
 	//获取当前防御塔所属阵营的玩家序号
 	TPlayerID getOwnerID() { return m_PlayerID; }
+	//提供防御塔信息>>>>>>>>>>这是【JYP】加的
+	//>>>>>>>>>>m_producttype如果没有生产任务请用宏定义NOTASK=-1
+	//>>>>>>>>>>需要补充一下info.exist的定义，也就是这个塔是否还在<bool>，是否被摧毁
+	TowerInfo ShowInfo() {
+		TowerInfo info;
+		info.ID = m_id;
+		info.ownerID = m_PlayerID;
+		info.position = m_position;
+		info.productPoint = m_productpoint;
+		info.healthPoint = m_healthpoint;
+		info.battlePoint = m_battlepoint;
+		info.experPoint = m_experpoint;
+		info.level = m_level;
+		info.pdtType = m_producttype;
+		info.productConsume = m_productconsume;
+		return info;
+	}
 };
 #endif

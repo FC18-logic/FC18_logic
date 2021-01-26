@@ -1,11 +1,20 @@
 #include "Controller.h"
 #include <ctime>
+#include <math.h>
 #ifdef FC15_DEBUG
 #define _COMMAND_OUTPUT_ENABLED_
 #endif // FC15_DEBUG
 namespace DAGAN
 {
 	using namespace std;
+
+	TPoint moveDir[4] =    //移动方向，与enum corpsMoveDir枚举类型对应
+	{// dx, dy
+		{0,-1},      //上，-y
+		{0, 1},      //下，+y
+		{-1,0},      //左，-x
+		{1, 0}       //右，+x
+	};
 
 	void Controller::run(char* json_filename)
 	{
@@ -182,7 +191,16 @@ namespace DAGAN
 			json_os.close();
 		}
 	}
-
+	/***********************************************************************************************
+	*函数名 :【FC18】run单玩家回合运行函数
+	*函数功能描述 : 生成当前游戏信息，向玩家ai发出，接受命令表之后依次执行，执行每个有效命令后修改
+					Data修改DATA::Data中所有变化的数据，然后调用函数jsonChange修改命令Json的数据，
+					执行完后要判断玩家是否出局以及游戏是否继续进行。这位玩家的命令全部执行完后，再
+					修改场上信息的Json数据。
+	*函数参数 : id<TPlayerID>--当前玩家id，json_filename<char*>--Json文件名前缀
+	*函数返回值 : 无
+	*作者 : 姜永鹏
+	***********************************************************************************************/
 	void Controller::run(TPlayerID id, char* json_filename) {  //@@@【FC18】每个玩家依次执行
 		//清空上一回合记录的Json数据
 		data->currentRoundCommandJson.clear();
@@ -278,13 +296,10 @@ namespace DAGAN
 
 		//#json save
 		{
-			game_.saveJson();
 			game_.roundTime.push_back(clock());
-			data->currentRoundJson["runDuration"] =
+			data->currentRoundCommandJson["runDuration"] =
 				int(game_.roundTime[game_.roundTime.size() - 1] - game_.roundTime[game_.roundTime.size() - 2]);
-
-			data->root["head"]["totalRounds"] = round + 1;
-			data->root["body"].append(data->currentRoundJson);
+			game_.saveJson();
 
 			//输出到文件 #json 
 			Json::FastWriter fw;
@@ -294,4 +309,85 @@ namespace DAGAN
 			json_os.close();
 		}
 	}
+
+	/***********************************************************************************************
+	*函数名 :【FC18】jsonChange命令Json修改函数
+	*函数功能描述 : 将ID为id的玩家下达的命令c录入当前回合命令Json中
+	                注意，该玩家的命令是按它命令表中顺序从先至后进行
+					的。并且调用本函数前请确保命令执行过，也就是要确
+					保每个参数都合法，并且与场上情况对应。
+	*函数参数 : id<TPlayerID>--当前玩家的ID，c<Command&>--当前指令
+	*函数返回值 : 无
+	*作者 : 姜永鹏
+	***********************************************************************************************/
+	
+	
+	void Controller::jsonChange(TPlayerID id, Command& c) {
+		if (c.cmdType == corpsCommand) {
+			Json::Value newCmd;
+			newCmd["cT"] = Json::Value(int(corpsCommand));
+			newCmd["tp"] = Json::Value(int(c.parameters[0]));
+			newCmd["id"] = Json::Value(int(c.parameters[1]));
+			switch (c.parameters[0])  //第0个参数
+			{
+			case(CMove):
+				newCmd["mv"] = Json::Value(int(c.parameters[2]));
+				newCmd["dir"] = Json::Value(std::atan2(DAGAN::moveDir[c.parameters[2]].m_y, DAGAN::moveDir[c.parameters[2]].m_x));
+				break;
+			case(CStation):
+				break;
+			case(CStationTower):
+				newCmd["dFT"] = Json::Value(int(c.parameters[2]));
+				break;
+			case(CAttackCorps):
+				newCmd["dEC"] = Json::Value(int(c.parameters[2]));
+				TPoint dirTPoint = data->myCorps[c.parameters[2]].getPos() - data->myCorps[c.parameters[1]].getPos();
+				newCmd["dir"] = Json::Value(std::atan2(dirTPoint.m_y, dirTPoint.m_x));
+				break;
+			case(CAttackTower):
+				newCmd["dET"] = Json::Value(int(c.parameters[2]));
+				TPoint dirTPoint = data->myTowers[c.parameters[2]].getPosition() - data->myCorps[c.parameters[1]].getPos();
+				newCmd["dir"] = Json::Value(std::atan2(dirTPoint.m_y, dirTPoint.m_x));
+				break;
+			case(CRegroup):
+				newCmd["dFC"] = Json::Value(int(c.parameters[2]));
+				break;
+			case(CBuild):
+				break;
+			case(CRepair):
+				newCmd["dFT"] = Json::Value(int(c.parameters[2]));
+				break;
+			case(CChangeTerrain):
+				newCmd["dT"] = Json::Value(int(c.parameters[2]));
+				break;
+			default:;
+			}
+			data->currentRoundCommandJson["command"].append(newCmd);
+		}
+		else if (c.type == towerCommand) {
+			Json::Value newCmd;
+			newCmd["cT"] = Json::Value(int(towerCommand));
+			newCmd["tp"] = Json::Value(int(c.parameters[0]));
+			newCmd["id"] = Json::Value(int(c.parameters[1]));
+			switch (c.parameters[0]) 
+			{
+			case(TProduct):
+				newCmd["pT"] = Json::Value(int(c.parameters[2]));
+				break;
+			case(TAttackCorps):
+				newCmd["dEC"] = Json::Value(int(c.parameters[2]));
+				TPoint dirTPoint = data->myCorps[c.parameters[2]].getPos() - data->myTowers[c.parameters[1]].getPosition();
+				newCmd["dir"] = Json::Value(std::atan2(dirTPoint.m_y, dirTPoint.m_x));
+				break;
+			case(TAttackTower):
+				newCmd["dET"] = Json::Value(int(c.parameters[2]));
+				TPoint dirTPoint = data->myTowers[c.parameters[2]].getPosition() - data->myTowers[c.parameters[1]].getPosition();
+				newCmd["dir"] = Json::Value(std::atan2(dirTPoint.m_y, dirTPoint.m_x));
+				break;
+			default:;
+			}
+			data->currentRoundCommandJson["command"].append(newCmd);
+		}
+	}
 }
+
