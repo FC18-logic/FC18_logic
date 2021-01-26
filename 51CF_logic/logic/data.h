@@ -35,7 +35,7 @@ namespace DATA                                         //@@@【FC18】名空间
 	{
 		TTower totalTowers;                            //【FC18】总的防御塔数
 		//【FC18】指向所有防御塔（数组/vector均可）的指针，可以参考原来的Cell* cells
-		vector<class Tower> myTowers;                  //【FC18】所有防御塔的向量
+		vector<Tower> myTowers;                  //【FC18】所有防御塔的向量
 		
 		
 		TCorps totalCorps;                             //【FC18】总的兵团数
@@ -60,6 +60,11 @@ namespace DATA                                         //@@@【FC18】名空间
 		Json::Value currentRoundCorpsJson;             //【FC18】当前回合兵团的Json根节点
 		Json::Value currentRoundMapJson;               //【FC18】当前回合地图的Json根节点
 
+		void resetAllCnt() { totalRounds = 0; totalTowers = 0; totalCorps = 0; totalPlayers = 0; }//[【FC18】data中几个关键的数据全部清零
+		TRound getRound() { return totalRounds; }      //【FC18】获取当前data正在记录第几回合的数据（小回合）
+		TRound addRound() { totalRounds++; return totalRounds; }             //【FC18】data回合数增加，在上一回合Json数据清空，每个玩家ai代码开始跑之前（小回合）
+		TTower getTotalTower() { return totalTowers; } //【FC18】获取当前data记录的总防御塔数
+		TCorps getTotalCorp() { return totalCorps; }   //【FC18】获取当前data记录的总兵团数
 
 
 		//FC15的

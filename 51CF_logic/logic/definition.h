@@ -204,15 +204,15 @@ enum productType
 };
 
 
-//【FC18】地形的枚举类
+//【FC18】地形的枚举类（TR前缀表示地形）
 enum terrainType
 {
-	Tower     = 0,       //塔
-	Plain     = 1,       //平原
-	Mountain  = 2,       //山地
-	Forest    = 3,       //森林
-	Swamp     = 4,       //沼泽
-	Road      = 5,       //道路
+	TRTower     = 0,       //塔
+	TRPlain     = 1,       //平原
+	TRMountain  = 2,       //山地
+	TRForest    = 3,       //森林
+	TRSwamp     = 4,       //沼泽
+	TRRoad      = 5,       //道路
 };
 
 
@@ -431,6 +431,60 @@ enum CellType  //细胞种类的枚举
 
 
 //@@@【FC18】防御塔结构体，struct CellInfo
+
+
+struct TowerInfo {
+
+};
+
+
+//@@@【FC18】兵团结构体，有需要的信息再加
+struct CorpsInfo
+{
+	bool	exist;		//是否存在
+	TPoint	pos;		//兵团坐标
+	int		level;		//兵团等级
+	TCorpsID		ID;	//兵团ID
+	THealthPoint	HealthPoint;	//生命值
+	TBuildPoint		BuildPoint;		//劳动力
+	TPlayerID		owner;			//所属玩家ID
+};
+
+
+//@@@【FC18】玩家结构体
+struct PlayerInfo
+{
+	TPlayerID id;                        //【FC18】玩家的序号（从？[0 or 1]开始）
+	int rank;                            //【FC18】该选手排名（出局者直接由出局回合数给位次）|（存活者按防御塔得分和兵团得分来排名）|（同名次按防御塔攻占数、消灭敌方军团数、俘虏敌方军团数依次检索排名）|（仍有同名次者随机分配排名）
+	bool alive;                          //【FC18】玩家是否还活着
+
+	//@@@【FC18】玩家所有塔的序号，参照原来的set<TCellID> cells
+	set<TTowerID> tower;
+
+
+	//【FC18】玩家所有兵团的序号，建议也用set这种数据结构，内部按兵团序号升序来排序
+	set<TCorpsID> corps; //所有兵团
+	//@@@【FC18】其他需要添加的属性或接口
+
+
+	//FC15的
+	TResourceD technologyPoint;        //科技点数
+	TLevel RegenerationSpeedLevel;      //再生倍率等级
+	TLevel ExtendingSpeedLevel;         //延伸速度等级
+	TLevel ExtraControlLevel;           //额外操作数等级
+	TLevel DefenceLevel;          //防御等级
+	size_t maxControlNumber;    //最大控制数
+	set<TCellID> cells; //所有的细胞
+};
+
+//【FC18】地图单元格信息结构体
+struct mapBlockInfo
+{
+	terrainType type;                           //【FC18】地块类型，对应terrainType枚举类
+	int owner;                                  //【FC18】所属玩家序号，-1为过渡TRANSITION，-2为公共PUBLIC
+	vector<int> occupyPoint;                    //【FC18】各玩家的占有属性值，秩为玩家序号-1
+};
+
 struct CellInfo
 {
 	TCellID id;
@@ -450,18 +504,6 @@ struct CellInfo
 	TPower techSpeed;    //科创点数是资源再生速率的几倍
 };
 
-//@@@【FC18】兵团结构体，有需要的信息再加
-struct CorpsInfo
-{
-	bool	exist;		//是否存在
-	TPoint	pos;		//兵团坐标
-	int		level;		//兵团等级
-	TCorpsID		ID;	//兵团ID
-	THealthPoint	HealthPoint;	//生命值
-	TBuildPoint		BuildPoint;		//劳动力
-	TPlayerID		owner;			//所属玩家ID
-};
-
 //【FC15】
 struct TentacleInfo
 {
@@ -473,38 +515,6 @@ struct TentacleInfo
 	TResourceD      resource;                   //当前资源      （切断前有效）
 	TResourceD      frontResource;              //切断后前方资源（切断后有效）
 	TResourceD      backResource;               //切断后后方资源（切断后有效）
-};
-
-//@@@【FC18】玩家结构体
-struct PlayerInfo
-{
-	TPlayerID id;                        //【FC18】玩家的序号（从？[0 or 1]开始）
-	int rank;                            //【FC18】该选手排名（出局者直接由出局回合数给位次）|（存活者按防御塔得分和兵团得分来排名）|（同名次按防御塔攻占数、消灭敌方军团数、俘虏敌方军团数依次检索排名）|（仍有同名次者随机分配排名）
-	bool alive;                          //【FC18】玩家是否还活着
-
-	//@@@【FC18】玩家所有塔的序号，参照原来的set<TCellID> cells
-	set<TCellID> cells; //所有的细胞
-
-	//【FC18】玩家所有兵团的序号，建议也用set这种数据结构，内部按兵团序号升序来排序
-	set<TCorpsID> corps; //所有兵团
-	//@@@【FC18】其他需要添加的属性或接口
-
-
-	//FC15的
-	TResourceD technologyPoint;        //科技点数
-	TLevel RegenerationSpeedLevel;      //再生倍率等级
-	TLevel ExtendingSpeedLevel;         //延伸速度等级
-	TLevel ExtraControlLevel;           //额外操作数等级
-	TLevel DefenceLevel;          //防御等级
-	size_t maxControlNumber;    //最大控制数
-};
-
-//【FC18】地图单元格信息结构体
-struct mapBlockInfo
-{
-	terrainType type;                           //【FC18】地块类型，对应terrainType枚举类
-	int owner;                                  //【FC18】所属玩家序号，-1为过渡TRANSITION，-2为公共PUBLIC
-	vector<int> occupyPoint;                    //【FC18】各玩家的占有属性值，秩为玩家序号-1
 };
 
 //类声明
@@ -675,27 +685,30 @@ struct Info
 	TTower totalTowers;                                     //【FC18】总的防御塔个数
 	TCorps totalCorps;                                      //【FC18】总的兵团个数
 	TPlayerID myID;                                         //【FC18】选手ID号
-	BaseMap* mapInfo;                                       //【FC18】地图信息
+
 	CommandList myCommandList;                              //【FC18】用于接收玩家发出的指令的指令集
 
 	//@@@【FC18】返回所有势力信息的vector，可以参照原来的vector<PlayerInfo> playerInfo;
 	vector<PlayerInfo> playerInfo;   //势力信息
 
 	//@@@【FC18】返回所有防御塔信息的vector，可以参照原来的vector<CellInfo> cellInfo;
-	vector<CellInfo> cellInfo; //同学信息
+
 
 	//@@@【FC18】返回所有兵团信息的vector，可以参照原来的vector<vector<TentacleInfo> > tentacleInfo;
-	vector<vector<CorpsInfoUnit>> corpsInfo;//下标为ij的位置表示位置为x:i,y:j的兵团信息
+	//vector<vector<CorpsInfoUnit>> corpsInfo;//下标为ij的位置表示位置为x:i,y:j的兵团信息
+	vector<CorpsInfo> corpsInfo;
 
 	//【FC18】地图信息
 	vector<vector<mapBlockInfo>> mapInfo;
 
 	//FC15的
+	BaseMap* mapInfo;
 	TRound round;
 	int playerSize;
 	int cellNum;    //细胞总数量
 	int myMaxControl;    //最大操作数
 	vector<vector<TentacleInfo> > tentacleInfo; //触手信息
+	vector<CellInfo> cellInfo; //同学信息
 };
 
 #endif // DEFINITION_H

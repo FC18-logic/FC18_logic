@@ -145,7 +145,9 @@ int main(int argc, char** argv)
 	//一个回合一个回合的跑
 	while (controller.isValid())
 	{
-		controller.run(json_filename);
+		for (int i = 1; i <= 4; i++)
+			controller.run(1, json_filename);   //每个玩家依次运行
+		//旧代码//controller.run(json_filename);
 	}
 
 

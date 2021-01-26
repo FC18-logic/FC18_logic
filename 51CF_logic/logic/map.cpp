@@ -181,6 +181,7 @@ bool Map::init(const TMapID& filename,TResourceI _MAX_RESOURCE_)
 *作者 : 姜永鹏
 ***********************************************************************************************/
 bool Map::readMap(ifstream& inMap, bool enableOutput, std::vector<std::string> players_name) {
+	data->resetAllCnt();             //初始化过程为第0回合
 	//初始化地图高度、宽度
 	if (enableOutput)
 		cout << "init map......" << endl;
@@ -206,6 +207,10 @@ bool Map::readMap(ifstream& inMap, bool enableOutput, std::vector<std::string> p
 	inMap >> data->totalPlayers;
 	data->commandJsonRoot["head"]["totalPlayers"] = data->totalPlayers; //#json
 	data->players = new Player[data->totalPlayers];
+
+
+
+
 	for (int i = 1; i < 5; i++) {
 		Json::Value playerJson;
 		playerJson["id"] = Json::Value(i);
@@ -222,6 +227,7 @@ bool Map::readMap(ifstream& inMap, bool enableOutput, std::vector<std::string> p
 	for (int i = 0; i != data->totalPlayers; ++i)
 	{
 		data->players[i].setdata(data);
+		data->players[i].setID(i + 1);
 
 		Json::Value paj;
 		paj["id"] = Json::Value(int(i + 1));
@@ -240,9 +246,7 @@ bool Map::readMap(ifstream& inMap, bool enableOutput, std::vector<std::string> p
 		paj["move"] = move;
 		data->currentRoundCommandJson["playerCommand"].append(paj);
 	}
-	data->totalTowers = 0;
-	data->totalCorps = 0;
-	data->totalRounds = 0;        //初始化过程为第0回合
+
 	return true;
 }
 
@@ -325,7 +329,7 @@ bool Map::randomInitMap() {
 			mapBlock newBlock;               //地块初始化，无塔，平原，没有主人，占有属性值为0
 			newBlock.TowerIndex = NOTOWER;
 			newBlock.owner = -1;
-			newBlock.type = Plain;
+			newBlock.type = TRPlain;
 			for (int k = 0; k < 4; k++) {
 				newBlock.occupyPoint.push_back(0);    //各方格初始占有属性值均为0
 			}
@@ -387,11 +391,11 @@ bool Map::randomInitMap() {
 		TPoint towerPoint;
 		towerPoint.m_x = generateRanInt(towerRegion[i].first.m_x, towerRegion[i].second.m_x);
 		towerPoint.m_y = generateRanInt(towerRegion[i].first.m_y, towerRegion[i].second.m_y);
-		map[towerPoint.m_y][towerPoint.m_x].type = Tower;     //更新data的地图类：当前方格的地形修改为防御塔
+		map[towerPoint.m_y][towerPoint.m_x].type = TRTower;     //更新data的地图类：当前方格的地形修改为防御塔
 		map[towerPoint.m_y][towerPoint.m_x].owner = i + 1;
 		data->totalTowers++;                      //更新data类：更新防御塔总数
 		//@@@【FC18】[！！！这个塔的构造函数可能会改]更新data类：向防御塔向量中添加新增的防御塔
-		class Tower newTower(i + 1, towerPoint);
+		Tower newTower(i + 1, towerPoint);
 		data->myTowers.push_back(newTower);
 		//【FC18】更新player类：向player的防御塔序号向量中添加新的防御塔序号
 		data->players[i].getTower().insert(i);
@@ -400,7 +404,28 @@ bool Map::randomInitMap() {
 			p.m_x = towerPoint.m_x + paraOffset[j].m_x;
 			p.m_y = towerPoint.m_y + paraOffset[j].m_y;
 			map[p.m_y][p.m_x].occupyPoint[i] = TowerOccupyPoint[0];
-			map[p.m_y][p.m_x].type = Road;
+			map[p.m_y][p.m_x].type = TRRoad;
+		}
+	}
+
+	////////////////////////////////////////////////////////
+	//【FC18】每个势力防御塔向周边方格施加初始占有属性值  //
+	////////////////////////////////////////////////////////
+
+	for (int cnt = 0; cnt < 4; cnt++) {
+		TPoint towerPoint = data->myTowers[cnt].getPosition();
+		TPlayerID ownerID = data->myTowers[cnt].getOwnerID();
+		for (int i = 0; i < m_height; i++) {
+			for (int j = 0; j < m_width; j++) {
+				TPoint currentPoint;
+				currentPoint.m_x = j;
+				currentPoint.m_y = i;
+				TDist distance = getDist(currentPoint, towerPoint);
+				if (distance >= 1 && distance <= 5)
+					map[i][j].occupyPoint[ownerID - 1] += TowerOccupyPoint[distance - 1];
+				else                     //在塔当前格内会getDist超过6，就不更新占有属性值了
+					continue;
+			}
 		}
 	}
 	
@@ -421,7 +446,7 @@ bool Map::randomInitMap() {
 				occupyPointUnit["point"] = Json::Value(map[i][j].occupyPoint[k]);
 				occupyPoint.append(occupyPointUnit);
 			}
-			if (map[i][j].type == Tower) {
+			if (map[i][j].type == TRTower) {
 				Json::Value towerJson;
 				towerJson["id"] = Json::Value(map[i][j].owner - 1);
 				towerJson["ownerId"] = Json::Value(map[i][j].owner); 
@@ -459,7 +484,7 @@ bool Map::randomInitMap() {
 *作者 : 姜永鹏
 ***********************************************************************************************/
 void Map::saveMapJson() {
-	int round = data->totalRounds;      //更新地图Json前记录当前回合数
+	TRound round = data->getRound();      //更新地图Json前记录当前回合数
 	data->currentRoundMapJson["round"] = Json::Value(round);
 	data->mapInfoJsonRoot.append(data->currentRoundMapJson);
 }

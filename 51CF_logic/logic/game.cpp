@@ -5,6 +5,7 @@
 #include <algorithm>
 #include <ctime>
 #include <cmath> 
+#include <math.h>
 
 bool Game::init(string file, char* json_file, vector<string> players_name)   //[【FC18】接着用，改好了
 {
@@ -140,7 +141,9 @@ bool Game::init(string file, char* json_file, vector<string> players_name)   //[
 
 void Game::DebugPhase()
 {
-	cout << "/*************** DEBUG 信息 ***************/" << endl;
+	//FC15旧的调试信息
+	/********************************************************************************************************************************************************************************************
+	cout << "*************** DEBUG 信息 ***************" << endl;
 	cout << "Round " << currentRound << endl;
 	cout << "玩家剩余： " << playerAlive << " / " << playerSize << endl;
 	for (int i = 0; i != data.PlayerNum; ++i)
@@ -201,6 +204,7 @@ void Game::DebugPhase()
 				cout << endl;
 			}
 	cout << "\n\n";
+	********************************************************************************************************************************************************************************************/
 }
 
 //每回合-========
@@ -629,7 +633,7 @@ vector<Info> Game::generateInfo()
 		I.cellNum = data.CellNum;
 		I.round = currentRound;
 		I.myMaxControl = data.players[i].maxControlNumber();
-		I.mapInfo = &data.gameMap;
+		//I.mapInfo = &data.gameMap;
 		info.push_back(I);
 	}
 	//初始化阵营
@@ -762,13 +766,15 @@ void Game::takeEffect(TransEffect& te)
 //【不冲突】主要是访问塔，但regenerate()有对player属性的访问
 void Game::regeneratePhase()
 {
-	/*//回复科技点数
+	//旧代码
+	/**************************************************
+	//回复科技点数
 	for (int i = 0;i!=data.PlayerNum;++i)
 	{
 		Player& p = data.players[i];
 		if (p.isAlive())
 			p.regenerateTechPoint();
-	}*/
+	}
 	//每个兵塔回复资源//同时回复势力科技点数
 	for (int i = 0;i!=data.CellNum;++i)
 	{
@@ -776,6 +782,7 @@ void Game::regeneratePhase()
 			data.cells[i].regenerate();
 		}
 	}
+	***************************************************/
 }
 
 //【可能冲突】主要是兵线的操作，但takeEffect()涉及塔属性的访问，主要OwnerChange既有兵线有有塔会冲突
@@ -1148,3 +1155,79 @@ void Game::OwnerChange(TransEffect** TE)
 		}
 	}
 }
+
+
+
+
+
+
+
+
+/***********************************************************************************************
+*函数名 :【FC18】generatePlayerInfo生成投放给选手ai代码的信息info
+*函数功能描述 : 将场上信息通过info传给选手的ai代码
+*函数参数 : 无
+*函数返回值 : <Info>信息
+*作者 : 姜永鹏
+***********************************************************************************************/
+
+
+Info Game::generatePlayerInfo(TPlayerID id) {
+	Info info;
+	info.myID = id;
+	info.totalPlayers = getTotalPlayerNum();
+	info.playerAlive = getTotalPlayerAlive();
+	info.totalRounds = ceil(data.getRound() / 4);     //比game的round计数要提前1回合，把小回合数除以每轮4个小回合，得到大回合数传给选手
+	info.totalTowers = data.getTotalTower();
+	info.totalCorps = data.getTotalCorp();
+
+	//info中的玩家数据
+	for (int i = 0; i < getTotalPlayerNum(); i++) {
+		PlayerInfo newPlayer;
+		Player currentPlayer = data.players[i];
+		newPlayer.id = currentPlayer.getId();
+		newPlayer.alive = currentPlayer.isAlive();
+		newPlayer.tower = currentPlayer.getTower();
+		newPlayer.corps = currentPlayer.getCrops();
+		newPlayer.rank = std::find(Rank.begin(), Rank.end(), i) - Rank.begin() + 1;//可见Rank中存的是玩家id-1
+		info.playerInfo.push_back(newPlayer);
+	}
+
+	//info中的防御塔
+	for (int i = 0; i < data.myTowers.size(); i++) {
+
+	}
+	//info中的兵团信息
+	for (int i = 0; i < data.myCorps.size(); i++) {
+
+	}
+
+	for (int i = 0; i < data.gameMap.getHeigth(); i++) {
+		vector<mapBlockInfo> newMapRow;
+		info.mapInfo.push_back(newMapRow);
+		for (int j = 0; j < data.gameMap.getWidth(); j++) {
+			mapBlockInfo newBlock;
+			newBlock.owner = data.gameMap.map[i][j].owner;
+			newBlock.type = data.gameMap.map[i][j].type;
+			newBlock.occupyPoint = data.gameMap.map[i][j].occupyPoint;
+			info.mapInfo[i].push_back(newBlock);
+		}
+	}
+
+
+	return info;
+}
+
+
+/***********************************************************************************************
+*函数名 :【FC18】saveJson保存这一轮的Json数据
+*函数功能描述 : 将当前回合的Json数据保存到总的Json数据中
+*函数参数 : 无
+*函数返回值 : 无
+*作者 : 姜永鹏
+***********************************************************************************************/
+void saveJson() {
+
+}
+
+

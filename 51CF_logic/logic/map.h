@@ -17,12 +17,12 @@ namespace DATA
 
 const terrainType terrain[TERRAIN_TYPE_NUM + 1] =     //【FC18】地形：按占地面积大小排序，塔地形单独算，不放在这里面
 {//                  enum值   排序
-    Plain,       //    1       1
-    Road,        //    5       2
-    Mountain,    //    2       3
-    Forest,      //    3       4
-    Swamp,       //    4       5
-    Tower        //    0       6
+    TRPlain,       //    1       1
+    TRRoad,        //    5       2
+    TRMountain,    //    2       3
+    TRForest,      //    3       4
+    TRSwamp,       //    4       5
+    TRTower        //    0       6
 };
 
 const TPoint paraOffset[8] =                                //【FC18】用于生成随机地图时增强连通性

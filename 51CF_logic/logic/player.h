@@ -4,6 +4,7 @@
 #include "cell.h"
 #include "tentacle.h"
 #include "Crops.h"
+#include "tower.h"
 #include <set>
 #include "data.h"
 class Player                                                                //@@@【FC18】玩家类
@@ -21,6 +22,8 @@ public:
 	void setdeadRound(int d) { deadRound = d; }                             //【FC18】设置死亡回合
 	//@@@【FC18】获取玩家当前得分（按照规则来，建议考虑到同名次时按什么指标来比较等）
 	int getPlayerScore();
+	void setID(TPlayerID id) { m_id = id; }
+	TPlayerID getId() { return m_id; }                                      //【FC18】获取玩家ID
 
 	//【FC18】获取玩家的所有防御塔set
 	std::set<TTowerID>& getTower() { return m_tower; }
@@ -50,6 +53,7 @@ private:
 	bool alive = true;                                                      //【FC18】是不是还活着
 	int deadRound;                                                          //【FC18】死掉的回合
 	DATA::Data* data;                                                       //【FC18】数据的存储与共享
+	TPlayerID m_id;                                                         //【FC18】玩家ID
 	//@@@【FC18】指向当前玩家所有防御塔的set数据结构，参考原来的std::set<TCellID> m_cells
 	std::set<TTowerID> m_tower;
 	

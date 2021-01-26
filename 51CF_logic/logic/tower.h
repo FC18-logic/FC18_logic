@@ -54,5 +54,12 @@ public:
 	己方兵团驻扎情况（计算战斗力增益）
 	敌方兵团战斗力、兵种（计算两方生命值损失）
 	*/
+
+	//获取当前防御塔的等级
+	int getLevel() { return m_level; }
+	//获取当前防御塔的位置
+	TPoint getPosition() { return m_position; }
+	//获取当前防御塔所属阵营的玩家序号
+	TPlayerID getOwnerID() { return m_PlayerID; }
 };
 #endif

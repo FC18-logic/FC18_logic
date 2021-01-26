@@ -7,16 +7,10 @@ namespace DAGAN
 {
 	using namespace std;
 
-	void Controller::run(char* json_filename)  //@@@【FC18】
+	void Controller::run(char* json_filename)
 	{
-		//#json getFC18InitData
-		data->currentRoundCommandJson.clear();
-		data->currentRoundPlayerJson.clear();
-		data->currentRoundTowerJson.clear();
-		data->currentRoundMapJson.clear();
-
+	
 		//#json getInitdata 
-		/******************************************FC15旧代码**********************************************
 		data->currentRoundJson.clear();
 		data->cutTentacleInfoJson.clear();
 		data->cutTentacleBornJson.clear();
@@ -24,7 +18,6 @@ namespace DAGAN
 		data->cutTentacleBornJson.assign(data->CellNum, vector<bool>(data->CellNum, false));
 		data->cutTentacleJson.assign(data->CellNum, vector<bool>(data->CellNum, false));
 		data->cutTentacleInfoJson.resize(data->CellNum, vector<CutTentacleInfoJson>(data->CellNum));
-		***************************************************************************************************/
 
 		DATA::Data dataCopyLastRound = *data;
 		DataSupplement dataSuppleMent;
@@ -174,6 +167,118 @@ namespace DAGAN
 		//#json save
 		{
 			game_.saveJson(dataCopyLastRound, dataSuppleMent);
+			game_.roundTime.push_back(clock());
+			data->currentRoundJson["runDuration"] =
+				int(game_.roundTime[game_.roundTime.size() - 1] - game_.roundTime[game_.roundTime.size() - 2]);
+
+			data->root["head"]["totalRounds"] = round + 1;
+			data->root["body"].append(data->currentRoundJson);
+
+			//输出到文件 #json 
+			Json::FastWriter fw;
+			ofstream json_os;
+			json_os.open(json_filename);
+			json_os << fw.write(data->root);
+			json_os.close();
+		}
+	}
+
+	void Controller::run(TPlayerID id, char* json_filename) {  //@@@【FC18】每个玩家依次执行
+		//清空上一回合记录的Json数据
+		data->currentRoundCommandJson.clear();
+		data->currentRoundPlayerJson.clear();
+		data->currentRoundTowerJson.clear();
+		data->currentRoundCorpsJson.clear();
+		data->currentRoundMapJson.clear();
+
+		//data内的回合数据更新+1
+		volatile TRound dataRound = data->addRound();
+		//Json更新data中的回合数据，此时game中回合数据还保持在上一回合
+		data->currentRoundCommandJson["round"] = dataRound;
+		data->currentRoundPlayerJson["round"] = dataRound;
+		data->currentRoundTowerJson["round"] = dataRound;
+		data->currentRoundCorpsJson["round"] = dataRound;
+		data->currentRoundMapJson["round"] = dataRound;
+		int playerSize = game_.getTotalPlayerNum();
+		volatile TRound round = game_.getCurrentRound() + 1;
+
+		if (!silent_mode_) cout << "-=-=-=-=-=-=-=-=-=-=-= Controller: Round[" << round << "] =-=-=-=-=-=-=-=-=-=-=-=-=-" << endl;
+		if (debug_mode) {
+			game_.DebugPhase();      //调试阶段：输出调试信息
+		}
+		game_.beginPhase();          //启动阶段：玩家/塔/兵团/地图每回合开始前的准备工作放在这里
+		game_.regeneratePhase();     //恢复阶段：玩家/塔/兵团/地图属性要进行的恢复放在这里
+
+		//为玩家的AI代码生成数据
+		Info info2Player = game_.generatePlayerInfo(id);
+		vector<CommandList> commands; //选手命令
+		Player_Code& player = players_[id - 1];  //取出玩家对应的ai代码类
+		if (player.isValid() && game_.isAlive(id))  //绝不运行出错的ai代码，绝不运行出局玩家的ai代码
+		{
+			// 单个玩家执行，运行玩家ai获取指令
+			if (!silent_mode_) cout << "Calling Player " << (int)id << "'s Run() method" << endl;
+			//run运行dll，然后把对应的myCommandList(由dll修改)回传到这里
+			players_[id].run(info2Player);
+			commands.push_back(info2Player.myCommandList);
+		}
+		else
+		{
+			players_[id].kill();
+			commands.push_back(CommandList());
+		}
+
+
+		// 直接输出此玩家的操作
+#ifdef _COMMAND_OUTPUT_ENABLED_
+		if (file_output_enabled_ && game_.isAlive(id))
+		{
+			if (game_.isAlive(id)) {
+				cout << "Player " << id << "'s commands:" << endl;
+				for (Command& c : commands[id])
+				{
+					switch (c.type)
+					{
+					default:
+						break;
+					}
+				}
+			}
+		}
+		if (file_output_enabled_) cout << endl;
+#endif
+		isValid_ = game_.isValid();
+		if (!isValid())
+		{
+			if (!silent_mode_)
+			{
+				cout << "-=-=-=-=-=-=-=-=-=-=-= GAME OVER ! =-=-=-=-=-=-=-=-=-=-=-=-=-" << endl;
+				cout << "Rank:" << endl;
+				for (TPlayerID id : game_.getRank())
+				{
+					cout << "Player " << id << " : " << players_[id].getName() << endl;
+				}
+			}
+		}
+		//执行移动、势力转换和攻防结算的部分
+		else //isValid
+		{
+			//各种塔的操作在这里
+			game_.commandPhase(commands);//读取玩家命令，然后有效命令写进JSON里面去，然后执行一些加兵线之类的操作
+			game_.movePhase();//兵线的推移和结算
+			game_.transPhase();//兵线的传输和结算
+			game_.endPhase();//兵线的切断和结算
+		}
+		// check if killed
+		//检查并判断玩家是否出局
+		for (TCellID i = 0; i < playerSize; ++i)
+			if (!game_.isAlive(i))
+				players_[i].kill();
+		//回合数增加1
+		game_.addRound();
+
+		//#json save
+		{
+			game_.saveJson();
 			game_.roundTime.push_back(clock());
 			data->currentRoundJson["runDuration"] =
 				int(game_.roundTime[game_.roundTime.size() - 1] - game_.roundTime[game_.roundTime.size() - 2]);

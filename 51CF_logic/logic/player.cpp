@@ -4,14 +4,19 @@ using std::vector;
 
 Player::Player()
 {
-	m_techPoint = 0.0;//初始化科技点数为0，根据规则科技点数可能要改成int
+	alive = true;
+	deadRound = -1;
+	m_id = -1;
+	data = nullptr;
 }
 
 //#json
 Player::Player(Player& _player)// copy构造player
 {
 	m_crops = _player.getCrops();
+	m_tower = _player.getTower();
 	alive = _player.isAlive();
+	m_id = _player.getId();
 	data = nullptr;   //避免浅复制
 
 	//FC15的
@@ -176,10 +181,9 @@ int Player::getPlayerScore() {
 		else if (data->myCorps[i].getType() == Construct)
 			corpsScore += CONSTRUCT_CORP_SCORE * 1;
 	}
-	//【FC18】补充所有防御塔得分计算公式
-	//for (TTowerID i : m_tower)
-	//{
-		//towerScore += TOWER_SCORE * data 1;             //防御塔等级从0开始[!!!反复确认]
-	//}
+	for (TTowerID i : m_tower)
+	{
+		towerScore += TOWER_SCORE * (data->myTowers[i].getLevel() + 1);             //防御塔等级从0开始[!!!反复确认]
+	}
 	return corpsScore + towerScore;
 }

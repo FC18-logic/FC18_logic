@@ -24,20 +24,23 @@ public:
 	bool init(string filename, char* json_filename,vector<string> players_name);                  //@@@【FC18】从文件读入信息，初始化游戏，并写第0轮的JSON
 	DATA::Data& getData() { return data; }                            //【FC18】从game类获取当前游戏信息   #json
 	vector<TPlayerID> getRank() { return Rank; }                      //【FC18】获取当前所有玩家的排名
-	int getTotalPlayerNum() { return data.totalPlayers; }             //【FC18】获取当前玩家数目
+	int getTotalPlayerNum() { return totalPlayers; }             //【FC18】获取当前玩家数目
+	int getTotalPlayerAlive() { return playerAlive; }
 	TRound getCurrentRound() { return totalRounds; }                  //【FC18】获取当前回合数
 	void DebugPhase();                                                //@@@【FC18】输出调试信息
-	vector<Info> generateInfo();                                      //@@@【FC18】得到分配给每个ai代码dll的参数info向量
+	Info generatePlayerInfo(TPlayerID id);                            //@@@【FC18】得到分配给每个ai代码dll的参数info向量
 	bool isValid();                                                   //【FC18】判定是否结束
 	//@@@【FC18】根据规则每回合分过程的执行与结算函数
 	void commandPhase(vector<CommandList>& command_list);             //@@@【FC18】处理玩家指令
 	void killPlayer(TPlayerID id);                                    //@@@【FC18】杀死玩家 
 	bool isAlive(TPlayerID id) { return data.players[id].isAlive(); } //【FC18】判断玩家是否活着
-	void saveJson(DATA::Data & dataLastRound, DataSupplement & dataSuppleMent);//【FC18】写入这一轮的JSON文档
+	void saveJson(DATA::Data & dataLastRound, DataSupplement & dataSuppleMent);//？？？【FC18】写入这一轮的JSON文档
+	void saveJson();                                                  //【FC18】写入这一轮的Json数据
 	void addRound() { currentRound++;  totalRounds++; }               //@@@【FC18】回合数递增
 
 
 	//FC15的
+	vector<Info> generateInfo();
 	TRound getRound() { return currentRound; }//获取回合数
 	int getPlayerSize() { return data.PlayerNum; }//获取玩家数量
 	void regeneratePhase();    //恢复阶段

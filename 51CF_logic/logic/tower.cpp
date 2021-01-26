@@ -1,6 +1,6 @@
 #include "tower.h"
 
-TTowerID ID = 0;
+TTowerID Tower::ID = 0;
 
 Tower::Tower(void)
 {
