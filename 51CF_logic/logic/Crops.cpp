@@ -16,6 +16,7 @@ Crops::~Crops(void)
 Crops::Crops(DATA::Data* _data, corpsType type, battleCorpsType battletype, constructCorpsType buildtype, TPlayerID PlayerID, TPoint pos)
 	:m_data(_data)
 {
+	m_bAlive = true;
 	m_type = type;
 	m_BattleType = battletype;
 	m_BuildType = buildtype;
@@ -43,6 +44,7 @@ Crops::Crops(DATA::Data* _data, corpsType type, battleCorpsType battletype, cons
 	m_bResting = true;//兵团生产出来后默认驻守塔
 	m_data->corps[m_position.m_x][m_position.m_y].push_back(this);
 	m_data->players[m_PlayerID].addCrops(m_myID);
+	m_data->totalCorps++;
 }
 
 /*
@@ -53,7 +55,7 @@ dx：x坐标变化量 dy：y坐标变化量
 */
 bool Crops::Move(int dx, int dy)
 {
-	if(!bAlive())
+	if(!m_bAlive)
 	{
 		return false;
 	}
@@ -65,7 +67,7 @@ bool Crops::Move(int dx, int dy)
 	//判断目标位置是否存在己方塔
 	bool haveTower = false;
 	int index = m_data->gameMap.map[next_x][next_y].TowerIndex;
-	if(index != HAVE_NO_TOWER)
+	if(index != NOTOWER)
 	{
 		class Tower targettower = m_data->myTowers[index];
 		if(targettower.showPlayerID() != m_PlayerID)
@@ -175,47 +177,23 @@ bool Crops::BeAttacked(int attack,TPlayerID ID)
 	//俘虏工程兵
 	if(m_type == Construct)
 	{
-		m_PlayerID = ID;
+		ChangeOwner(ID);
 		return true;
 	}
 	//战斗兵
 	m_PeaceNum = 0;
 	m_HealthPoint -= attack;
-	if(!bAlive())
+	if(m_HealthPoint<=0)
 	{
-		m_data->players[m_PlayerID].deleteCrops(m_myID);
-		return false;
+		KillCorps();
 	}
 
-	return true;
+	return m_bAlive;
 }
 
 bool Crops::bAlive()
 {
-	if(m_type == Battle)
-	{
-		if(m_HealthPoint>0)
-		{
-			return true;
-		}
-		else
-		{
-			m_HealthPoint = 0;
-			return false;
-		}
-
-	}
-	else if(m_BuildType == Builder)
-	{
-		if(m_BuildPoint>0)
-		{
-			return true;
-		}
-	}
-	else
-	{
-		return true;
-	}
+	return m_bAlive;
 }
 
 /*
@@ -274,44 +252,38 @@ bool Crops::MergeCrops(TCorpsID targetID)
 	targetCrops = &(m_data->myCorps[targetID]);
 	//如果目标队伍不存在
 	if(targetCrops == NULL)
-	{
 		return false;
-	}
+
 	//如果无行动力
 	if(m_MovePoint == 0)
-	{
 		return false;
-	}
+
 	//如果一方已经阵亡
-	if(!bAlive()||!(targetCrops->bAlive()))
-	{
+	if(!m_bAlive||!(targetCrops->m_bAlive))
 		return false;
-	}
+
 	//如果不同阵营
 	if(m_PlayerID!=targetCrops->m_PlayerID)
-	{
 		return false;
-	}
+
 	//如果不同类型
 	if(m_type!=Battle||targetCrops->m_type!=Battle)
-	{
 		return false;
-	}
 	if(m_BattleType!=targetCrops->m_BattleType)
-	{
 		return false;
-	}
+
+	//如果不是邻居
+	if(!IsNeighbor(targetCrops->m_position))
+		return false;
+
 	//如果星级不符合要求
 	int level1 = m_level+1;
 	int level2 = targetCrops->m_level+1;
 	if(level2>level1)
-	{
 		return false;
-	}
 	if(level1+level2 >3)
-	{
 		return false;
-	}
+
 	//整编
 	float HPSum = m_HealthPoint+targetCrops->m_HealthPoint;
 	float TotalSum = battleHealthPoint[m_BattleType][m_level]
@@ -321,7 +293,7 @@ bool Crops::MergeCrops(TCorpsID targetID)
 
 	m_MovePoint = 0;
 	targetCrops->m_HealthPoint = 0;
-	m_data->players[m_PlayerID].deleteCrops(targetID);
+	targetCrops->KillCorps();
 	m_bResting = false;
 }
 
@@ -349,24 +321,24 @@ ChangeTerrain
 */
 bool Crops::ChangeTerrain(terrainType target)
 {
-	if(!bAlive())
-	{
+	if(!m_bAlive)
 		return false;
-	}
 	if(m_type != Construct)
 		return false;
 	if(m_BuildType != Builder)
 		return false;
 	int curID = m_data->gameMap.map[m_position.m_x][m_position.m_y].owner;
 	if(curID != m_PlayerID)
-	{
 		return false;
-	}
-	if(m_data->gameMap.map[m_position.m_x][m_position.m_y].TowerIndex == HAVE_NO_TOWER)
+	if(m_data->gameMap.map[m_position.m_x][m_position.m_y].TowerIndex == NOTOWER)
 	{
 		m_data->gameMap.map[m_position.m_x][m_position.m_y].type = target;
 		m_BuildPoint--;
 		m_bResting = false;
+		if(m_BuildPoint == 0)
+		{
+			KillCorps();
+		}
 		return true;
 	}
 	return false;
@@ -375,7 +347,7 @@ bool Crops::ChangeTerrain(terrainType target)
 //新回合开始
 void Crops::newRound()
 {
-	if(bAlive())
+	if(m_bAlive)
 	{
 		ResetMP();
 		Recover();
@@ -392,6 +364,22 @@ void Crops::GoRest()
 		m_bResting = true;
 	}
 }
+
+//驻扎在己方势力的塔中
+void Crops::StationInTower()
+{
+	int index = m_data->gameMap.map[m_position.m_x][m_position.m_y].TowerIndex;
+	//如果选择驻扎的位置有塔 则驻扎在塔中
+	if(index != NOTOWER)
+	{
+		//如果塔属于己方则驻扎
+		if(m_data->myTowers[index].getOwnerID == m_PlayerID)
+		{
+			m_data->myTowers[index].input_staycrops(this);
+		}
+	}
+}
+
 
 /*
 ShowInfo
@@ -420,6 +408,7 @@ int Crops::AttackTower(class Tower *enemy)
 {
 	int TowerCE;//塔的战斗力
 	//获取塔的战斗力
+	TowerCE = enemy->get_towerbp();
 	int myCE = getCE();//兵团战斗力
 	//敌人已阵亡或不在射程范围内
 	//添加代码
@@ -428,13 +417,13 @@ int Crops::AttackTower(class Tower *enemy)
 	int mylost = floor(28*pow(2.71828,-deta));
 	int enemylost = floor(30*pow(2.71828,deta))*corpsAttackTowerGain[m_BattleType][m_level];
 
-	bool canmove = false;
-	//判断塔是否被摧毁
-	//添加代码
+	bool IsTowerDestroy = false;
+	//判断塔是否被攻陷
+	IsTowerDestroy = enemy->Be_Attacked(m_PlayerID, enemylost);
 	//
 	if(m_BattleType == Archer)
-		canmove = false;
-	if(canmove)
+		IsTowerDestroy = false;
+	if(IsTowerDestroy)
 	{
 		UpdatePos(enemy->showPosition());
 	}
@@ -450,22 +439,20 @@ bool Crops::Attack(CorpsCommandEnum type, int ID)
 {
 	//如果不是战斗兵
 	if(m_type!=Battle)
-	{
 		return false;
-	}
 
 	//如果已经死亡
-	if(!bAlive())
-	{
+	if(!m_bAlive)
 		return false;
-	}
 
 	m_bResting = false;
+
 	if(m_MovePoint == 0)
-	{
 		return false;
-	}
+
 	m_MovePoint = 0;
+
+	//我方HP减少值
 	int mylost = 0;
 	if(type == CAttackCorps)
 	{
@@ -473,13 +460,15 @@ bool Crops::Attack(CorpsCommandEnum type, int ID)
 		//寻找敌人
 		enemy = &m_data->myCorps[ID];
 		//敌人已阵亡
-		if(!enemy->bAlive())
-		{
+		if(!enemy->m_bAlive)
 			return false;
-		}
 		//敌人同阵营
 		if(enemy->m_PlayerID == m_PlayerID)
 			return false;
+		//敌人不在射程范围内
+		if(!IsInRange(enemy->m_position))
+			return false;
+
 		//如果敌人所在位置存在敌方势力塔 优先与塔结算
 		int x = enemy->m_position.m_x;
 		int y = enemy->m_position.m_y;
@@ -497,11 +486,15 @@ bool Crops::Attack(CorpsCommandEnum type, int ID)
 		//寻找敌人
 		enemy = &m_data->myTowers[ID];
 		//敌人已阵亡
-		//添加代码
-		//
+		if(!enemy->getexsit())
+			return false;
 		//敌人同阵营
 		if(enemy->showPlayerID() == m_PlayerID)
 			return false;
+		//敌人不在射程范围内
+		if(!IsInRange(enemy->showPosition()))
+			return false;
+
 		mylost = AttackTower(enemy);
 	}
 	else//指令有误
@@ -512,27 +505,133 @@ bool Crops::Attack(CorpsCommandEnum type, int ID)
 		m_HealthPoint -= mylost;
 	}
 	//如果已阵亡
-	if(!bAlive())
+	if(m_HealthPoint <= 0)
 	{
-		m_data->players[m_PlayerID].deleteCrops(m_myID);
+		KillCorps();
 	}
 
 	return true;
 }
 
-
+/*
+UpdatePos 更新位置
+更新在m_data中corps记录的位置以及类内部的位置
+参数 新的位置
+*/
 void Crops::UpdatePos(TPoint targetpos)
 {
-	CorpsUnit thisplace = m_data->corps[m_position.m_x][m_position.m_y];
+	CorpsUnit* thisplace = &(m_data->corps[m_position.m_x][m_position.m_y]);
 	CorpsUnit::iterator it;
-	for(it = thisplace.begin(); it!=thisplace.end(); it++)
+	for(it = (*thisplace).begin(); it!=(*thisplace).end(); it++)
 	{
 		if(*it == this)
 		{
-			thisplace.erase(it);
+			(*thisplace).erase(it);
 			break;
 		}
 	}
 	m_data->corps[targetpos.m_x][targetpos.m_y].push_back(this);
 	m_position = targetpos;
+}
+
+/*
+ChangeOwner
+改变所有者 修改data中对应的player中的m_corps
+参数 新主人ID
+*/
+void Crops::ChangeOwner(TPlayerID newowner)
+{
+	m_data->players[m_PlayerID].deleteCrops(m_myID);
+	m_PlayerID = newowner;
+	m_data->players[m_PlayerID].addCrops(m_myID);
+}
+
+void Crops::KillCorps()
+{
+	m_HealthPoint = 0;
+	m_BuildPoint = 0;
+	m_data->players[m_PlayerID].deleteCrops(m_myID);
+	m_data->totalCorps--;
+	CorpsUnit* thisplace = &(m_data->corps[m_position.m_x][m_position.m_y]);
+	CorpsUnit::iterator it;
+	for(it = (*thisplace).begin(); it!=(*thisplace).end(); it++)
+	{
+		if(*it == this)
+		{
+			(*thisplace).erase(it);
+			break;
+		}
+	}
+	m_bAlive = false;
+}
+
+//建筑兵修塔
+bool Crops::MendTower()
+{
+	if(!m_bAlive)
+		return false;
+	if(m_type != Construct)
+		return false;
+	if(m_BuildType != Builder)
+		return false;
+
+	//获取该位置塔的信息
+	int index = m_data->gameMap.map[m_position.m_x][m_position.m_y].TowerIndex;
+	//没有塔
+	if(index == NOTOWER)
+		return false;
+	//不是己方塔
+	if(m_data->myTowers[index].getOwnerID()!=m_PlayerID)
+		return false;
+	//塔已被摧毁
+	if(!m_data->myTowers[index].getexsit())
+		return false;
+
+	m_BuildPoint--;
+	m_bResting = false;
+	if(m_BuildPoint == 0)
+	{
+		KillCorps();
+	}
+
+	m_data->myTowers[index].Recover();
+
+}
+
+//开拓者建塔
+bool Crops::BuildTower()
+{
+	//获取该位置塔的信息
+	int index = m_data->gameMap.map[m_position.m_x][m_position.m_y].TowerIndex;
+	//如果该位置已存在塔
+	if(index != NOTOWER)
+		return false;
+
+	//获取该位置所有者属性
+	int OwnerID;
+	//等待添加代码
+	//
+	//如果该单元格属于己方
+	//新建一个防御塔
+	Tower newTower(m_data, m_PlayerID, m_position);
+	m_data->myTowers.push_back(newTower);
+}
+
+bool Crops::IsNeighbor(TPoint point)
+{
+	if(abs(point.m_x-m_position.m_x) == 1)
+		return true;
+	else if(abs(point.m_y-m_position.m_y) == 1)
+		return true;
+	return false;
+}
+
+bool Crops::IsInRange(TPoint point)
+{
+	int range = TBattleRange[m_BattleType];
+	if(abs(point.m_x-m_position.m_x) <= range)
+		return true;
+	else if(abs(point.m_y-m_position.m_y) <= range)
+		return true;
+	return false;
 }

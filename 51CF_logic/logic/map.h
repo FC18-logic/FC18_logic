@@ -8,7 +8,7 @@
 #include <cmath>
 #include <ctime>
 #define UNALLOCATED -1   //未分配地形
-#define HAVE_NO_TOWER	-1	//该单元格没有塔
+
 using namespace std;
 namespace DATA 
 {

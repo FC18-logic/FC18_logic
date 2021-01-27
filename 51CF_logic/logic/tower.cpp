@@ -175,23 +175,22 @@ bool Tower::Be_Attacked(TPlayerID enemy_id,THealthPoint hp_decrease)
 			m_data->players->getTower().erase(m_PlayerID);
 			m_data->gameMap.map[m_position.m_x][m_position.m_y].TowerIndex = NOTOWER;
 			//等待调用更新occupypoint的函数
-			//等待调用更新owner的函数
+
 		}
 		//塔被攻占
 		else
 		{
 			set_all(m_level);
 			m_PlayerID = enemy_id;
-			//修改塔驻扎兵团的属性
-			for (int i = 0; i < m_staycrops.size(); i++)
-			{
-				m_staycrops[i]->set_playid(enemy_id);
-				if (m_staycrops[i]->getType() == Battle)//战斗兵团生命值为0
-				{
-					m_staycrops[i]->set_hp(0);
-				}
-				//等待调用修改data的函数
-			}
+		}
+
+		//俘虏驻扎工程兵并修改data
+		for(int i = 0; i<m_staycrops.size(); i++)
+		{
+			if(m_staycrops[i]->getType() == Construct)
+				m_staycrops[i]->ChangeOwner(enemy_id);
+			else
+				m_staycrops[i]->KillCorps();
 		}
 		return true;
 	}
@@ -199,4 +198,9 @@ bool Tower::Be_Attacked(TPlayerID enemy_id,THealthPoint hp_decrease)
 }
 
 
+void Tower::Recover()
+{
+	struct TowerConfig levelInfo = TowerInitConfig[m_level-1];
+	m_healthpoint += floor(levelInfo.initHealthPoint/3);
+}
 

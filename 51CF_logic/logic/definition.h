@@ -266,6 +266,8 @@ const THealthPoint battleHealthPoint[BATTLE_CORPS_TYPE_NUM][MAX_CORPS_LEVEL] =
 	{70,   90,   110}    //骑兵
 };
 
+//【FC18】战斗兵团射程距离 战士1 弓箭手2 骑兵1
+const int TBattleRange[BATTLE_CORPS_TYPE_NUM] = { 1, 2, 1 };
 
 //【FC18】兵团操作所需操作数个数，判断指令合法性（与兵团操作的枚举类在序号上对应)
 const TOperaNum CorpsOperaNumNeed[CORPS_ACTION_TYPE_NUM] =

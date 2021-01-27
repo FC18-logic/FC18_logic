@@ -100,5 +100,7 @@ public:
 	bool Be_Attacked(TPlayerID enemy_id, THealthPoint hp_decrease);
 	//兵团驻扎信息录入 
 	void input_staycrops(Crops* newcrop) { m_staycrops.push_back(newcrop); }
+	//吕梦欣加 修理塔回复生命值
+	void Recover();
 };
 #endif
