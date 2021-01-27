@@ -42,7 +42,7 @@ public:
 	//获取战斗力
 	TBattlePoint getCE();
 	//整编兵团 返回是否整编成功
-	bool MergeCrops(Crops* targetCrops);
+	bool MergeCrops(TCorpsID ID);
 	//兵团进入驻扎状态
 	void GoRest();
 	//建造兵修塔
@@ -62,16 +62,16 @@ public:
 	//获取当前兵团的位置
 	TPoint getPos() { return m_position; }
 protected:
-	//作战兵团受到攻击 返回是否存活 如果死亡，会自动在兵团数组中删除
+	//作战兵团受到攻击 返回是否存活 如果死亡
 	bool BeAttacked(int attack, TPlayerID ID);
 	//重置行动力
 	void ResetMP();
 	//回复HP
 	void Recover();
-	//作战兵团攻击 返回是否成功攻击 并减去生命值
-	bool AttackCrops(Crops* enemy);
+	//作战兵团攻击
+	int AttackCrops(Crops* enemy);
 	//作战兵团攻击塔
-	bool AttackTower(class Tower *enemy);
+	int AttackTower(class Tower *enemy);
 	//更新位置
 	void UpdatePos(TPoint targetpos);
 };

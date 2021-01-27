@@ -30,6 +30,10 @@ public:
 	//【FC18】获取玩家的所有兵团的set
 	std::set<TCorpsID>& getCrops() { return m_crops; }
 
+	//【FC18】添加兵团
+	void addCrops(TCorpsID ID);
+	//【FC18】删除兵团
+	void deleteCrops(TCorpsID ID);
 
 	//FC15的
 	TResourceD totalResource();//获取所有塔资源数的总和
@@ -57,7 +61,7 @@ private:
 	std::set<TTowerID> m_tower;
 	
 	//@@@【FC18】玩家所有兵团的序号，建议也用set这种数据结构，内部按兵团序号升序来排序
-	std::set<TCorpsID> m_crops;
+	std::set<TCorpsID> m_crops;//由兵团类内部修改
 	
 
 	//FC15的
