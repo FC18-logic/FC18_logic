@@ -14,12 +14,18 @@ Tower::Tower(DATA::Data* _data, TPlayerID m_playid, TPoint pos) :m_data(_data)
 	m_PlayerID = m_playid;
 	m_position = pos;
 	m_id = ID;
+	m_exsit = true;
 	ID++;
 	m_level = 1;//初始等级为1  
 	set_all(m_level);
 	m_experpoint = 0;//初始经验值为0
 	m_productconsume = INF;
+	//更新data
 	m_data->totalTowers++;
+	m_data->players->getTower().insert(m_PlayerID);
+	m_data->gameMap.map[m_position.m_x][m_position.m_y].TowerIndex = m_id;
+	//等待调用更新occupypoint的函数
+	//等待调用更新owner的函数
 }
 /*
 名称：level_upgrade
@@ -33,6 +39,7 @@ bool Tower::set_level()
 	upgrade = false;
 	//回合开始累加上一回合所得经验值
 	int bonus = 0;
+	int m_round = m_data->getRound();
 	if (m_round >= 0 && m_round < 100)
 		bonus = 5;
 	if (m_round >= 100 && m_round < 200)
@@ -61,16 +68,33 @@ by lxj
 void Tower::product_crops(productType protype)
 {
 	if (protype == PWarrior) 
+	{
 		Crops temp(m_data, Battle, Warrior, Builder, m_PlayerID, m_position);
-	if (protype == PArcher)
+		m_data->myCorps.push_back(temp);
+	}
+	if (protype == PArcher) 
+	{
 		Crops temp(m_data, Battle, Archer, Builder, m_PlayerID, m_position);
-	if (protype == PCavalry)
+		m_data->myCorps.push_back(temp);
+	}
+	if (protype == PCavalry) 
+	{
 		Crops temp(m_data, Battle, Cavalry, Builder, m_PlayerID, m_position);
-	if (protype == PBuilder)
+		m_data->myCorps.push_back(temp);
+	}
+	if (protype == PBuilder) 
+	{
 		Crops temp(m_data, Construct, Warrior, Builder, m_PlayerID, m_position);
-	if (protype == PExtender)
+		m_data->myCorps.push_back(temp);
+	}
+	if (protype == PExtender) 
+	{
 		Crops temp(m_data, Construct, Warrior, Extender, m_PlayerID, m_position);
+		m_data->myCorps.push_back(temp);
+	}
+		
 }
+
 /*
 名称：set_producttype
 功能：结算上一回合生产任务完成情况/设置新的生产任务
@@ -78,13 +102,11 @@ void Tower::product_crops(productType protype)
 返回值：上一回合生产任务是否完成
 by lxj
 */
-bool Tower::set_producttype(productType m_protype)
+void Tower::set_producttype(productType m_protype)
 {
 	set_level();
-	bool finish = false;
 	if (m_productconsume <= 0) //上一回合生产任务完成
 	{
-		finish = true;
 		if (m_producttype < 5) //当前任务为生产兵团    
 			product_crops(m_producttype);
 		if (m_producttype == PUpgrade)//当前任务为升级项目
@@ -102,7 +124,7 @@ bool Tower::set_producttype(productType m_protype)
 		if (m_producttype == m_protype) //继续上一回合的完成任务
 		{
 			m_productconsume -= m_productpoint;
-			return finish;
+			return;
 		}
 	}
 	m_producttype = m_protype;
@@ -117,7 +139,6 @@ bool Tower::set_producttype(productType m_protype)
 		m_productconsume = 40 * m_level;
 		m_productconsume -= m_productpoint;
 	}
-	return finish; 
 }
 /*
 名称：get_towerbp
@@ -136,18 +157,42 @@ TBattlePoint Tower::get_towerbp()
 名称：Be_Attacked
 功能：兵团攻击塔时更新塔的生命值
 参数：生命值损失
-返回值：塔是否被攻陷
+返回值：塔是否被攻陷（即生命值是否小于0，但塔不一定能被攻占，有可能已经被摧毁）
 by lxj
 */
-bool Tower::Be_Attacked(Crops* enemy)
+bool Tower::Be_Attacked(TPlayerID enemy_id,THealthPoint hp_decrease)
 {
-	//	m_healthpoint -= enemy->;
+	m_healthpoint -= hp_decrease;
 	if (m_healthpoint <= 0)
 	{
 		m_level -= 4;//塔的等级下降4级
+		//塔被摧毁
 		if (m_level < 1)
-			m_level = 1;
-		set_all(m_level);
+		{
+			m_exsit = false;
+			//更新data
+			m_data->totalTowers--;
+			m_data->players->getTower().erase(m_PlayerID);
+			m_data->gameMap.map[m_position.m_x][m_position.m_y].TowerIndex = NOTOWER;
+			//等待调用更新occupypoint的函数
+			//等待调用更新owner的函数
+		}
+		//塔被攻占
+		else
+		{
+			set_all(m_level);
+			m_PlayerID = enemy_id;
+			//修改塔驻扎兵团的属性
+			for (int i = 0; i < m_staycrops.size(); i++)
+			{
+				m_staycrops[i]->set_playid(enemy_id);
+				if (m_staycrops[i]->getType() == Battle)//战斗兵团生命值为0
+				{
+					m_staycrops[i]->set_hp(0);
+				}
+				//等待调用修改data的函数
+			}
+		}
 		return true;
 	}
 	return false;

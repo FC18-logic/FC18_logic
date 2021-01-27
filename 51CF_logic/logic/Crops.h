@@ -63,6 +63,10 @@ public:
 	TPoint getPos() { return m_position; }
 	//获取当前战斗兵团的类型
 	battleCorpsType getbattleType() { return m_BattleType; }
+	//修改当前兵团所属玩家
+	void set_playid(TPlayerID id) { m_PlayerID = id; }
+	//修改当前兵团的生命值
+	void set_hp(THealthPoint hp) { m_HealthPoint = hp; }
 protected:
 	//作战兵团受到攻击 返回是否存活 如果死亡
 	bool BeAttacked(int attack, TPlayerID ID);

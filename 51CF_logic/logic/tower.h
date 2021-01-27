@@ -14,13 +14,13 @@ private:
 	//塔属性
 	static TTowerID		ID;
 	TTowerID			m_id;//塔ID
+	bool				m_exsit;//塔是否存活：即等级是否大于1
 	TProductPoint       m_productpoint;//生产力
 	productType			m_producttype;//生产任务类型  0-4：生产	5：升级
 	THealthPoint        m_healthpoint;//生命值
 	TBattlePoint        m_battlepoint;//战斗力
 	TExperPoint			m_experpoint;//经验值
 	TExperPoint			m_upgradexper;//升级到下一级所需经验值
-	TRound				m_round;//游戏回合数
 	int					m_level;//等级:从1开始                 *补充定义
 	int					m_attackrange;//攻击范围               *补充定义
 	int					m_productconsume;//当前生产任务对应得生产力消耗值	*补充定义
@@ -46,8 +46,15 @@ public:
 	Tower(void);
 	~Tower(void);
 	Tower(DATA::Data* _data, TPlayerID m_playid, TPoint pos);
+	//判断上一轮生产任务是否完成
+	bool protask_finish()
+	{
+		if (m_productconsume <= 0)
+			return true;
+		return false;
+	}
 	//每一回合开始时，结算上轮生产任务完成情况，并设置新的生产任务
-	bool set_producttype(productType m_protype);
+	void set_producttype(productType m_protype);
 	//显示所有者ID
 	const TPlayerID showPlayerID() { return m_PlayerID; }
 	//显示位置
@@ -58,6 +65,8 @@ public:
 	TPoint getPosition() { return m_position; }
 	//获取当前防御塔所属阵营的玩家序号
 	TPlayerID getOwnerID() { return m_PlayerID; }
+	//获取塔当前是否存活（等级小于1即被摧毁）
+	bool getexsit() { return m_exsit; }
 	//提供防御塔信息>>>>>>>>>>这是【JYP】加的
 	//>>>>>>>>>>m_producttype如果没有生产任务请用宏定义NOTASK=-1
 	//>>>>>>>>>>需要补充一下info.exist的定义，也就是这个塔是否还在<bool>，是否被摧毁
@@ -88,7 +97,7 @@ public:
 	//遭到兵团进攻时，计算考虑增益后塔的战斗力
 	TBattlePoint get_towerbp();
 	//抵御兵团的进攻，返回塔是否被攻陷
-	bool Be_Attacked(Crops* enemy);
+	bool Be_Attacked(TPlayerID enemy_id, THealthPoint hp_decrease);
 	//兵团驻扎信息录入 
 	void input_staycrops(Crops* newcrop) { m_staycrops.push_back(newcrop); }
 };
