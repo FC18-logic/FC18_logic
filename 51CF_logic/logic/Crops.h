@@ -61,6 +61,8 @@ public:
 	int getLevel() { return m_level; }
 	//获取当前兵团的位置
 	TPoint getPos() { return m_position; }
+	//获取当前战斗兵团的类型
+	battleCorpsType getbattleType() { return m_BattleType; }
 protected:
 	//作战兵团受到攻击 返回是否存活 如果死亡
 	bool BeAttacked(int attack, TPlayerID ID);

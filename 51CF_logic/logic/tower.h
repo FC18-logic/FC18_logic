@@ -24,7 +24,7 @@ private:
 	int					m_level;//等级:从1开始                 *补充定义
 	int					m_attackrange;//攻击范围               *补充定义
 	int					m_productconsume;//当前生产任务对应得生产力消耗值	*补充定义
-
+	vector <Crops*>    m_staycrops;//储存驻扎兵团指针
 	TPlayerID			m_PlayerID;//所属阵营
 
 	TPoint				m_position;//位置
@@ -49,16 +49,9 @@ public:
 	//每一回合开始时，结算上轮生产任务完成情况，并设置新的生产任务
 	bool set_producttype(productType m_protype);
 	//显示所有者ID
-	const TPlayerID showPlayerID(){ return m_PlayerID; }
+	const TPlayerID showPlayerID() { return m_PlayerID; }
 	//显示位置
-	const TPoint showPosition(){ return m_position; }
-    //抵御兵团的进攻
-	/*
-	待接收参数：
-	己方兵团驻扎情况（计算战斗力增益）
-	敌方兵团战斗力、兵种（计算两方生命值损失）
-	*/
-
+	const TPoint showPosition() { return m_position; }
 	//获取当前防御塔的等级
 	int getLevel() { return m_level; }
 	//获取当前防御塔的位置
@@ -82,5 +75,21 @@ public:
 		info.productConsume = m_productconsume;
 		return info;
 	}
+	//获取当前防御塔的生产力
+	TProductPoint getProductPoint() { return m_productpoint; }
+	//获取当前防御塔的生命值
+	THealthPoint getHealthPoint() { return m_healthpoint; }
+	//获取当前防御塔的战斗力
+	TBattlePoint getBattlePoint() { return m_battlepoint; }
+	//获取当前防御塔的经验值
+	TExperPoint getExperPoint() { return m_experpoint; }
+	//获取当前防御塔的攻击范围
+	int getExperPoint() { return m_attackrange; }
+	//遭到兵团进攻时，计算考虑增益后塔的战斗力
+	TBattlePoint get_towerbp();
+	//抵御兵团的进攻，返回塔是否被攻陷
+	bool Be_Attacked(Crops* enemy);
+	//兵团驻扎信息录入 
+	void input_staycrops(Crops* newcrop) { m_staycrops.push_back(newcrop); }
 };
 #endif

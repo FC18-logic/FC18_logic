@@ -19,6 +19,7 @@ Tower::Tower(DATA::Data* _data, TPlayerID m_playid, TPoint pos) :m_data(_data)
 	set_all(m_level);
 	m_experpoint = 0;//初始经验值为0
 	m_productconsume = INF;
+	m_data->totalTowers++;
 }
 /*
 名称：level_upgrade
@@ -117,6 +118,39 @@ bool Tower::set_producttype(productType m_protype)
 		m_productconsume -= m_productpoint;
 	}
 	return finish; 
+}
+/*
+名称：get_towerbp
+功能：遭到兵团进攻时，计算考虑增益后塔的战斗力
+返回值：塔的战斗力(考虑增益)
+by lxj
+*/
+TBattlePoint Tower::get_towerbp()
+{
+	int bonus = 0;
+	for (int i = 0; i < m_staycrops.size(); i++)
+		bonus += corpsBattleGain[m_staycrops[i]->getbattleType()][0] * (m_staycrops[i]->getLevel() + 1);
+	return (m_battlepoint + bonus);
+}
+/*
+名称：Be_Attacked
+功能：兵团攻击塔时更新塔的生命值
+参数：生命值损失
+返回值：塔是否被攻陷
+by lxj
+*/
+bool Tower::Be_Attacked(Crops* enemy)
+{
+	//	m_healthpoint -= enemy->;
+	if (m_healthpoint <= 0)
+	{
+		m_level -= 4;//塔的等级下降4级
+		if (m_level < 1)
+			m_level = 1;
+		set_all(m_level);
+		return true;
+	}
+	return false;
 }
 
 
