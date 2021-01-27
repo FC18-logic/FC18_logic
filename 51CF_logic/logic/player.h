@@ -27,6 +27,9 @@ public:
 	int getCqTowerNum() { return conqueTowerNum; }                          //【FC18】获取玩家占领敌方防御塔数
 	int getElCorpsNum() { return eliminateCorpsNum; }                       //【FC18】获取玩家消灭敌方兵团数
 	int getCpCorpsNum() { return captureCorpsNum; }                         //【FC18】获取玩家俘虏地方兵团数
+	void setCqTowerNum(int num) { conqueTowerNum = num; }                   //【FC18】设置玩家占领敌方防御塔数
+	void setElCorpsNum(int num) { eliminateCorpsNum = num; }                //【FC18】设置玩家消灭敌方兵团数
+	void serCpCorpsNum(int num) { captureCorpsNum = num; }                  //【FC18】设置玩家俘虏地方兵团数
 	//【FC18】获取玩家的所有防御塔set
 	std::set<TTowerID>& getTower() { return m_tower; }
 

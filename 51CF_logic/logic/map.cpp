@@ -526,6 +526,7 @@ bool Map::withinMap(TPoint p) {
 *作者 : 姜永鹏
 ***********************************************************************************************/
 void Map::modifyOccupyPoint(TPlayerID oldOwner, TPlayerID newOwner, TPoint p) {
+	if (!withinMap(p)) return;  //当前方格在地图之外
 	if (oldOwner != NOTOWER) map[p.m_y][p.m_x].occupyPoint[oldOwner - 1] -= INF;
 	if (newOwner != NOTOWER) map[p.m_y][p.m_x].occupyPoint[newOwner - 1] += INF;
 	for (int i = p.m_y - 5; i <= p.m_y + 5; i++) {
@@ -536,6 +537,7 @@ void Map::modifyOccupyPoint(TPlayerID oldOwner, TPlayerID newOwner, TPoint p) {
 			if (!withinMap(currentPoint) || dist < 1 || dist > 5) continue;//点不在图上，离塔太近或太远
 			if (oldOwner != NOTOWER) map[i][j].occupyPoint[oldOwner - 1] -= TowerOccupyPoint[dist - 1];
 			if (newOwner != NOTOWER) map[i][j].occupyPoint[newOwner - 1] += TowerOccupyPoint[dist - 1];
+			ownerChange(currentPoint);
 		}
 	}
 }
@@ -545,21 +547,40 @@ void Map::modifyOccupyPoint(TPlayerID oldOwner, TPlayerID newOwner, TPoint p) {
 *函数名 :【FC18】ownerChang改变方格拥有者函数
 *函数功能描述 : 改变位置p处方格拥有者，判定过渡区域
 *函数参数 : p<TPoint>---所在方格的TPoint坐标
-*函数返回值 : <TPlayerID>---塔当前所在方格变化后的所有者坐标（TRANSITION=-1过渡区域）s
+*函数返回值 : <TPlayerID>---塔当前所在方格变化后的所有者坐标（PUBLIC=0，公共区域，TRANSITION=-1
+              过渡区域，OUTOFRANGE=-2在地图外）
 *作者 : 姜永鹏
 ***********************************************************************************************/
 TPlayerID Map::ownerChange(TPoint p) {
+	if (!withinMap(p)) return OUTOFRANGE;    //当前方格在地图之外
 	int maxOccupyPoint = -1, occupyID = PUBLIC;
 	for (int i = 0; i < 4; i++) {
 		if (map[p.m_y][p.m_x].occupyPoint[i] > maxOccupyPoint) {
 			maxOccupyPoint = map[p.m_y][p.m_x].occupyPoint[i];
 			occupyID = i + 1;
 		}
-		else if (map[p.m_y][p.m_x].occupyPoint[i] == maxOccupyPoint) {  //有相同占有属性值，过渡区域
+		else if (map[p.m_y][p.m_x].occupyPoint[i] == maxOccupyPoint && maxOccupyPoint != 0) {  //有相同占有属性值，过渡区域
 			map[p.m_y][p.m_x].owner = TRANSITION;
 			return TRANSITION;
 		}
 	}
+	if (maxOccupyPoint == 0) {
+		map[p.m_y][p.m_x].owner = PUBLIC;
+		return PUBLIC;
+	}
 	map[p.m_y][p.m_x].owner = occupyID;
 	return occupyID;
+}
+
+/*****************************s******************************************************************
+*函数名 :【FC18】showOwner判断方格拥有者函数
+*函数功能描述 : 判断当前方格的拥有者
+*函数参数 : p<TPoint>---所在方格的TPoint坐标
+*函数返回值 :  <TPlayerID>---塔当前所在方格的所有者坐标（PUBLIC=0，公共区域，TRANSITION=-1过渡区
+               域，OUTOFRANGE=-2在地图外）
+*作者 : 姜永鹏
+***********************************************************************************************/
+TPlayerID Map::showOwner(TPoint p) {
+	if (!withinMap(p)) return OUTOFRANGE;  //当前方格在地图之外
+	else return map[p.m_y][p.m_x].owner;
 }

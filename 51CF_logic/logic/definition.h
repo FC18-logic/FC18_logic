@@ -9,6 +9,7 @@
 #define PUBLIC 0      //公共地形区域
 #define NOTOWER -1    //当前方格没有防御塔
 #define NOTASK  -1    //当前防御塔无生产任务
+#define OUTOFRANGE -2  //当前方格在地图之外
 
 
 #include <vector>

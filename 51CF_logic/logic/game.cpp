@@ -1198,6 +1198,7 @@ Info Game::generatePlayerInfo(TPlayerID id) {
 
 	//info中的防御塔
 	for (int i = 0; i < data.myTowers.size(); i++) {
+		if (data.myTowers[i].getexsit() == false) continue;    //塔没了，就不记录信息
 		TowerInfo newTower = data.myTowers[i].ShowInfo();
 		info.towerInfo.push_back(newTower);
 	}
@@ -1205,6 +1206,7 @@ Info Game::generatePlayerInfo(TPlayerID id) {
 
 	//info中的兵团信息
 	for (int i = 0; i < data.myCorps.size(); i++) {
+		if (data.myCorps[i].bAlive() == false) continue;    //兵团没了，就不记录信息，跟梦欣确认一下兵团死了之后不要再回复生命值了
 		CorpsInfo newCorps = data.myCorps[i].ShowInfo();
 		info.corpsInfo.push_back(newCorps);
 	}
@@ -1261,6 +1263,7 @@ void Game::saveJson() {
 
 	//保存这一轮结束的防御塔数据
 	for (int i = 0; i < data.myTowers.size(); i++) {
+		if (data.myTowers[i].getexsit() == false) continue;   //塔没了，就不记录信息
 		Json::Value towerJson;
 		TowerInfo currentTowerInfo = data.myTowers[i].ShowInfo();
 		towerJson["id"] = Json::Value(currentTowerInfo.ID);
@@ -1287,6 +1290,7 @@ void Game::saveJson() {
 	data.currentRoundTowerJson.clear();
 	//保存这一轮结束的兵团数据
 	for (int i = 0; i < data.myCorps.size(); i++) {
+		if (data.myCorps[i].bAlive() == false) continue;    //兵团没了，就不记录信息
 		Json::Value corpsJson;
 		CorpsInfo currentCorpsInfo = data.myCorps[i].ShowInfo();
 		corpsJson["id"] = Json::Value(currentCorpsInfo.ID);

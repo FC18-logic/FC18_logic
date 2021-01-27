@@ -61,6 +61,7 @@ public:
     void modifyOccupyPoint(TPlayerID oldOwner, TPlayerID newOwner, TPoint p);       //【FC18】按塔的所有者改变修改周围方格的占有属性值
     bool withinMap(TPoint p);                    //【FC18】判断p点是否在地图之内
     TPlayerID ownerChange(TPoint p);             //【FC18】检查、改变方格p位置的拥有者
+    TPlayerID showOwner(TPoint p);               //【FC18】判断当前方格拥有者的ID
 
     //FC15的
     bool init(const TMapID& filename, TResourceI _MAX_RESOURCE_);             //通过文件初始化地图信息

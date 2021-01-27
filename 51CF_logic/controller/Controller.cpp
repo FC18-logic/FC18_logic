@@ -274,8 +274,8 @@ namespace DAGAN
 		set<TTowerID> towerBanned;//不能再执行操作的塔
 		set<TCorpsID> corpsBanned;//不能再执行操作的兵团
 		for (Command c : commands.getCommand()) {
+			commandRead++;  //更新读取指令数，有效、无效指令都要读取
 			if (c.type == corpsCommand) {
-				commandRead++;  //更新读取指令数，有效、无效指令都要读取
 				if (c.parameters.size() != CorpsOperaNumNeed[c.parameters[0]]) continue;   //判断操作数合法性
 				if (handleCorpsCommand(id, c) == true) {   //记录不能再进行其他操作的兵团序号
 					jsonChange(id, c);   //更新有效的指令Json
@@ -350,7 +350,7 @@ namespace DAGAN
 		//回合数增加1
 		game_.addRound();
 
-		//#json save
+		//#json save，保存Json存档数据
 		{
 			game_.roundTime.push_back(clock());
 			data->currentRoundCommandJson["runDuration"] =
