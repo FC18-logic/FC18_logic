@@ -84,6 +84,8 @@ public:
 		info.productConsume = m_productconsume;
 		return info;
 	}
+	//获取驻扎兵团
+	vector<Crops*> getCrops() { return m_staycrops; }
 	//获取当前防御塔的生产力
 	TProductPoint getProductPoint() { return m_productpoint; }
 	//获取当前防御塔的生命值

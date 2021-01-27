@@ -220,6 +220,47 @@ enum terrainType
 	TRRoad      = 5,       //道路
 };
 
+//【FC18】兵团操作名
+const string CorpsCmd[CORPS_ACTION_TYPE_NUM] = 
+{
+	"move","station","station at tower","attack corps","attack tower","regroup","dissolve","build tower","repair tower","change terrain"
+};
+
+//【FC18】塔操作名
+const string TowerCmd[TOWER_ACTION_TYPE_NUM] = 
+{
+	"produce","attack corps","attack tower"
+};
+
+//【FC18】塔生产任务名
+const string ProductCmd[TOWER_PRODUCT_TASK_NUM] = 
+{
+	"warrior","archer","caster","builder","extender","upgrade"
+};
+
+//【FC18】移动方向名
+const string Direction[4] = 
+{
+	"up","down","left","right"
+};
+
+//【FC18】改变的地形名
+const string Terrain[TERRAIN_TYPE_NUM] = 
+{
+	"plain","mountain","forest","swamp","road"
+};
+
+//【FC18】作战兵团名字
+const string BattleName[3] =
+{
+	"warrior","archer","caster"
+};
+
+//【FC18】工程兵团名字
+const string ConstructName[2] =
+{
+	"Builder","Explorer"
+};
 
 //【FC18】作战兵团行动力（与作战兵团的枚举类在序号上对应，且考虑了等级）
 const TMovePoint battleMovePoint[BATTLE_CORPS_TYPE_NUM][MAX_CORPS_LEVEL] = 
@@ -488,6 +529,8 @@ struct CorpsInfo
 	TPlayerID		owner;			//所属玩家ID
 	corpsType       type;           //兵团种类
 	TMovePoint      movePoint;      //行动力
+	battleCorpsType		m_BattleType;	//战斗兵用
+	constructCorpsType	m_BuildType;	//建造兵用
 };
 
 

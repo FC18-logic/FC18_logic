@@ -38,7 +38,7 @@ public:
 	void saveJson();                                                  //【FC18】写入这一轮的Json数据
 	void addRound() { totalRounds++; }               //@@@【FC18】回合数递增
 	bool goNext();                                                   //【FC18】判断还能否继续进行
-
+	void setGameOver() {}
 	//FC15的
 	vector<Info> generateInfo();
 	TRound getRound() { return currentRound; }//获取回合数

@@ -95,15 +95,15 @@ bool Game::init(string file, char* json_file, vector<string> players_name)   //[
 	//旧代码//for (int i = 0; i != playerSize; ++i)
 		//旧代码//Rank.push_back(i);
 	for (int i = 0; i < totalPlayers; i++) {
-		Rank.push_back(i);
+		Rank.push_back(i + 1);
 	}
 
 	//初始化计数
 	//旧代码//for (int i = 0; i != playerSize; ++i)
 		//旧代码//controlCount.push_back(0);
-	for (int i = 0; i < totalPlayers; i++) {
-		controlCount.push_back(0);
-	}
+	//旧代码//for (int i = 0; i < totalPlayers; i++) {
+		//旧代码//controlCount.push_back(0);
+	//旧代码//}
 
 	//旧代码//data.root["head"]["totalRounds"] = currentRound + 1;
 	//旧代码//data.root["body"].append(data.currentRoundJson);
@@ -144,6 +144,77 @@ bool Game::init(string file, char* json_file, vector<string> players_name)   //[
 
 void Game::DebugPhase()
 {
+	cout << "*************** DEBUG 信息 ***************" << endl;
+	cout << "Round " << totalRounds << " " << std::ceil(totalRounds / 4) << endl;
+	cout << "玩家剩余： " << playerAlive << " / " << totalPlayers << endl;
+	for (int i = 0; i < data.totalPlayers; ++i)
+	{
+		cout << "玩家 " << i + 1 << " ： " << " 占领塔数： " << data.players[i].getCqTowerNum() << " 杀兵团数： " << data.players[i].getElCorpsNum() << " 俘兵团数： "
+			<< data.players[i].getCpCorpsNum() << " 存活 " << ((data.players[i].isAlive())?"活":"死") << " 死亡回合：" << ((data.players[i].isAlive()) ? 0 : data.players[i].getdeadRound()) << endl;
+		cout << "当前塔： ";
+		for (TTowerID u : data.players[i].getTower())   //这个for循环遍历i号玩家所有塔的信息，塔用u来存储
+		{
+			if (!data.myTowers[i].getexsit()) continue;
+			cout << u << " ";  //塔的序号
+		}
+		for (TCorpsID u : data.players[i].getCrops())   //这个for循环遍历i号玩家所有塔的信息，塔用u来存储
+		{
+			if (!data.myCorps[i].bAlive()) continue;
+			cout << u << " ";  //兵团序号
+		}
+		cout << endl;
+		cout << "排名： " << std::find(Rank.begin(), Rank.end(), i + 1) - Rank.begin() + 1;
+		cout << endl;
+	}
+	cout << "塔信息" << endl;
+	for (int i = 0; i < data.myTowers.size(); i++) {
+		if (!data.myTowers[i].getexsit()) continue;
+		cout << "塔 " << i << " ： " << "主人：" << data.myTowers[i].getOwnerID() << " 位于：(" << data.myTowers[i].getPosition().m_x << "," << data.myTowers[i].getPosition().m_y
+			<< ") 等级：" << data.myTowers[i].getLevel() << " 生产力 " << data.myTowers[i].getProductPoint() << " 战斗力：" << data.myTowers[i].getBattlePoint() << " 生命值：" << data.myTowers[i].getHealthPoint()
+			<< " 经验值：" << data.myTowers[i].getExperPoint() << " 生产：" << ((data.myTowers[i].ShowInfo().pdtType >= 0 && data.myTowers[i].ShowInfo().pdtType <= 5) ? ProductCmd[data.myTowers[i].ShowInfo().pdtType] : "N/A")
+			<< " 任务消耗：" << data.myTowers[i].ShowInfo().productConsume << endl;
+		for (Crops* u : data.myTowers[i].getCrops()) {
+			if (!u->bAlive()) continue;
+			cout << u->getID() << " "; //兵团序号
+		}
+		cout << endl;
+	}
+	cout << "兵团信息" << endl;
+	for (int i = 0; i < data.myCorps.size(); i++) {
+		if (!data.myCorps[i].bAlive()) continue;
+		CorpsInfo currentCrops = data.myCorps[i].ShowInfo();
+		cout << "兵团 " << i << " ： " << "主人：" << currentCrops.owner << " 位于：(" << currentCrops.pos.m_x << "," << currentCrops.pos.m_y << " ) 移动力：" << currentCrops.movePoint
+			<< " 等级：" << currentCrops.level;
+		if (currentCrops.type == Battle) {
+			cout << " 类型：作战兵团 + " << BattleName[currentCrops.m_BattleType] << " 生命值：" << currentCrops.HealthPoint;
+		}
+		else if (currentCrops.type == Construct) {
+			cout << " 类型：工程兵团 + " << ConstructName[currentCrops.m_BuildType] << " 劳动力：" << currentCrops.BuildPoint;
+		}
+		cout << endl;
+	}
+	cout << "地图信息" << endl;
+	for (int i = 0; i < data.gameMap.getHeigth(); i++) {
+		for (int j = 0; j < data.gameMap.getWidth(); j++) {
+			mapBlockInfo currentBlock = data.gameMap.ShowInfo(j, i);
+			cout << "(" << j << "," << i << ") 主人：" ;
+			if (currentBlock.owner == PUBLIC)
+				cout << " 公有";
+			else if (currentBlock.owner == TRANSITION)
+				cout << " 过渡";
+			else
+				cout << " 玩家" << currentBlock.owner;
+			if (currentBlock.type == TRTower)
+				cout << " 地形：塔";
+			else
+				cout << " 地形：" << Terrain[currentBlock.type];
+			cout << " 占有属性：";
+			for (int u : currentBlock.occupyPoint) {
+				cout << u << " ";
+			}
+			cout << endl;
+		}
+	}
 	//FC15旧的调试信息
 	/********************************************************************************************************************************************************************************************
 	cout << "*************** DEBUG 信息 ***************" << endl;
@@ -650,7 +721,7 @@ vector<Info> Game::generateInfo()
 		temp.ExtraControlLevel = curr->getExtraControlLevel();
 		temp.id = i;
 		temp.maxControlNumber = curr->maxControlNumber();
-		temp.rank = std::find(Rank.begin(), Rank.end(), i) - Rank.begin() + 1;
+		temp.rank = std::find(Rank.begin(), Rank.end(), i + 1) - Rank.begin() + 1;
 		temp.RegenerationSpeedLevel = curr->getRegenerationLevel();
 		temp.technologyPoint = curr->techPoint();
 		temp.cells = curr->cells();
@@ -728,7 +799,9 @@ vector<Info> Game::generateInfo()
 //【不冲突】就只有player的操作
 bool Game::isValid()
 {
-	if (playerAlive == 1 || currentRound >= _MAX_ROUND_)
+	//旧代码//if (playerAlive == 1 || currentRound >= _MAX_ROUND_)
+		//旧代码//return false;
+	if (playerAlive <= 1 || totalRounds >= 4 * MAX_ROUND)
 		return false;
 	else
 		return true;
@@ -1192,7 +1265,7 @@ Info Game::generatePlayerInfo(TPlayerID id) {
 		newPlayer.alive = currentPlayer.isAlive();
 		newPlayer.tower = currentPlayer.getTower();
 		newPlayer.corps = currentPlayer.getCrops();
-		newPlayer.rank = std::find(Rank.begin(), Rank.end(), i) - Rank.begin() + 1;//可见Rank中存的是玩家id-1
+		newPlayer.rank = std::find(Rank.begin(), Rank.end(), i + 1) - Rank.begin() + 1;//可见Rank中存的是玩家id-1
 		info.playerInfo.push_back(newPlayer);
 	}
 
@@ -1242,7 +1315,7 @@ void Game::saveJson() {
 		Player currentPlayer = data.players[i];
 		playerJson["id"] = Json::Value(currentPlayer.getId());
 		playerJson["tm"] = Json::Value(currentPlayer.getId());
-		playerJson["rk"] = Json::Value(std::find(Rank.begin(), Rank.end(), i) - Rank.begin() + 1);
+		playerJson["rk"] = Json::Value(std::find(Rank.begin(), Rank.end(), i + 1) - Rank.begin() + 1);
 		playerJson["scr"] = Json::Value(currentPlayer.getPlayerScore());
 		Json::Value rankJson;
 		rankJson["rk"] = playerJson["rk"];
@@ -1303,10 +1376,14 @@ void Game::saveJson() {
 		corpsJson["sL"] = Json::Value(currentCorpsInfo.level);
 		corpsJson["mp"] = Json::Value(currentCorpsInfo.movePoint);
 		if (currentCorpsInfo.type == Battle) {
-			corpsJson["hP"] = currentCorpsInfo.HealthPoint;
+			corpsJson["hP"] = Json::Value(currentCorpsInfo.HealthPoint);
+			corpsJson["tp"] = Json::Value(Battle);
+			corpsJson["Btp"] = Json::Value(currentCorpsInfo.m_BattleType);
 		}
 		else if (currentCorpsInfo.type == Construct) {
-			corpsJson["bP"] = currentCorpsInfo.BuildPoint;
+			corpsJson["bP"] = Json::Value(currentCorpsInfo.BuildPoint);
+			corpsJson["tp"] = Json::Value(Construct);
+			corpsJson["Ctp"] = Json::Value(currentCorpsInfo.m_BuildType);
 		}
 		data.currentRoundCorpsJson["corps"].append(corpsJson);
 	}

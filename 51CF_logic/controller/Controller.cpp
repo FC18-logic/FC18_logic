@@ -41,6 +41,7 @@ namespace DAGAN
 		}
 	};
 
+
 	void Controller::run(char* json_filename)
 	{
 	
@@ -314,25 +315,8 @@ namespace DAGAN
 			}
 			if (moreCommand(id, towerBanned, corpsBanned) == false) break;  //接收不了更多命令了，直接跳出
 		}
+		getGameRank();   //获取游戏中玩家排名
 
-		// 直接输出此玩家的操作
-#ifdef _COMMAND_OUTPUT_ENABLED_
-		if (file_output_enabled_ && game_.isAlive(id))
-		{
-			if (game_.isAlive(id)) {
-				cout << "Player " << id << "'s commands:" << endl;
-				for (Command& c : commands.getCommand())
-				{
-					switch (c.type)
-					{
-					default:
-						break;
-					}
-				}
-			}
-		}
-		if (file_output_enabled_) cout << endl;
-#endif
 		isValid_ = game_.isValid();
 		if (!isValid())
 		{
@@ -342,7 +326,7 @@ namespace DAGAN
 				cout << "Rank:" << endl;
 				for (TPlayerID id : game_.getRank())
 				{
-					cout << "Player " << id << " : " << players_[id].getName() << endl;
+					cout << "Player " << id << " : " << players_[id - 1].getName() << endl;
 				}
 			}
 		}
@@ -490,6 +474,67 @@ namespace DAGAN
 				data->players[i].Kill();
 			}
 		}
+	}
+
+
+	/***********************************************************************************************
+	*函数名 :【FC18】outPutCommand指令输出函数
+	*函数功能描述 : 输出当前玩家实际执行的指令
+	*函数参数 : 无
+	*函数返回值 : 无
+	*作者 : 姜永鹏
+	***********************************************************************************************/
+	void Controller::outPutCommand(TPlayerID id, Command& c) {
+		// 直接输出此玩家的操作
+#ifdef _COMMAND_OUTPUT_ENABLED_
+		if (file_output_enabled_ && game_.isAlive(id))
+		{
+			if (game_.isAlive(id)) {
+				cout << "Player " << id << "'s commands:" << endl;
+				if (c.type == corpsCommand) {
+					cout << "corps " << c.parameters[1] << " " << CorpsCmd[c.parameters[0]];
+					switch (c.parameters[0]) {
+					case(CMove):
+						cout << " " << Direction[c.parameters[2]];
+						break;
+					case(CStation):
+					case(CBuild):
+						cout << " at (" << data->myCorps[c.parameters[1]].getPos().m_x << "," << data->myCorps[c.parameters[1]].getPos().m_y << ")";
+						break;
+					case(CStationTower):
+					case(CAttackCorps):
+					case(CAttackTower):
+						cout << " " << c.parameters[2];
+						break;
+					case(CRegroup):
+						cout << " with corps " << c.parameters[2];
+						break;
+					case(CRepair):
+						cout << " " << c.parameters[2];
+						break;
+					case(CChangeTerrain):
+						cout << " of (" << data->myCorps[c.parameters[1]].getPos().m_x << "," << data->myCorps[c.parameters[1]].getPos().m_y << ")" << " to " << Terrain[c.parameters[2] - 1];
+						break;
+					default:;
+					}
+				}
+				else if (c.type == towerCommand) {
+					cout << "tower " << c.parameters[1] << " " << CorpsCmd[c.parameters[0]];
+					switch (c.parameters[0]) {
+					case(TProduct):
+						cout << " " << ProductCmd[c.parameters[2]];
+						break;
+					case(TAttackCorps):
+					case(TAttackTower):
+						cout << " " << c.parameters[2];
+						break;
+					default:;
+					}
+				}
+			}
+		}
+		if (file_output_enabled_) cout << "." << endl;
+#endif
 	}
 
 	/***********************************************************************************************

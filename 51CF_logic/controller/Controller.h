@@ -42,6 +42,7 @@ namespace DAGAN
 		bool handleCorpsCommand(TPlayerID id, Command& c);                       //【FC18】执行当前兵团指令，并返回是否执行成功
 		bool handleTowerCommand(TPlayerID id, Command& c);                       //【FC18】执行当前防御塔指令，并返回是否执行成功
 		void getGameRank();                                                      //【FC18】获取更新游戏排名
+		void outPutCommand(TPlayerID id,Command& c);                             //【FC18】输出当前玩家的指令，这个函数只输出被实际执行的指令
 
 		inline void setSilentMode(bool flag) { silent_mode_ = flag; }                         //【FC18】重设silent_mode
 		inline void setFileOutputEnabled(bool flag) { file_output_enabled_ = flag; }          //【FC18】文件输出开关，重设file_output_enabled_
