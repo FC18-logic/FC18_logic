@@ -24,6 +24,9 @@ public:
 	int getPlayerScore();
 	void setID(TPlayerID id) { m_id = id; }
 	TPlayerID getId() { return m_id; }                                      //【FC18】获取玩家ID
+	int getCqTowerNum() { return conqueTowerNum; }                          //【FC18】获取玩家占领敌方防御塔数
+	int getEmCorpsNum() { return eliminateCorpsNum; }                       //【FC18】获取玩家消灭敌方兵团数
+	int getCpCorpsNum() { return captureCorpsNum; }                         //【FC18】获取玩家俘虏地方兵团数
 	//【FC18】获取玩家的所有防御塔set
 	std::set<TTowerID>& getTower() { return m_tower; }
 
@@ -57,6 +60,9 @@ private:
 	int deadRound;                                                          //【FC18】死掉的回合
 	DATA::Data* data;                                                       //【FC18】数据的存储与共享
 	TPlayerID m_id;                                                         //【FC18】玩家ID
+	int conqueTowerNum;                                                     //@@@【FC18】玩家占领防御塔数
+	int eliminateCorpsNum;                                                  //@@@【FC18】玩家消灭敌军兵团数量
+	int captureCorpsNum;                                                    //@@@【FC18】玩家俘虏敌军兵团数量
 	//@@@【FC18】指向当前玩家所有防御塔的set数据结构，参考原来的std::set<TCellID> m_cells
 	std::set<TTowerID> m_tower;
 	

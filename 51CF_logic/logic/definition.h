@@ -40,6 +40,7 @@ typedef int    TMap;           //【FC18】地图参数（高度/宽度）
 typedef int    TRound;         //【FC18】回合数
 typedef int    TScore;         //【FC18】玩家得分
 typedef int    TDist;          //【FC18】游戏中距离的定义
+typedef int    TOperaNum;      //【FC18】操作数的个数
 
 
 const int MAX_CORPS_LEVEL = 3;    //【FC18】最大的兵团等级
@@ -51,10 +52,12 @@ const int TOWER_PRODUCT_TASK_NUM = 6;     //【FC18】塔的生产任务种类数
 const int TOWER_EXPER_GAIN_SCALE = 3;     //【FC18】塔的每回合经验值增加等级数
 const int OCCUPY_POINT_DIST_SCALE = 5;    //【FC18】塔对周围方格施加占有属性值的距离等级有几个
 const int CORPS_ACTION_TYPE_NUM = 10;    //【FC18】兵团能进行的操作种类数
-const int MAX_ROUND = 300;               //【FC18】游戏全程的最大回合数，确定的，不像FC15从外部文件读入
+const int TOWER_ACTION_TYPE_NUM = 3;     //【FC18】防御塔进行的操作种类数
+const int MAX_ROUND = 500;               //【FC18】游戏全程的最大回合数，确定的，不像FC15从外部文件读入
 const int TOWER_SCORE = 10;              //【FC18】计算玩家得分时每个防御塔每个等级得分
 const int BATTLE_CORP_SCORE = 2;         //【FC18】战斗兵团每个星级得分
 const int CONSTRUCT_CORP_SCORE = 4;      //【FC18】工程兵团每个得分
+const int MAX_CMD_NUM = 10;              //【FC18】限制每个玩家每次最大命令数
 
 class Crops;
 struct CorpsInfo;
@@ -264,7 +267,23 @@ const THealthPoint battleHealthPoint[BATTLE_CORPS_TYPE_NUM][MAX_CORPS_LEVEL] =
 };
 
 
-//【FC18】工程建设兵团操作的劳动力消耗（与兵团操作的枚举类在序号上对应
+//【FC18】兵团操作所需操作数个数，判断指令合法性（与兵团操作的枚举类在序号上对应)
+const TOperaNum CorpsOperaNumNeed[CORPS_ACTION_TYPE_NUM] =
+{
+	3,    //移动
+	2,    //驻扎
+	3,    //驻扎塔
+	3,    //攻击兵团
+	3,    //攻击塔
+	3,    //兵团整编
+	INF,  //兵团解散（去掉）
+	2,    //修建塔
+	3,    //维护塔
+	3     //改地形
+};
+
+
+//【FC18】工程建设兵团操作的劳动力消耗（与兵团操作的枚举类在序号上对应)
 const TBuildPoint constructBuildCost[CORPS_ACTION_TYPE_NUM] = 
 {
 	0,       //在地图上移动
@@ -279,6 +298,12 @@ const TBuildPoint constructBuildCost[CORPS_ACTION_TYPE_NUM] =
 	1,       //改变方格地形
 };
 
+const TOperaNum towerOperaNumNeed[TOWER_ACTION_TYPE_NUM] =
+{
+	3,       //生产任务
+	3,       //攻击防御塔
+	3        //攻击兵团
+};
 
 //【FC18】塔的生产任务生产力消耗值
 const TProductPoint TowerProductCost[TOWER_PRODUCT_TASK_NUM] = 
@@ -643,10 +668,12 @@ class CommandList
 	public:
 		void addCommand(commandType _FC18type, initializer_list<int> _FC18parameters)  //【FC18】由初始化列表直接添加命令
 		{
+			if (size() >= MAX_CMD_NUM) return;
 			m_commands.emplace_back(_FC18type, _FC18parameters);
 		}
 		void addCommand(commandType _FC18type, vector<int> _FC18parameters)            //【FC18】由默认向量数组添加命令（需要拷贝构造）
 		{
+			if (size() >= MAX_CMD_NUM) return;
 			Command newCmd;
 			newCmd.cmdType = _FC18type;
 			newCmd.parameters = _FC18parameters;
@@ -658,6 +685,7 @@ class CommandList
 				throw std::out_of_range("移除命令时越界");
 			m_commands.erase(m_commands.begin() + n);
 		}
+		vector<Command> getCommand() { return m_commands; }                            //【FC18】获取所有命令
 		Command& operator[](int n)                                                     //【FC18】访问第n条命令，返回该命令的引用
 		{
 			if (n < 0 || size() <= n)

@@ -194,10 +194,10 @@ bool Map::readMap(ifstream& inMap, bool enableOutput, std::vector<std::string> p
 	//rankInfo
 	//更新当前回合的排名信息JSON，不知道第5名无名氏玩家为什么也在Json里，但是暂时照着FC15原码修改了
 	Json::Value rankInfoJson;
-	for (int i = 1; i < 5; i++) rankInfoJson["rank"].append(i);
-	rankInfoJson["rank"].append(0);
-	for (int i = 1; i < 5; i++) rankInfoJson["score"].append(1 * TOWER_SCORE);
-	rankInfoJson["score"].append(INF);
+	for (int i = 1; i < 5; i++) rankInfoJson["rk"].append(i);
+	rankInfoJson["rk"].append(0);
+	for (int i = 1; i < 5; i++) rankInfoJson["scr"].append(1 * TOWER_SCORE);
+	rankInfoJson["scr"].append(INF);
 	data->currentRoundPlayerJson["rankInfo"] = rankInfoJson;
 
 
@@ -392,7 +392,7 @@ bool Map::randomInitMap() {
 		map[towerPoint.m_y][towerPoint.m_x].owner = i + 1;
 		data->totalTowers++;                      //更新data类：更新防御塔总数
 		//@@@【FC18】[！！！这个塔的构造函数可能会改]更新data类：向防御塔向量中添加新增的防御塔
-		Tower newTower(i + 1, towerPoint);
+		Tower newTower(data, i + 1, towerPoint);
 		data->myTowers.push_back(newTower);
 		//【FC18】更新player类：向player的防御塔序号向量中添加新的防御塔序号
 		data->players[i].getTower().insert(i);
@@ -431,11 +431,11 @@ bool Map::randomInitMap() {
 		for (int j = 0; j < m_width; j++) {
 			Json::Value blockJson;
 			Json::Value position;
-			position["posx"] = Json::Value(j);
-			position["posy"] = Json::Value(i);
-			blockJson["position"] = position;
-			blockJson["type"] = Json::Value(int(map[i][j].type));
-			blockJson["owner"] = Json::Value(map[i][j].owner);
+			position["x"] = Json::Value(j);
+			position["y"] = Json::Value(i);
+			blockJson["pos"] = position;
+			blockJson["tp"] = Json::Value(int(map[i][j].type));
+			blockJson["oId"] = Json::Value(map[i][j].owner);
 			/*Json::Value occupyPoint;
 			for (int k = 0; k < 4; k++) {
 				Json::Value occupyPointUnit;

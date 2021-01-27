@@ -10,9 +10,9 @@
 bool Game::init(string file, char* json_file, vector<string> players_name)   //[【FC18】接着用，改好了
 {
 	//【FC18】Json文件名
-	cmd_json_filename = file.append("cmd.json");
-	info_json_filename = file.append("info.json");
-	mapinfo_json_filename = file.append("map.info");
+	cmd_json_filename = file.append("_cmd.json");
+	info_json_filename = file.append("_info.json");
+	mapinfo_json_filename = file.append("_map.info");
 	//#json
 	roundTime.push_back(clock());
 	Json::Value Head;     //【FC18】
@@ -1213,7 +1213,7 @@ Info Game::generatePlayerInfo(TPlayerID id) {
 		vector<mapBlockInfo> newMapRow;
 		info.mapInfo.push_back(newMapRow);
 		for (int j = 0; j < data.gameMap.getWidth(); j++) {
-			mapBlockInfo newBlock = data.gameMap.ShowInfo(i,j);
+			mapBlockInfo newBlock = data.gameMap.ShowInfo(j,i);
 			info.mapInfo[i].push_back(newBlock);
 		}
 	}
@@ -1242,6 +1242,9 @@ void Game::saveJson() {
 		playerJson["tm"] = Json::Value(currentPlayer.getId());
 		playerJson["rk"] = Json::Value(std::find(Rank.begin(), Rank.end(), i) - Rank.begin() + 1);
 		playerJson["scr"] = Json::Value(currentPlayer.getPlayerScore());
+		Json::Value rankJson;
+		rankJson["rk"] = playerJson["rk"];
+		rankJson["scr"] = playerJson["scr"];
 		playerJson["cpN"] = Json::Value(currentPlayer.getCrops().size());
 		playerJson["twN"] = Json::Value(currentPlayer.getTower().size());
 		for (TCorpsID i : currentPlayer.getCrops()) {
@@ -1251,6 +1254,7 @@ void Game::saveJson() {
 			playerJson["tw"].append(Json::Value(i));
 		}
 		data.currentRoundPlayerJson["player"].append(playerJson);
+		data.currentRoundPlayerJson["rank"].append(rankJson);
 	}
 	data.infoJsonRoot["body"]["playerInfo"].append(data.currentRoundPlayerJson);
 	data.currentRoundPlayerJson.clear();
@@ -1313,6 +1317,7 @@ void Game::saveJson() {
 			Json::Value blockPos;
 			blockPos["x"] = Json::Value(j);
 			blockPos["y"] = Json::Value(i);
+			blockJson["pos"] = blockPos;
 			blockJson["tp"] = currentBlockInfo.type;
 			blockJson["oId"] = currentBlockInfo.owner;
 			data.currentRoundMapJson["map"].append(blockJson);
@@ -1342,3 +1347,20 @@ void Game::saveJson() {
 }
 
 
+/***********************************************************************************************
+*函数名 :【FC18】goNext判断新回合进行函数
+*函数功能描述 : 更新玩家出局信息，更新存活玩家数，判断游戏能否继续进行
+*函数参数 : 无
+*函数返回值 : <bool>是否能继续进行false---不能，true---能
+*作者 : 姜永鹏
+***********************************************************************************************/
+bool Game::goNext() {
+	int aliveNum = 0;
+	for (int i = 0; i < 4; i++) {
+		if (data.players[i].isAlive() == true)
+			aliveNum++;
+	}
+	playerAlive = aliveNum;//更新游戏存活人数
+	if (playerAlive <= 1) return false;
+	else return true;
+}

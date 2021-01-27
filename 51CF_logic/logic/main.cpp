@@ -146,7 +146,12 @@ int main(int argc, char** argv)
 	while (controller.isValid())
 	{
 		for (int i = 1; i <= 4; i++)
-			controller.run(1, json_filename);   //每个玩家依次运行
+		{
+			controller.run(i);   //每个玩家依次运行，传入玩家ID，运行该玩家指令
+			if (G.goNext() == false) {
+				break;
+			}
+		}
 		//旧代码//controller.run(json_filename);
 	}
 

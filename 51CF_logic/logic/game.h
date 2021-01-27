@@ -23,7 +23,7 @@ public:
 	vector<time_t> roundTime;                                         //【FC18】游戏每回合时间   #json
 	bool init(string filename, char* json_filename,vector<string> players_name);                  //@@@【FC18】从文件读入信息，初始化游戏，并写第0轮的JSON
 	DATA::Data& getData() { return data; }                            //【FC18】从game类获取当前游戏信息   #json
-	vector<TPlayerID> getRank() { return Rank; }                      //【FC18】获取当前所有玩家的排名
+	vector<TPlayerID>& getRank() { return Rank; }                     //【FC18】获取当前所有玩家的排名
 	int getTotalPlayerNum() { return totalPlayers; }             //【FC18】获取当前玩家数目
 	int getTotalPlayerAlive() { return playerAlive; }
 	TRound getCurrentRound() { return totalRounds; }                  //【FC18】获取当前回合数
@@ -37,7 +37,7 @@ public:
 	void saveJson(DATA::Data & dataLastRound, DataSupplement & dataSuppleMent);//？？？【FC18】写入这一轮的JSON文档
 	void saveJson();                                                  //【FC18】写入这一轮的Json数据
 	void addRound() { currentRound++;  totalRounds++; }               //@@@【FC18】回合数递增
-
+	bool goNext();                                                   //【FC18】判断还能否继续进行
 
 	//FC15的
 	vector<Info> generateInfo();
@@ -58,8 +58,7 @@ protected:
 	size_t playerAlive;                                               //【FC18】存活人数
 	vector<TPlayerID> Rank;                                           //【FC18】根据规则进行排名
 
-	TRound _MAX_ROUND_;                                               //【FC18】最大回合数
-	vector<int> controlCount;                                         //【FC18】记录玩家已执行的操作数
+
 	string cmd_json_filename;                                         //【FC18】指令JSON文件名
 	string info_json_filename;                                        //【FC18】信息JSON文件名
 	string mapinfo_json_filename;                                     //【FC18】地图信息JSON文件名
@@ -68,6 +67,8 @@ protected:
 	TRound currentRound;  //当前回合数
 	size_t playerSize;    //游戏规模
 	TResourceI _MAX_RESOURCE_;//每局特定的最大资源
+	vector<int> controlCount;//记录玩家已执行的操作数
+	TRound _MAX_ROUND_;//最大回合数
 	void takeEffect(TransEffect& te); //将te施用到目标上
 	void handleExtending(TransEffect& t);
 	void OwnerChange(TransEffect** TE);

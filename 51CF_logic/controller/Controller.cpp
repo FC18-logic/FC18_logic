@@ -1,6 +1,7 @@
 #include "Controller.h"
 #include <ctime>
 #include <math.h>
+#include <cmath>
 #ifdef FC15_DEBUG
 #define _COMMAND_OUTPUT_ENABLED_
 #endif // FC15_DEBUG
@@ -201,7 +202,7 @@ namespace DAGAN
 	*函数返回值 : 无
 	*作者 : 姜永鹏
 	***********************************************************************************************/
-	void Controller::run(TPlayerID id, char* json_filename) {  //@@@【FC18】每个玩家依次执行
+	void Controller::run(TPlayerID id) {  //@@@【FC18】每个玩家依次执行
 		//清空上一回合记录的Json数据
 		data->currentRoundCommandJson.clear();
 		data->currentRoundPlayerJson.clear();
@@ -222,14 +223,14 @@ namespace DAGAN
 
 		if (!silent_mode_) cout << "-=-=-=-=-=-=-=-=-=-=-= Controller: Round[" << round << "] =-=-=-=-=-=-=-=-=-=-=-=-=-" << endl;
 		if (debug_mode) {
-			game_.DebugPhase();      //调试阶段：输出调试信息
+			game_.DebugPhase();      //@@@调试阶段：输出调试信息
 		}
-		game_.beginPhase();          //启动阶段：玩家/塔/兵团/地图每回合开始前的准备工作放在这里
-		game_.regeneratePhase();     //恢复阶段：玩家/塔/兵团/地图属性要进行的恢复放在这里
+		game_.beginPhase();          //@@@启动阶段：玩家/塔/兵团/地图每回合开始前的准备工作放在这里,现已对FC15代码注释
+		game_.regeneratePhase();     //@@@恢复阶段：玩家/塔/兵团/地图属性要进行的恢复放在这里,现已对FC15代码注释
 
 		//为玩家的AI代码生成数据
 		Info info2Player = game_.generatePlayerInfo(id);
-		vector<CommandList> commands; //选手命令
+		CommandList commands; //选手命令
 		Player_Code& player = players_[id - 1];  //取出玩家对应的ai代码类
 		if (player.isValid() && game_.isAlive(id))  //绝不运行出错的ai代码，绝不运行出局玩家的ai代码
 		{
@@ -237,14 +238,58 @@ namespace DAGAN
 			if (!silent_mode_) cout << "Calling Player " << (int)id << "'s Run() method" << endl;
 			//run运行dll，然后把对应的myCommandList(由dll修改)回传到这里
 			players_[id].run(info2Player);
-			commands.push_back(info2Player.myCommandList);
+			commands = info2Player.myCommandList;
 		}
 		else
 		{
 			players_[id].kill();
-			commands.push_back(CommandList());
+			commands = CommandList();
 		}
-
+		commandRead = 0;
+		//循环执行玩家命令
+		set<TTowerID> towerBanned;//不能再执行操作的塔
+		set<TCorpsID> corpsBanned;//不能再执行操作的兵团
+		for (Command c : commands.getCommand()) {
+			if (c.type == corpsCommand) {
+				commandRead++;  //更新读取指令数，有效、无效指令都要读取
+				if (c.parameters.size() != CorpsOperaNumNeed[c.parameters[0]]) continue;   //判断操作数合法性
+				if (handleCorpsCommand(id, c) == true) {   //记录不能再进行其他操作的兵团序号
+					jsonChange(id, c);   //更新有效的指令Json
+					switch (c.parameters[0]) {
+					case(CStation):
+					case(CStationTower):
+					case(CBuild):
+					case(CRepair):
+					case(CChangeTerrain):
+						corpsBanned.insert(c.parameters[1]);//记录不能继续操作的兵团ID
+						break;
+					default:;
+					}
+				}
+				else continue; //指令执行失败，丢弃，读取下一条
+			}
+			else if (c.type == towerCommand) {
+				if (c.parameters.size() != towerOperaNumNeed[c.parameters[0]]) continue;   //判断操作合法性
+				if (handleTowerCommand(id, c)) {   //记录不能再进行其他操作的塔序号
+					jsonChange(id, c);   //更新有效的指令Json
+					switch (c.parameters[0]) {
+					case(TProduct):
+						towerBanned.insert(c.parameters[1]);//记录不能继续操作的塔ID
+						break;
+					default:;
+					}
+				}
+				else continue; //指令执行失败，丢弃，读取下一条
+			}
+			else continue;   //指令有误，直接丢弃
+			//指令正常执行后才会到这里
+			killPlayers();  //判断设置玩家出局
+			if (game_.goNext() == false) {   //设置控制器无效，游戏结束，退出读取命令的循环
+				setValid(false);  //关闭Controller，中断游戏，直接game_over
+				break;
+			}
+			if (moreCommand(id, towerBanned, corpsBanned) == false) break;  //接收不了更多命令了，直接跳出
+		}
 
 		// 直接输出此玩家的操作
 #ifdef _COMMAND_OUTPUT_ENABLED_
@@ -252,7 +297,7 @@ namespace DAGAN
 		{
 			if (game_.isAlive(id)) {
 				cout << "Player " << id << "'s commands:" << endl;
-				for (Command& c : commands[id])
+				for (Command& c : commands.getCommand())
 				{
 					switch (c.type)
 					{
@@ -286,11 +331,7 @@ namespace DAGAN
 			game_.transPhase();//兵线的传输和结算
 			game_.endPhase();//兵线的切断和结算
 		}
-		// check if killed
-		//检查并判断玩家是否出局
-		for (TCellID i = 0; i < playerSize; ++i)
-			if (!game_.isAlive(i))
-				players_[i].kill();
+
 		//回合数增加1
 		game_.addRound();
 
@@ -299,14 +340,7 @@ namespace DAGAN
 			game_.roundTime.push_back(clock());
 			data->currentRoundCommandJson["runDuration"] =
 				int(game_.roundTime[game_.roundTime.size() - 1] - game_.roundTime[game_.roundTime.size() - 2]);
-			game_.saveJson();
-
-			//输出到文件 #json 
-			Json::FastWriter fw;
-			ofstream json_os;
-			json_os.open(json_filename);
-			json_os << fw.write(data->root);
-			json_os.close();
+			game_.saveJson();//保存及写入Json文档
 		}
 	}
 
@@ -389,5 +423,164 @@ namespace DAGAN
 			data->currentRoundCommandJson["command"].append(newCmd);
 		}
 	}
+	/***********************************************************************************************
+	*函数名 :【FC18】moreCommand判断玩家还能否继续下一条指令
+	*函数功能描述 : 塔不能再操作条件：这个塔攻击过一次|这个塔正在执行生产任务
+	                工程兵团不能再操作条件：工程兵团已经下达工作命令|在驻扎
+					战斗兵团不能再操作条件：战斗兵团在驻扎
+					这三个条件满足其一，或者：
+					已经执行的操作数达到最大操作数，就不再接受命令
+	*函数参数 : id<TPlayerID>---玩家id，tBanned<set<TTowerID>&>---不能执行操作的塔ID，cBanned
+	            <set<TCorpsID>&>---不能执行操作的兵团ID
+	*函数返回值 : <bool>---能否读下一条指令，false---不能，true---能
+	*作者 : 姜永鹏
+	***********************************************************************************************/
+	bool Controller::moreCommand(TPlayerID id, set<TTowerID>& tBanned, set<TCorpsID>& cBanned) {
+		bool towerFree = false;  //能进行塔操作
+		bool corpsFree = false;  //能进行兵团操作
+		for (TTowerID i : data->players[id - 1].getTower()) {
+			if (tBanned.find(i) == tBanned.end())//用户现存的塔还有能进行操作的
+			{
+				towerFree = true;
+				break;
+			}
+		}
+		if (!towerFree)   //若塔不能操作了
+		{
+			for (TCorpsID i : data->players[id - 1].getCrops()) {
+				if (cBanned.find(i) == cBanned.end())//用户现存的兵团还有能进行操作的
+				{
+					corpsFree = true;
+					break;
+				}
+			}
+		}
+		if (commandRead >= MAX_CMD_NUM || (!towerFree && !corpsFree))//超过最大命令条数，或者没有可操作性的塔或兵团了
+			return false;
+		else return true;
+	}
+
+
+	/***********************************************************************************************
+	*函数名 :【FC18】killPlayers判断玩家出局函数
+	*函数功能描述 : 看看哪个玩家防御塔数减到0，让他出局
+	*函数参数 : 无
+	*函数返回值 : 无
+	*作者 : 姜永鹏
+	***********************************************************************************************/
+	void Controller::killPlayers() {
+		for (int i = 0; i < 4; i++) {
+			if (data->players[i].getTower().size() <= 0)  //没有防御塔的玩家直接出局，打出局回合的标签
+			{
+				data->players[i].Kill();
+			}
+		}
+	}
+
+	/***********************************************************************************************
+	*函数名 :【FC18】handleCorpsCommand兵团指令执行函数
+	*函数功能描述 : 执行当前兵团指令，并返回是否执行成功
+	*函数参数 : 令id<TPlayerID>---当前玩家ID,c<Command&>---当前指
+	*函数返回值 : <bool>指令执行情况false---执行成功，true---没有执行成功
+	*作者 : 姜永鹏
+	***********************************************************************************************/
+	bool Controller::handleCorpsCommand(TPlayerID id, Command& c) {
+		//需要return返回命令执行是否成功<bool>
+		switch (c.parameters[0]) {
+		case(CMove):
+			//兵团移动的操作
+			break;
+		case(CStation):
+			//兵团原地驻扎的操作
+			break;
+		case(CStationTower):
+			//兵团驻扎当前格防御塔的操作
+			break;
+		case(CAttackCorps):
+			//兵团攻击兵团的操作
+			break;
+		case(CAttackTower):
+			//兵团攻击防御塔的操作
+			break;
+		case(CRegroup):
+			//兵团整编的操作
+			break;
+		case(CBuild):
+			//兵团修建新塔的操作
+			break;
+		case(CRepair):
+			//兵团修理防御塔的操作
+			break;
+		case(CChangeTerrain):
+			//兵团改变方格地形的操作
+			break;
+		default:
+			return false;
+			break;
+		}
+	}
+
+	/***********************************************************************************************
+	*函数名 :【FC18】handleTowerCommand防御塔指令执行函数
+	*函数功能描述 : 执行当前防御塔指令，并返回是否执行成功
+	*函数参数 : id<TPlayerID>---当前玩家ID,c<Command&>---当前指令
+	*函数返回值 : <bool>指令执行情况false---执行成功，true---没有执行成功
+	*作者 : 姜永鹏
+	***********************************************************************************************/
+	bool Controller::handleTowerCommand(TPlayerID id, Command& c) {
+		//需要return返回命令执行是否成功<bool>
+		switch (c.parameters[0]) {
+		case(TProduct):
+			//塔生产任务的操作
+			break;
+		case(TAttackCorps):
+			//塔攻击兵团的操作
+			break;
+		case(TAttackTower):
+			//塔攻击防御塔的操作
+			break;
+		default:
+			return false;
+			break;
+		}
+	}
+
+
+	/***********************************************************************************************
+	*函数名 :【FC18】getGameRank获取更新游戏排名函数函数
+	*函数功能描述 : 计算玩家游戏排名，得到降序排序放到Game::Rank里面
+	                第一关键字---玩家得分，第二关键字---玩家占领防御塔个数
+					第三关键字---玩家消灭敌方兵团个数，第四关键字---玩家俘虏敌方兵团个数
+					之后将随机排序
+	*函数参数 : 无
+	*函数返回值 : 无
+	*作者 : 姜永鹏
+	***********************************************************************************************/
+	void Controller::getGameRank() {
+		struct rankCmp {
+			TPlayerID ID;
+			TScore score;
+			int CQTowerNum;//攻占塔数
+			int ELCorpsNum;//消灭兵团数
+			int CPCorpsNum;//俘虏兵团数
+			bool compare(rankCmp a, rankCmp b) {
+				if (a.score > b.score) return true;
+				else if (a.score == b.score) {
+					if (a.CQTowerNum > b.CQTowerNum) return true;
+					else if (a.CQTowerNum == b.CQTowerNum) {
+						if (a.ELCorpsNum > b.ELCorpsNum) return true;
+						else if (a.ELCorpsNum == b.ELCorpsNum) {
+							if (a.CPCorpsNum > b.CPCorpsNum) return true;
+							else {
+								return generateRanInt(0,1);
+							}
+						}
+					}
+				}
+			}
+		};
+	}
 }
+
+
 

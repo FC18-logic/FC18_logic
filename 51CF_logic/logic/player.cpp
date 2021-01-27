@@ -8,6 +8,9 @@ Player::Player()
 	deadRound = -1;
 	m_id = -1;
 	data = nullptr;
+	conqueTowerNum = 0;
+	eliminateCorpsNum = 0;
+	captureCorpsNum = 0;
 }
 
 //#json
@@ -17,15 +20,19 @@ Player::Player(Player& _player)// copy构造player
 	m_tower = _player.getTower();
 	alive = _player.isAlive();
 	m_id = _player.getId();
+	conqueTowerNum = _player.getCqTowerNum();
+	eliminateCorpsNum = _player.getEmCorpsNum();
+	captureCorpsNum = _player.getCpCorpsNum();
+
 	data = nullptr;   //避免浅复制
 
 	//FC15的
-	m_cells = _player.cells();
-	m_techPoint = _player.techPoint();
-	m_RegenerationLevel = _player.getRegenerationLevel();
-	m_ExtraControlLevel = _player.getExtraControlLevel();
-	m_DefenceLevel = _player.getDefenceLevel();
-	m_MoveLevel = _player.getMoveLevel();
+	//m_cells = _player.cells();
+	//m_techPoint = _player.techPoint();
+	//m_RegenerationLevel = _player.getRegenerationLevel();
+	//m_ExtraControlLevel = _player.getExtraControlLevel();
+	//m_DefenceLevel = _player.getDefenceLevel();
+	//m_MoveLevel = _player.getMoveLevel();
 }
 
 
@@ -162,6 +169,7 @@ TResourceD Player::totalResource()
 void Player::Kill()
 {
 	alive = false;
+	deadRound = std::ceil(data->getRound() / 4); //返回死亡回合数是大回合数
 }
 
 /***********************************************************************************************
@@ -172,6 +180,8 @@ void Player::Kill()
 *作者 : 姜永鹏
 ***********************************************************************************************/
 int Player::getPlayerScore() {
+	if (isAlive() == false)   //玩家已经出局，根据出局的回合数记录进行排名
+		return deadRound - MAX_ROUND;
 	TScore corpsScore, towerScore;
 	corpsScore = towerScore = 0;
 	for (TCorpsID i : m_crops)
