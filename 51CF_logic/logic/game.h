@@ -36,7 +36,7 @@ public:
 	bool isAlive(TPlayerID id) { return data.players[id].isAlive(); } //【FC18】判断玩家是否活着
 	void saveJson(DATA::Data & dataLastRound, DataSupplement & dataSuppleMent);//？？？【FC18】写入这一轮的JSON文档
 	void saveJson();                                                  //【FC18】写入这一轮的Json数据
-	void addRound() { currentRound++;  totalRounds++; }               //@@@【FC18】回合数递增
+	void addRound() { totalRounds++; }               //@@@【FC18】回合数递增
 	bool goNext();                                                   //【FC18】判断还能否继续进行
 
 	//FC15的

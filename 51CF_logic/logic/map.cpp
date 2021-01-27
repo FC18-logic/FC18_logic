@@ -408,8 +408,11 @@ bool Map::randomInitMap() {
 	////////////////////////////////////////////////////////
 	//【FC18】每个势力防御塔向周边方格施加初始占有属性值  //
 	////////////////////////////////////////////////////////
-
-	for (int cnt = 0; cnt < 4; cnt++) {
+	for (int i = 0; i < data->myTowers.size(); i++) {
+		TPoint towerPoint = data->myTowers[i].getPosition();
+		modifyOccupyPoint(NOTOWER, data->myTowers[i].getOwnerID(), towerPoint);
+	}
+	/*for (int cnt = 0; cnt < 4; cnt++) {
 		TPoint towerPoint = data->myTowers[cnt].getPosition();
 		TPlayerID ownerID = data->myTowers[cnt].getOwnerID();
 		for (int i = 0; i < m_height; i++) {
@@ -424,7 +427,7 @@ bool Map::randomInitMap() {
 					continue;
 			}
 		}
-	}
+	}*/
 	
 	int countRound = 0, countPlayer = 0;
 	for (int i = 0; i < m_height; i++) {
@@ -500,4 +503,63 @@ mapBlockInfo Map::ShowInfo(int x, int y) {
 	info.owner = map[y][x].owner;
 	info.occupyPoint = map[y][x].occupyPoint;
 	return info;
+}
+
+/***********************************************************************************************
+*函数名 :【FC18】withinMap判断某点是否在地图范围内
+*函数功能描述 : 判断点p是否在当前地图的范围内
+*函数参数 : p<TPoint*>---指向所在点的指针
+*函数返回值 : <mapBlockInfo>--地图方格信息
+*作者 : 姜永鹏
+***********************************************************************************************/
+bool Map::withinMap(TPoint p) {
+	return (p.m_x >= 0) && (p.m_x < m_width) && (p.m_y >= 0) && (p.m_y < m_height);
+}
+
+/***********************************************************************************************
+*函数名 :【FC18】modifyOccupyPoint按塔所有者改变修改占有属性值
+*函数功能描述 : 通过塔之前的拥有者（或共有，即无塔NOTOWER），以及现在的拥有者（同上），修改周围
+                方格的占有属性值
+*函数参数 : oldOwner<TPlayerID>--之前的拥有者ID，newOwner<TPlayerID>--现在的拥有者ID，p<TPoint>
+            ---塔的所在点位坐标
+*函数返回值 : 无
+*作者 : 姜永鹏
+***********************************************************************************************/
+void Map::modifyOccupyPoint(TPlayerID oldOwner, TPlayerID newOwner, TPoint p) {
+	if (oldOwner != NOTOWER) map[p.m_y][p.m_x].occupyPoint[oldOwner - 1] -= INF;
+	if (newOwner != NOTOWER) map[p.m_y][p.m_x].occupyPoint[newOwner - 1] += INF;
+	for (int i = p.m_y - 5; i <= p.m_y + 5; i++) {
+		for (int j = p.m_x - 5; j <= p.m_x + 5; j++) {
+			TPoint currentPoint = { j,i };
+			TDist dist = getDist(currentPoint, p);
+			if (data->getRound() == 0 && map[i][j].owner == PUBLIC) continue;  //开局不改变公共地盘的占有属性值
+			if (!withinMap(currentPoint) || dist < 1 || dist > 5) continue;//点不在图上，离塔太近或太远
+			if (oldOwner != NOTOWER) map[i][j].occupyPoint[oldOwner - 1] -= TowerOccupyPoint[dist - 1];
+			if (newOwner != NOTOWER) map[i][j].occupyPoint[newOwner - 1] += TowerOccupyPoint[dist - 1];
+		}
+	}
+}
+
+
+/***********************************************************************************************
+*函数名 :【FC18】ownerChang改变方格拥有者函数
+*函数功能描述 : 改变位置p处方格拥有者，判定过渡区域
+*函数参数 : p<TPoint>---所在方格的TPoint坐标
+*函数返回值 : <TPlayerID>---塔当前所在方格变化后的所有者坐标（TRANSITION=-1过渡区域）s
+*作者 : 姜永鹏
+***********************************************************************************************/
+TPlayerID Map::ownerChange(TPoint p) {
+	int maxOccupyPoint = -1, occupyID = PUBLIC;
+	for (int i = 0; i < 4; i++) {
+		if (map[p.m_y][p.m_x].occupyPoint[i] > maxOccupyPoint) {
+			maxOccupyPoint = map[p.m_y][p.m_x].occupyPoint[i];
+			occupyID = i + 1;
+		}
+		else if (map[p.m_y][p.m_x].occupyPoint[i] == maxOccupyPoint) {  //有相同占有属性值，过渡区域
+			map[p.m_y][p.m_x].owner = TRANSITION;
+			return TRANSITION;
+		}
+	}
+	map[p.m_y][p.m_x].owner = occupyID;
+	return occupyID;
 }

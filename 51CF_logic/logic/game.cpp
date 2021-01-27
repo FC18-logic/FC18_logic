@@ -1355,12 +1355,13 @@ void Game::saveJson() {
 *作者 : 姜永鹏
 ***********************************************************************************************/
 bool Game::goNext() {
+	if (getCurrentRound() >= 4 * MAX_ROUND) return false;//超过最大回合数，利用的是Game中的回合数，超过4倍（4人）最大回合数，直接game_over
 	int aliveNum = 0;
 	for (int i = 0; i < 4; i++) {
 		if (data.players[i].isAlive() == true)
 			aliveNum++;
 	}
 	playerAlive = aliveNum;//更新游戏存活人数
-	if (playerAlive <= 1) return false;
+	if (playerAlive <= 1)  return false;
 	else return true;
 }

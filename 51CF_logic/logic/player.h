@@ -25,7 +25,7 @@ public:
 	void setID(TPlayerID id) { m_id = id; }
 	TPlayerID getId() { return m_id; }                                      //【FC18】获取玩家ID
 	int getCqTowerNum() { return conqueTowerNum; }                          //【FC18】获取玩家占领敌方防御塔数
-	int getEmCorpsNum() { return eliminateCorpsNum; }                       //【FC18】获取玩家消灭敌方兵团数
+	int getElCorpsNum() { return eliminateCorpsNum; }                       //【FC18】获取玩家消灭敌方兵团数
 	int getCpCorpsNum() { return captureCorpsNum; }                         //【FC18】获取玩家俘虏地方兵团数
 	//【FC18】获取玩家的所有防御塔set
 	std::set<TTowerID>& getTower() { return m_tower; }

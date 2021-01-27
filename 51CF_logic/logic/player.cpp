@@ -21,7 +21,7 @@ Player::Player(Player& _player)// copyππ‘Ïplayer
 	alive = _player.isAlive();
 	m_id = _player.getId();
 	conqueTowerNum = _player.getCqTowerNum();
-	eliminateCorpsNum = _player.getEmCorpsNum();
+	eliminateCorpsNum = _player.getElCorpsNum();
 	captureCorpsNum = _player.getCpCorpsNum();
 
 	data = nullptr;   //±‹√‚«≥∏¥÷∆

@@ -58,7 +58,9 @@ public:
     bool readMap(ifstream& inMap, bool enableOutput, vector<string> players_name);   //通过文件初始化地图信息，包括读入地图数据和初始化玩家数组
 	void saveMapJson();                       //【FC18】保存地图的json数据
     mapBlockInfo ShowInfo(int x,int y);                       //【FC18】生成地图方格信息
-
+    void modifyOccupyPoint(TPlayerID oldOwner, TPlayerID newOwner, TPoint p);       //【FC18】按塔的所有者改变修改周围方格的占有属性值
+    bool withinMap(TPoint p);                    //【FC18】判断p点是否在地图之内
+    TPlayerID ownerChange(TPoint p);             //【FC18】检查、改变方格p位置的拥有者
 
     //FC15的
     bool init(const TMapID& filename, TResourceI _MAX_RESOURCE_);             //通过文件初始化地图信息

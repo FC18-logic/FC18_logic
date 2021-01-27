@@ -2,6 +2,7 @@
 #include <ctime>
 #include <math.h>
 #include <cmath>
+#include <algorithm>
 #ifdef FC15_DEBUG
 #define _COMMAND_OUTPUT_ENABLED_
 #endif // FC15_DEBUG
@@ -15,6 +16,29 @@ namespace DAGAN
 		{0, 1},      //下，+y
 		{-1,0},      //左，-x
 		{1, 0}       //右，+x
+	};
+
+	struct rankCmp {  //用于给玩家排名的结构体
+		TPlayerID ID;
+		TScore score;
+		int CQTowerNum;//攻占塔数
+		int ELCorpsNum;//消灭兵团数
+		int CPCorpsNum;//俘虏兵团数
+		bool compare(rankCmp a, rankCmp b) {  //重载的比较运算符，用于排名
+			if (a.score > b.score) return true;
+			else if (a.score == b.score) {
+				if (a.CQTowerNum > b.CQTowerNum) return true;
+				else if (a.CQTowerNum == b.CQTowerNum) {
+					if (a.ELCorpsNum > b.ELCorpsNum) return true;
+					else if (a.ELCorpsNum == b.ELCorpsNum) {
+						if (a.CPCorpsNum > b.CPCorpsNum) return true;
+						else {
+							return generateRanInt(0, 1);   //在0,1间返回随机数来随机给出排名
+						}
+					}
+				}
+			}
+		}
 	};
 
 	void Controller::run(char* json_filename)
@@ -322,15 +346,6 @@ namespace DAGAN
 				}
 			}
 		}
-		//执行移动、势力转换和攻防结算的部分
-		else //isValid
-		{
-			//各种塔的操作在这里
-			game_.commandPhase(commands);//读取玩家命令，然后有效命令写进JSON里面去，然后执行一些加兵线之类的操作
-			game_.movePhase();//兵线的推移和结算
-			game_.transPhase();//兵线的传输和结算
-			game_.endPhase();//兵线的切断和结算
-		}
 
 		//回合数增加1
 		game_.addRound();
@@ -557,28 +572,21 @@ namespace DAGAN
 	*作者 : 姜永鹏
 	***********************************************************************************************/
 	void Controller::getGameRank() {
-		struct rankCmp {
-			TPlayerID ID;
-			TScore score;
-			int CQTowerNum;//攻占塔数
-			int ELCorpsNum;//消灭兵团数
-			int CPCorpsNum;//俘虏兵团数
-			bool compare(rankCmp a, rankCmp b) {
-				if (a.score > b.score) return true;
-				else if (a.score == b.score) {
-					if (a.CQTowerNum > b.CQTowerNum) return true;
-					else if (a.CQTowerNum == b.CQTowerNum) {
-						if (a.ELCorpsNum > b.ELCorpsNum) return true;
-						else if (a.ELCorpsNum == b.ELCorpsNum) {
-							if (a.CPCorpsNum > b.CPCorpsNum) return true;
-							else {
-								return generateRanInt(0,1);
-							}
-						}
-					}
-				}
-			}
-		};
+		vector<rankCmp> Ranker;
+		for (int i = 0; i < 4; i++) {
+			rankCmp playerRanker;
+			Player newPlayer = data->players[i];
+			playerRanker.ID = newPlayer.getId();
+			playerRanker.score = newPlayer.getPlayerScore();
+			playerRanker.CQTowerNum = newPlayer.getCqTowerNum();
+			playerRanker.ELCorpsNum = newPlayer.getElCorpsNum();
+			playerRanker.CPCorpsNum = newPlayer.getCpCorpsNum();
+			Ranker.push_back(playerRanker);
+		}
+		std::sort(Ranker.begin(), Ranker.end(), rankCmp::compare);  //对玩家排序，按名次升序排序
+		for (int i = 0; i < 4; i++) {
+			game_.getRank()[i] = Ranker[i].ID;
+		}
 	}
 }
 

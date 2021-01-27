@@ -148,7 +148,7 @@ int main(int argc, char** argv)
 		for (int i = 1; i <= 4; i++)
 		{
 			controller.run(i);   //每个玩家依次运行，传入玩家ID，运行该玩家指令
-			if (G.goNext() == false) {
+			if (G.goNext() == false ) {
 				break;
 			}
 		}
