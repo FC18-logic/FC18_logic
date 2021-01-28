@@ -1,7 +1,7 @@
 #include "Crops.h"
 #include "tower.h"
 
-TCorpsID Crops::m_staticID = 1;
+TCorpsID Crops::m_staticID = 0;
 
 Crops::Crops():m_data(nullptr)
 {
