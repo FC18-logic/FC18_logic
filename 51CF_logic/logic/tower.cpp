@@ -188,9 +188,17 @@ bool Tower::Be_Attacked(TPlayerID enemy_id,THealthPoint hp_decrease)
 		for(int i = 0; i<m_staycrops.size(); i++)
 		{
 			if(m_staycrops[i]->getType() == Construct)
+			{
 				m_staycrops[i]->ChangeOwner(enemy_id);
+				int num = m_data->players[enemy_id].getElCorpsNum() + 1;
+				m_data->players[ID].setElCorpsNum(num);
+			}
 			else
+			{
 				m_staycrops[i]->KillCorps();
+				int num = m_data->players[enemy_id].getCqCorpsNum() + 1;
+				m_data->players[enemy_id].setCqCorpsNum(num);
+			}
 		}
 		return true;
 	}

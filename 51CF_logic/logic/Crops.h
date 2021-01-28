@@ -14,7 +14,7 @@ class Crops
 {
 private:
 
-	static TCorpsID		ID;
+	static TCorpsID		m_staticID;
 	TCorpsID			m_myID;			//兵团ID
 	corpsType			m_type;			//兵团属性
 	battleCorpsType		m_BattleType;	//战斗兵用
@@ -41,11 +41,11 @@ public:
 	
 	//兵团操作
 
-	bool Move(int dx, int dy);					//作战兵团移动 返回是否成功移动
-	bool Attack(CorpsCommandEnum type, int ID);	//兵团攻击
+	bool Move(int dir);					//作战兵团移动 返回是否成功移动
+	bool Attack(int type, int ID);	//兵团攻击
 	bool MergeCrops(TCorpsID ID);				//整编兵团 返回是否整编成功
-	void GoRest();								//兵团进入驻扎休整状态
-	void StationInTower();						//玩家驻扎所在位置的己方塔
+	bool GoRest();								//兵团进入驻扎休整状态
+	bool StationInTower();						//玩家驻扎所在位置的己方塔
 	bool MendTower();							//建造兵修塔
 	bool ChangeTerrain(terrainType target);		//建造兵更改地形
 	bool BuildTower();							//开拓者建塔

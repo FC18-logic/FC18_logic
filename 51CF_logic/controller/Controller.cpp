@@ -250,6 +250,7 @@ namespace DAGAN
 		if (debug_mode) {
 			game_.DebugPhase();      //@@@调试阶段：输出调试信息
 		}
+		game_.setPlayerID(id);		//@@@设置当前玩家编号
 		game_.beginPhase();          //@@@启动阶段：玩家/塔/兵团/地图每回合开始前的准备工作放在这里,现已对FC15代码注释
 		game_.regeneratePhase();     //@@@恢复阶段：玩家/塔/兵团/地图属性要进行的恢复放在这里,现已对FC15代码注释
 
@@ -546,38 +547,68 @@ namespace DAGAN
 	***********************************************************************************************/
 	bool Controller::handleCorpsCommand(TPlayerID id, Command& c) {
 		//需要return返回命令执行是否成功<bool>
+		bool bCmdSucs = false;
+		TCorpsID id = c.parameters[1];
 		switch (c.parameters[0]) {
 		case(CMove):
 			//兵团移动的操作
+			{
+				int dir = c.parameters[2];
+				bCmdSucs = data->myCorps[id].Move(dir);
+			}
 			break;
 		case(CStation):
 			//兵团原地驻扎的操作
+			{
+				bCmdSucs = data->myCorps[id].GoRest();
+			}
 			break;
 		case(CStationTower):
 			//兵团驻扎当前格防御塔的操作
+			{
+				bCmdSucs = data->myCorps[id].StationInTower();
+			}
 			break;
 		case(CAttackCorps):
-			//兵团攻击兵团的操作
-			break;
 		case(CAttackTower):
-			//兵团攻击防御塔的操作
+			//兵团攻击的操作
+			{
+				int type = c.parameters[0];
+				TCorpsID enemyid = c.parameters[2];
+				bCmdSucs = data->myCorps[id].Attack(type,enemyid);
+			}
 			break;
 		case(CRegroup):
 			//兵团整编的操作
+			{
+				TCorpsID target = c.parameters[2];
+				bCmdSucs = data->myCorps[id].MergeCrops(target);
+			}
 			break;
 		case(CBuild):
 			//兵团修建新塔的操作
+			{
+				bCmdSucs = data->myCorps[id].BuildTower();
+			}
 			break;
 		case(CRepair):
 			//兵团修理防御塔的操作
+			{
+				bCmdSucs = data->myCorps[id].MendTower();
+			}
 			break;
 		case(CChangeTerrain):
 			//兵团改变方格地形的操作
+			{
+				terrainType type = (terrainType)c.parameters[2];
+				bCmdSucs = data->myCorps[id].ChangeTerrain(type);
+			}
 			break;
 		default:
 			return false;
 			break;
 		}
+		return bCmdSucs;
 	}
 
 	/***********************************************************************************************

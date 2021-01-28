@@ -39,6 +39,9 @@ public:
 	void addRound() { totalRounds++; }               //@@@【FC18】回合数递增
 	bool goNext();                                                   //【FC18】判断还能否继续进行
 	void setGameOver() {}
+
+	void setPlayerID(TPlayerID id){ curPlayer = id; }				//【FC18】设置当前回合玩家ID
+
 	//FC15的
 	vector<Info> generateInfo();
 	TRound getRound() { return currentRound; }//获取回合数
@@ -62,6 +65,8 @@ protected:
 	string cmd_json_filename;                                         //【FC18】指令JSON文件名
 	string info_json_filename;                                        //【FC18】信息JSON文件名
 	string mapinfo_json_filename;                                     //【FC18】地图信息JSON文件名
+
+	TPlayerID curPlayer;	//【FC18】本回合正在执行的玩家 吕梦欣
 
 	//FC15的
 	TRound currentRound;  //当前回合数

@@ -859,6 +859,12 @@ void Game::regeneratePhase()
 		}
 	}
 	***************************************************/
+	//兵团操作
+	//所有属于该玩家的兵团回复HP MP
+	for (TCorpsID i : data.players[curPlayer].getCrops())
+	{
+		data.myCorps[i].newRound();
+	}
 }
 
 //【可能冲突】主要是兵线的操作，但takeEffect()涉及塔属性的访问，主要OwnerChange既有兵线有有塔会冲突
