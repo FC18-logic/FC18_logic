@@ -251,6 +251,12 @@ bool Map::readMap(ifstream& inMap, bool enableOutput, std::vector<std::string> p
 		data->currentRoundCommandJson["command"].append(paj);
 	}
 
+	//初始化兵团的表
+	data->corps = new CorpsUnit*[m_height];
+	for (int i = 0; i < m_height; i++) {
+		data->corps[i] = new CorpsUnit[m_width];
+	}
+
 	return true;
 }
 
@@ -599,4 +605,22 @@ TPlayerID Map::ownerChange(TPoint p) {
 TPlayerID Map::showOwner(TPoint p) {
 	if (!withinMap(p)) return OUTOFRANGE;  //当前方格在地图之外
 	else return map[p.m_y][p.m_x].owner;
+}
+
+/*****************************s******************************************************************
+*函数名 :【FC18】clearAll清理掉兵团表格
+*函数功能描述 : 判断当前方格的拥有者
+*函数参数 : p<TPoint>---所在方格的TPoint坐标
+*函数返回值 :  <TPlayerID>---塔当前所在方格的所有者坐标（PUBLIC=0，公共区域，TRANSITION=-1过渡区
+			   域，OUTOFRANGE=-2在地图外）
+*作者 : 姜永鹏
+***********************************************************************************************/
+void Map::clearAll(){
+	delete[] data->players;
+	data->players = nullptr;
+	for (int i = 0; i < m_height; i++) {
+		delete[] data->corps[i];
+	}
+	delete[] data->corps;
+	data->corps = nullptr;
 }

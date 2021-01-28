@@ -680,7 +680,7 @@ class BaseMap
 			return true;
 		}
 		bool   isPosValid(TPoint p) { return isPosValid(p.m_x, p.m_y); }             //判断点是否越界
-		bool   isPosValid(int x, int y) { return x >= 0 && x < m_width&&y >= 0 && y <= m_height; }
+		bool   isPosValid(int x, int y) { return x >= 0 && x < m_width&&y >= 0 && y < m_height; }
   //protected:
 	private:
 		int cross(const TPoint& p1, const TPoint& p2) { return p1.m_x*p2.m_y - p1.m_y*p2.m_x; }//叉乘

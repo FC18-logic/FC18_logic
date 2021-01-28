@@ -288,6 +288,7 @@ namespace DAGAN
 			commandRead++;  //更新读取指令数，有效、无效指令都要读取
 			if (c.type == corpsCommand) {
 				if (c.parameters.size() != CorpsOperaNumNeed[c.parameters[0]]) continue;   //判断操作数合法性
+				if (corpsBanned.find(c.parameters[1]) != corpsBanned.end()) continue;     //这个兵团本回合不能再接受操作，请求驳回
 				if (handleCorpsCommand(id, c) == true) {   //记录不能再进行其他操作的兵团序号
 					jsonChange(id, c);   //更新有效的指令Json
 					outPutCommand(id, c);  //复读被执行的命令，未执行的不复读
@@ -306,6 +307,7 @@ namespace DAGAN
 			}
 			else if (c.type == towerCommand) {
 				if (c.parameters.size() != towerOperaNumNeed[c.parameters[0]]) continue;   //判断操作合法性
+				if (towerBanned.find(c.parameters[1]) != towerBanned.end()) continue; //这个塔当前回合不能再操作，请求驳回
 				if (handleTowerCommand(id, c) == true) {   //记录不能再进行其他操作的塔序号
 					jsonChange(id, c);   //更新有效的指令Json
 					outPutCommand(id, c);  //复读被执行的命令，未执行的不复读
@@ -551,10 +553,11 @@ namespace DAGAN
 	*函数返回值 : <bool>指令执行情况false---执行成功，true---没有执行成功
 	*作者 : 姜永鹏
 	***********************************************************************************************/
-	bool Controller::handleCorpsCommand(TPlayerID id, Command& c) {
+	bool Controller::handleCorpsCommand(TPlayerID ID, Command& c) {
 		//需要return返回命令执行是否成功<bool>
 		bool bCmdSucs = false;
 		TCorpsID id = c.parameters[1];
+		if (id < 0 ||id >= data->myCorps.size()) return false;  //防止玩家命令越界
 		switch (c.parameters[0]) {
 		case(CMove):
 			//兵团移动的操作
@@ -624,8 +627,11 @@ namespace DAGAN
 	*函数返回值 : <bool>指令执行情况false---执行成功，true---没有执行成功
 	*作者 : 姜永鹏
 	***********************************************************************************************/
-	bool Controller::handleTowerCommand(TPlayerID id, Command& c) {
+	bool Controller::handleTowerCommand(TPlayerID ID, Command& c) {
 		//需要return返回命令执行是否成功<bool>
+		bool bCmdSucs = false;
+		TCorpsID id = c.parameters[1];
+		if (id < 0 || id >= data->myTowers.size()) return false;  //防止玩家命令越界
 		switch (c.parameters[0]) {
 		case(TProduct):
 			//塔生产任务的操作

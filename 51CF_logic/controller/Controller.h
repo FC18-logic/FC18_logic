@@ -39,8 +39,8 @@ namespace DAGAN
 		void killPlayers();                                  //【FC18】判断玩家阵亡情况
 		int commandRead;                                      //【FC18】已读取命令数量
 		void setValid(bool valid) { isValid_ = valid; }       //【FC18】设置游戏控制器不能继续运行了
-		bool handleCorpsCommand(TPlayerID id, Command& c);                       //【FC18】执行当前兵团指令，并返回是否执行成功
-		bool handleTowerCommand(TPlayerID id, Command& c);                       //【FC18】执行当前防御塔指令，并返回是否执行成功
+		bool handleCorpsCommand(TPlayerID ID, Command& c);                       //【FC18】执行当前兵团指令，并返回是否执行成功
+		bool handleTowerCommand(TPlayerID ID, Command& c);                       //【FC18】执行当前防御塔指令，并返回是否执行成功
 		void getGameRank();                                                      //【FC18】获取更新游戏排名
 		void outPutCommand(TPlayerID id,Command& c);                             //【FC18】输出当前玩家的指令，这个函数只输出被实际执行的指令
 

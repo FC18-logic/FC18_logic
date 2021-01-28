@@ -175,7 +175,7 @@ bool Tower::Be_Attacked(TPlayerID enemy_id,THealthPoint hp_decrease)
 			//更新data
 			m_data->totalTowers--;
 			m_data->players->getTower().erase(m_PlayerID);
-			m_data->gameMap.map[m_position.m_x][m_position.m_y].TowerIndex = NOTOWER;
+			m_data->gameMap.map[m_position.m_y][m_position.m_x].TowerIndex = NOTOWER;
 			//等待调用更新occupypoint的函数
 
 		}
