@@ -22,7 +22,7 @@ Player::Player(Player& _player)// copyππ‘Ïplayer
 	m_id = _player.getId();
 	conqueTowerNum = _player.getCqTowerNum();
 	eliminateCorpsNum = _player.getElCorpsNum();
-	captureCorpsNum = _player.getCpCorpsNum();
+	captureCorpsNum = _player.getCqCorpsNum();
 
 	data = nullptr;   //±‹√‚«≥∏¥÷∆
 

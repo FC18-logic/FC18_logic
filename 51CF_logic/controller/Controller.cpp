@@ -238,11 +238,11 @@ namespace DAGAN
 		//data内的回合数据更新+1
 		volatile TRound dataRound = data->addRound();
 		//Json更新data中的回合数据，此时game中回合数据还保持在上一回合
-		data->currentRoundCommandJson["round"] = dataRound;
-		data->currentRoundPlayerJson["round"] = dataRound;
-		data->currentRoundTowerJson["round"] = dataRound;
-		data->currentRoundCorpsJson["round"] = dataRound;
-		data->currentRoundMapJson["round"] = dataRound;
+		data->currentRoundCommandJson["round"] = Json::Value(std::to_string(dataRound));
+		data->currentRoundPlayerJson["round"] = Json::Value(std::to_string(dataRound));
+		data->currentRoundTowerJson["round"] = Json::Value(std::to_string(dataRound));
+		data->currentRoundCorpsJson["round"] = Json::Value(std::to_string(dataRound));
+		data->currentRoundMapJson["round"] = Json::Value(std::to_string(dataRound));
 		int playerSize = game_.getTotalPlayerNum();
 		volatile TRound round = game_.getCurrentRound() + 1;
 
@@ -261,26 +261,36 @@ namespace DAGAN
 		if (player.isValid() && game_.isAlive(id))  //绝不运行出错的ai代码，绝不运行出局玩家的ai代码
 		{
 			// 单个玩家执行，运行玩家ai获取指令
-			if (!silent_mode_) cout << "Calling Player " << (int)id << "'s Run() method" << endl;
+			if (!silent_mode_) cout << "Calling Player " << (int)id << "'s run() method" << endl;
 			//run运行dll，然后把对应的myCommandList(由dll修改)回传到这里
-			players_[id].run(info2Player);
+			player.run(info2Player);//【FC18】补充超时的判定，命令数过多的判定
 			commands = info2Player.myCommandList;
 		}
 		else
 		{
-			players_[id].kill();
+			player.kill();
 			commands = CommandList();
 		}
 		commandRead = 0;
+		//输出玩家命令的标题
+#ifdef _COMMAND_OUTPUT_ENABLED_
+		if (file_output_enabled_)
+			cout << "Player " << id << "'s commands:" << endl;
+#endif
 		//循环执行玩家命令
 		set<TTowerID> towerBanned;//不能再执行操作的塔
 		set<TCorpsID> corpsBanned;//不能再执行操作的兵团
+		if (commands.size() > MAX_CMD_NUM) {    //命令数超过限制是非法的，说明选手改动了不改改的东西，直接出局
+			data->players[id - 1].Kill();
+			cout << "Player " << id << " break the rules! Out!" << endl;
+		}
 		for (Command c : commands.getCommand()) {
 			commandRead++;  //更新读取指令数，有效、无效指令都要读取
 			if (c.type == corpsCommand) {
 				if (c.parameters.size() != CorpsOperaNumNeed[c.parameters[0]]) continue;   //判断操作数合法性
 				if (handleCorpsCommand(id, c) == true) {   //记录不能再进行其他操作的兵团序号
 					jsonChange(id, c);   //更新有效的指令Json
+					outPutCommand(id, c);  //复读被执行的命令，未执行的不复读
 					switch (c.parameters[0]) {
 					case(CStation):
 					case(CStationTower):
@@ -296,8 +306,9 @@ namespace DAGAN
 			}
 			else if (c.type == towerCommand) {
 				if (c.parameters.size() != towerOperaNumNeed[c.parameters[0]]) continue;   //判断操作合法性
-				if (handleTowerCommand(id, c)) {   //记录不能再进行其他操作的塔序号
+				if (handleTowerCommand(id, c) == true) {   //记录不能再进行其他操作的塔序号
 					jsonChange(id, c);   //更新有效的指令Json
+					outPutCommand(id, c);  //复读被执行的命令，未执行的不复读
 					switch (c.parameters[0]) {
 					case(TProduct):
 						towerBanned.insert(c.parameters[1]);//记录不能继续操作的塔ID
@@ -325,9 +336,10 @@ namespace DAGAN
 			{
 				cout << "-=-=-=-=-=-=-=-=-=-=-= GAME OVER ! =-=-=-=-=-=-=-=-=-=-=-=-=-" << endl;
 				cout << "Rank:" << endl;
-				for (TPlayerID id : game_.getRank())
+				int rank = 0;
+				for (TPlayerID r : game_.getRank())
 				{
-					cout << "Player " << id << " : " << players_[id - 1].getName() << endl;
+					cout << "Rank " << ++rank << " : player " << players_[r - 1].getName() << endl;
 				}
 			}
 		}
@@ -339,7 +351,7 @@ namespace DAGAN
 		{
 			game_.roundTime.push_back(clock());
 			data->currentRoundCommandJson["runDuration"] =
-				int(game_.roundTime[game_.roundTime.size() - 1] - game_.roundTime[game_.roundTime.size() - 2]);
+				Json::Value(std::to_string(int(game_.roundTime[game_.roundTime.size() - 1] - game_.roundTime[game_.roundTime.size() - 2])));
 			game_.saveJson();//保存及写入Json文档
 		}
 	}
@@ -359,40 +371,37 @@ namespace DAGAN
 	void Controller::jsonChange(TPlayerID id, Command& c) {
 		if (c.cmdType == corpsCommand) {
 			Json::Value newCmd;
-			newCmd["cT"] = Json::Value(int(corpsCommand));
-			newCmd["tp"] = Json::Value(int(c.parameters[0]));
-			newCmd["id"] = Json::Value(int(c.parameters[1]));
+			newCmd["oId"] = Json::Value(std::to_string(id));
+			newCmd["cT"] = Json::Value(std::to_string(int(corpsCommand)));
+			newCmd["tp"] = Json::Value(std::to_string(int(c.parameters[0])));
+			newCmd["id"] = Json::Value(std::to_string(int(c.parameters[1])));
 			switch (c.parameters[0])  //第0个参数
 			{
 			case(CMove):
-				newCmd["mv"] = Json::Value(int(c.parameters[2]));
-				newCmd["dir"] = Json::Value(std::atan2(DAGAN::moveDir[c.parameters[2]].m_y, DAGAN::moveDir[c.parameters[2]].m_x));
+				newCmd["mv"] = Json::Value(std::to_string(int(c.parameters[2])));
+				newCmd["dir"] = Json::Value(std::to_string(std::atan2(DAGAN::moveDir[c.parameters[2]].m_y, DAGAN::moveDir[c.parameters[2]].m_x)));
 				break;
 			case(CStation):
-				break;
 			case(CStationTower):
-				newCmd["dFT"] = Json::Value(int(c.parameters[2]));
 				break;
 			case(CAttackCorps):
-				newCmd["dEC"] = Json::Value(int(c.parameters[2]));
+				newCmd["dEC"] = Json::Value(std::to_string(int(c.parameters[2])));
 				TPoint dirTPoint = data->myCorps[c.parameters[2]].getPos() - data->myCorps[c.parameters[1]].getPos();
-				newCmd["dir"] = Json::Value(std::atan2(dirTPoint.m_y, dirTPoint.m_x));
+				newCmd["dir"] = Json::Value(std::to_string(std::atan2(dirTPoint.m_y, dirTPoint.m_x)));
 				break;
 			case(CAttackTower):
-				newCmd["dET"] = Json::Value(int(c.parameters[2]));
+				newCmd["dET"] = Json::Value(std::to_string(int(c.parameters[2])));
 				TPoint dirTPoint = data->myTowers[c.parameters[2]].getPosition() - data->myCorps[c.parameters[1]].getPos();
-				newCmd["dir"] = Json::Value(std::atan2(dirTPoint.m_y, dirTPoint.m_x));
+				newCmd["dir"] = Json::Value(std::to_string(std::atan2(dirTPoint.m_y, dirTPoint.m_x)));
 				break;
 			case(CRegroup):
-				newCmd["dFC"] = Json::Value(int(c.parameters[2]));
+				newCmd["dFC"] = Json::Value(std::to_string(int(c.parameters[2])));
 				break;
 			case(CBuild):
-				break;
 			case(CRepair):
-				newCmd["dFT"] = Json::Value(int(c.parameters[2]));
 				break;
 			case(CChangeTerrain):
-				newCmd["dT"] = Json::Value(int(c.parameters[2]));
+				newCmd["dT"] = Json::Value(std::to_string(int(c.parameters[2])));
 				break;
 			default:;
 			}
@@ -400,23 +409,24 @@ namespace DAGAN
 		}
 		else if (c.type == towerCommand) {
 			Json::Value newCmd;
-			newCmd["cT"] = Json::Value(int(towerCommand));
-			newCmd["tp"] = Json::Value(int(c.parameters[0]));
-			newCmd["id"] = Json::Value(int(c.parameters[1]));
+			newCmd["oId"] = Json::Value(std::to_string(id));
+			newCmd["cT"] = Json::Value(std::to_string(int(towerCommand)));
+			newCmd["tp"] = Json::Value(std::to_string(int(c.parameters[0])));
+			newCmd["id"] = Json::Value(std::to_string(int(c.parameters[1])));
 			switch (c.parameters[0]) 
 			{
 			case(TProduct):
-				newCmd["pT"] = Json::Value(int(c.parameters[2]));
+				newCmd["pT"] = Json::Value(std::to_string(int(c.parameters[2])));
 				break;
 			case(TAttackCorps):
-				newCmd["dEC"] = Json::Value(int(c.parameters[2]));
+				newCmd["dEC"] = Json::Value(std::to_string(int(c.parameters[2])));
 				TPoint dirTPoint = data->myCorps[c.parameters[2]].getPos() - data->myTowers[c.parameters[1]].getPosition();
-				newCmd["dir"] = Json::Value(std::atan2(dirTPoint.m_y, dirTPoint.m_x));
+				newCmd["dir"] = Json::Value(std::to_string(std::atan2(dirTPoint.m_y, dirTPoint.m_x)));
 				break;
 			case(TAttackTower):
-				newCmd["dET"] = Json::Value(int(c.parameters[2]));
+				newCmd["dET"] = Json::Value(std::to_string(int(c.parameters[2])));
 				TPoint dirTPoint = data->myTowers[c.parameters[2]].getPosition() - data->myTowers[c.parameters[1]].getPosition();
-				newCmd["dir"] = Json::Value(std::atan2(dirTPoint.m_y, dirTPoint.m_x));
+				newCmd["dir"] = Json::Value(std::to_string(std::atan2(dirTPoint.m_y, dirTPoint.m_x)));
 				break;
 			default:;
 			}
@@ -490,51 +500,47 @@ namespace DAGAN
 #ifdef _COMMAND_OUTPUT_ENABLED_
 		if (file_output_enabled_ && game_.isAlive(id))
 		{
-			if (game_.isAlive(id)) {
-				cout << "Player " << id << "'s commands:" << endl;
-				if (c.type == corpsCommand) {
-					cout << "corps " << c.parameters[1] << " " << CorpsCmd[c.parameters[0]];
-					switch (c.parameters[0]) {
-					case(CMove):
-						cout << " " << Direction[c.parameters[2]];
-						break;
-					case(CStation):
-					case(CBuild):
-						cout << " at (" << data->myCorps[c.parameters[1]].getPos().m_x << "," << data->myCorps[c.parameters[1]].getPos().m_y << ")";
-						break;
-					case(CStationTower):
-					case(CAttackCorps):
-					case(CAttackTower):
-						cout << " " << c.parameters[2];
-						break;
-					case(CRegroup):
-						cout << " with corps " << c.parameters[2];
-						break;
-					case(CRepair):
-						cout << " " << c.parameters[2];
-						break;
-					case(CChangeTerrain):
-						cout << " of (" << data->myCorps[c.parameters[1]].getPos().m_x << "," << data->myCorps[c.parameters[1]].getPos().m_y << ")" << " to " << Terrain[c.parameters[2] - 1];
-						break;
-					default:;
-					}
-				}
-				else if (c.type == towerCommand) {
-					cout << "tower " << c.parameters[1] << " " << CorpsCmd[c.parameters[0]];
-					switch (c.parameters[0]) {
-					case(TProduct):
-						cout << " " << ProductCmd[c.parameters[2]];
-						break;
-					case(TAttackCorps):
-					case(TAttackTower):
-						cout << " " << c.parameters[2];
-						break;
-					default:;
-					}
+			if (c.type == corpsCommand) {
+				cout << "corps " << c.parameters[1] << " " << CorpsCmd[c.parameters[0]];
+				switch (c.parameters[0]) {
+				case(CMove):
+					cout << " " << Direction[c.parameters[2]];
+					break;
+				case(CStation):
+				case(CBuild):
+				case(CRepair):
+				case(CStationTower):
+					cout << " at (" << data->myCorps[c.parameters[1]].getPos().m_x << "," << data->myCorps[c.parameters[1]].getPos().m_y << ")";
+					break;
+				case(CAttackCorps):
+				case(CAttackTower):
+					cout << " " << c.parameters[2];
+					break;
+				case(CRegroup):
+					cout << " with corps " << c.parameters[2];
+					break;
+				case(CChangeTerrain):
+					cout << " of (" << data->myCorps[c.parameters[1]].getPos().m_x << "," << data->myCorps[c.parameters[1]].getPos().m_y << ")" << " to " << Terrain[c.parameters[2] - 1];
+					break;
+				default:;
 				}
 			}
+			else if (c.type == towerCommand) {
+				cout << "tower " << c.parameters[1] << " " << TowerCmd[c.parameters[0]];
+				switch (c.parameters[0]) {
+				case(TProduct):
+					cout << " " << ProductCmd[c.parameters[2]];
+					break;
+				case(TAttackCorps):
+				case(TAttackTower):
+					cout << " " << c.parameters[2];
+					break;
+				default:;
+				}
+			}
+			cout << ".";
 		}
-		if (file_output_enabled_) cout << "." << endl;
+		if (file_output_enabled_) cout  << endl;
 #endif
 	}
 
@@ -656,12 +662,20 @@ namespace DAGAN
 			playerRanker.score = newPlayer.getPlayerScore();
 			playerRanker.CQTowerNum = newPlayer.getCqTowerNum();
 			playerRanker.ELCorpsNum = newPlayer.getElCorpsNum();
-			playerRanker.CPCorpsNum = newPlayer.getCpCorpsNum();
+			playerRanker.CPCorpsNum = newPlayer.getCqCorpsNum();
 			Ranker.push_back(playerRanker);
 		}
 		std::sort(Ranker.begin(), Ranker.end(), rankCmp::compare);  //对玩家排序，按名次升序排序
-		for (int i = 0; i < 4; i++) {
-			game_.getRank()[i] = Ranker[i].ID;
+		for (int i = 1; i <= 4; i++) {
+			int Rank = 0;
+			for (int j = 0; j < 4; j++) {
+				if (Ranker[j].ID == i) {
+					Rank = j + 1;
+					break;
+				}
+			}
+			data->players[i].setRank(Rank);
+			game_.getRank()[i - 1] = Rank;
 		}
 	}
 }

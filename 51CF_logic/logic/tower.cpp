@@ -14,16 +14,18 @@ Tower::Tower(DATA::Data* _data, TPlayerID m_playid, TPoint pos) :m_data(_data)
 	m_PlayerID = m_playid;
 	m_position = pos;
 	m_id = ID;
+	ID++;//这里再更新tower类的ID
 	m_exsit = true;
-	ID++;
 	m_level = 1;//初始等级为1  
 	set_all(m_level);
 	m_experpoint = 0;//初始经验值为0
 	m_productconsume = INF;
 	//更新data
 	m_data->totalTowers++;
-	m_data->players->getTower().insert(m_PlayerID);
-	m_data->gameMap.map[m_position.m_x][m_position.m_y].TowerIndex = m_id;
+	//by jyp : m_data->players->getTower().insert(m_PlayerID);
+	m_data->players->getTower().insert(m_id); //塔下标从0开始
+	//by jyp : m_data->gameMap.map[m_position.m_x][m_position.m_y].TowerIndex = m_id;
+	m_data->gameMap.map[m_position.m_y][m_position.m_x].TowerIndex = m_id;
 	//等待调用更新occupypoint的函数
 	//等待调用更新owner的函数
 }

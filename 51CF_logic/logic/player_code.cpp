@@ -75,6 +75,7 @@ namespace DAGAN {
 
 	bool Player_Code::run(Info &info)
 	{
+		//【FC18】补充超时的判定
 		int time_a = GetTickCount();              //运行某位玩家ai代码开始、结束时有时间戳
 		int time_b;
 		//运行某位玩家ai代码，如果接到异常，则gameover，并报出异常代码玩家的序号

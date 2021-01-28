@@ -434,17 +434,20 @@ ShowInfo
 struct CorpsInfo Crops::ShowInfo()
 {
 	struct CorpsInfo info;
-	info.BuildPoint = m_BuildPoint;
-	info.HealthPoint = m_HealthPoint;
-	info.exist = 1;
 	info.ID = m_myID;
 	info.level = m_level;
 	info.owner = m_PlayerID;
 	info.pos = m_position;
 	info.type = m_type;
 	info.movePoint = m_MovePoint;
-	if (info.type == Battle) info.m_BattleType = m_BattleType;
-	else if (info.type == Construct) info.m_BuildType = m_BuildType;
+	if (info.type == Battle) {
+		info.m_BattleType = m_BattleType;
+		info.HealthPoint = m_HealthPoint;  //玩家用生命值自己算战斗力，不提供
+	}
+	else if (info.type == Construct) {
+		info.m_BuildType = m_BuildType;
+		info.BuildPoint = m_BuildPoint;
+	}
 	return info;
 }
 

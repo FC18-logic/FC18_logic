@@ -1,4 +1,5 @@
 //#2021-1-19 <JYP> 熟悉代码，添加注释
+//#2021-1-28 <JYP> checked，检查代码，更改错误
 #include"map.h"
 #include<fstream>
 #include<iostream>
@@ -187,17 +188,22 @@ bool Map::readMap(ifstream& inMap, bool enableOutput, std::vector<std::string> p
 		cout << "init map......" << endl;
 	inMap >> m_height;
 	inMap >> m_width;
-	data->mapInfoJsonRoot["head"]["height"] = m_height;
-	data->mapInfoJsonRoot["head"]["width"] = m_width;
+	data->mapInfoJsonRoot["head"]["height"] = Json::Value(std::to_string(m_height));
+	data->mapInfoJsonRoot["head"]["width"] = Json::Value(std::to_string(m_width));
 
 
 	//rankInfo
 	//更新当前回合的排名信息JSON，不知道第5名无名氏玩家为什么也在Json里，但是暂时照着FC15原码修改了
 	Json::Value rankInfoJson;
-	for (int i = 1; i < 5; i++) rankInfoJson["rk"].append(i);
-	rankInfoJson["rk"].append(0);
-	for (int i = 1; i < 5; i++) rankInfoJson["scr"].append(1 * TOWER_SCORE);
-	rankInfoJson["scr"].append(INF);
+	Json::Value rankUnit;
+	for (int i = 1; i < 5; i++) {
+		rankUnit["rk"] = Json::Value(std::to_string(i));
+		rankUnit["scr"] = Json::Value(std::to_string(1 * TOWER_SCORE));
+		rankInfoJson.append(rankUnit);
+	}
+	rankUnit["rk"] = Json::Value(std::to_string(0));
+	rankUnit["scr"] = Json::Value(std::to_string(-INF));
+	rankInfoJson.append(rankUnit);
 	data->currentRoundPlayerJson["rankInfo"] = rankInfoJson;
 
 
@@ -205,7 +211,7 @@ bool Map::readMap(ifstream& inMap, bool enableOutput, std::vector<std::string> p
 	if (enableOutput)
 		cout << "init team......" << endl;
 	inMap >> data->totalPlayers;
-	data->commandJsonRoot["head"]["totalPlayers"] = data->totalPlayers; //#json
+	data->commandJsonRoot["head"]["totalPlayers"] = Json::Value(std::to_string(data->totalPlayers)); //#json
 	data->players = new Player[data->totalPlayers];
 
 
@@ -213,8 +219,8 @@ bool Map::readMap(ifstream& inMap, bool enableOutput, std::vector<std::string> p
 
 	for (int i = 1; i < 5; i++) {
 		Json::Value playerJson;
-		playerJson["id"] = Json::Value(i);
-		playerJson["team"] = Json::Value(i);
+		playerJson["id"] = Json::Value(std::to_string(i));
+		playerJson["team"] = Json::Value(std::to_string(i));
 		playerJson["name"] = Json::Value(players_name[i]);
 		data->commandJsonRoot["head"]["playerInfo"].append(playerJson);
 	}
@@ -224,23 +230,24 @@ bool Map::readMap(ifstream& inMap, bool enableOutput, std::vector<std::string> p
 	//初始化玩家信息JSON
 	//初始化玩家操作JSON
 	Json::Value playerActionJson; //
-	for (int i = 0; i != data->totalPlayers; ++i)
+	for (int i = 0; i < data->totalPlayers; ++i)
 	{
 		data->players[i].setdata(data);
 		data->players[i].setID(i + 1);
 
 		Json::Value paj;
-		paj["id"] = Json::Value(int(i + 1));
-		paj["cT"] = Json::Value(-1);
-		paj["tp"] = Json::Value(-1);
-		paj["pT"] = Json::Value(-1);
-		paj["dEC"] = Json::Value(-1);
-		paj["dFC"] = Json::Value(-1);
-		paj["dET"] = Json::Value(-1);
-		paj["dFT"] = Json::Value(-1);
-		paj["dT"] = Json::Value(-1);
-		paj["dir"] = Json::Value(0);
-		paj["mv"] = Json::Value(-1);
+		paj["oId"] = Json::Value(std::to_string(i + 1));
+		paj["id"] = Json::Value(std::to_string(-1));
+		paj["cT"] = Json::Value(std::to_string(-1));
+		paj["tp"] = Json::Value(std::to_string(-1));
+		paj["pT"] = Json::Value(std::to_string(-1));
+		paj["dEC"] = Json::Value(std::to_string(-1));
+		paj["dFC"] = Json::Value(std::to_string(-1));
+		paj["dET"] = Json::Value(std::to_string(-1));
+		paj["dFT"] = Json::Value(std::to_string(-1));
+		paj["dT"] = Json::Value(std::to_string(-1));
+		paj["dir"] = Json::Value(std::to_string(0.0));
+		paj["mv"] = Json::Value(std::to_string(-1));
 		data->currentRoundCommandJson["command"].append(paj);
 	}
 
@@ -268,7 +275,7 @@ bool Map::randomInitMap() {
 		typeOfTerrain[i] = new int[m_width];
 	}
 
-	double minNoise = 1, maxNoise = -1;
+	double minNoise = INF, maxNoise = -INF;
 	for (int i = 0; i < m_height; i++) {             //生成柏林噪声表，并记录其中的最大、最小噪声值
 		for (int j = 0; j < m_width; j++) {
 			typeOfTerrain[i][j] = UNALLOCATED;       //初始化所有格地形均为未分配
@@ -325,7 +332,7 @@ bool Map::randomInitMap() {
 		for (int j = 0; j < m_width; j++) {
 			mapBlock newBlock;               //地块初始化，无塔，平原，没有主人，占有属性值为0
 			newBlock.TowerIndex = NOTOWER;
-			newBlock.owner = -1;
+			newBlock.owner = PUBLIC;
 			newBlock.type = TRPlain;
 			for (int k = 0; k < 4; k++) {
 				newBlock.occupyPoint.push_back(0);    //各方格初始占有属性值均为0
@@ -336,7 +343,11 @@ bool Map::randomInitMap() {
 	for (int i = 0; i < m_height; i++) {      //生成地形
 		for (int j = 0; j < m_width; j++) {
 			int type = typeOfTerrain[i][j];
-			int rank = areaRankMap[type];
+			int rank;
+			if (areaRankMap.count(type) > 0)
+				rank = areaRankMap[type];
+			else
+				rank = 0;
 			map[i][j].type = terrain[rank];
 		}
 	}
@@ -388,19 +399,20 @@ bool Map::randomInitMap() {
 		TPoint towerPoint;
 		towerPoint.m_x = generateRanInt(towerRegion[i].first.m_x, towerRegion[i].second.m_x);
 		towerPoint.m_y = generateRanInt(towerRegion[i].first.m_y, towerRegion[i].second.m_y);
-		map[towerPoint.m_y][towerPoint.m_x].type = TRTower;     //更新data的地图类：当前方格的地形修改为防御塔
-		map[towerPoint.m_y][towerPoint.m_x].owner = i + 1;
-		data->totalTowers++;                      //更新data类：更新防御塔总数
+		map[towerPoint.m_y][towerPoint.m_x].type = TRTower;  //重复 tower构造   //更新data的地图类：当前方格的地形修改为防御塔
+		map[towerPoint.m_y][towerPoint.m_x].owner = i + 1;//重复 tower构造
+		map[towerPoint.m_y][towerPoint.m_x].TowerIndex = i;  //方格上的塔序号
+		//重复 tower构造 data->totalTowers++;                      //更新data类：更新防御塔总数
 		//@@@【FC18】[！！！这个塔的构造函数可能会改]更新data类：向防御塔向量中添加新增的防御塔
 		Tower newTower(data, i + 1, towerPoint);
 		data->myTowers.push_back(newTower);
 		//【FC18】更新player类：向player的防御塔序号向量中添加新的防御塔序号
-		data->players[i].getTower().insert(i);
-		for (int j = 0; j < 8; j++) {
+		//重复 tower构造 data->players[i].getTower().insert(i);
+		for (int j = 0; j < 8; j++) {  //规则：初始防御塔四周8格为道路
 			TPoint p;
 			p.m_x = towerPoint.m_x + paraOffset[j].m_x;
 			p.m_y = towerPoint.m_y + paraOffset[j].m_y;
-			map[p.m_y][p.m_x].occupyPoint[i] = TowerOccupyPoint[0];
+			//重复 tower构造 map[p.m_y][p.m_x].occupyPoint[i] = TowerOccupyPoint[0];
 			map[p.m_y][p.m_x].type = TRRoad;
 		}
 	}
@@ -408,10 +420,12 @@ bool Map::randomInitMap() {
 	////////////////////////////////////////////////////////
 	//【FC18】每个势力防御塔向周边方格施加初始占有属性值  //
 	////////////////////////////////////////////////////////
+	/*重复，tower构造******
 	for (int i = 0; i < data->myTowers.size(); i++) {
 		TPoint towerPoint = data->myTowers[i].getPosition();
 		modifyOccupyPoint(NOTOWER, data->myTowers[i].getOwnerID(), towerPoint);
 	}
+	***********************/
 	/*for (int cnt = 0; cnt < 4; cnt++) {
 		TPoint towerPoint = data->myTowers[cnt].getPosition();
 		TPlayerID ownerID = data->myTowers[cnt].getOwnerID();
@@ -434,12 +448,12 @@ bool Map::randomInitMap() {
 		for (int j = 0; j < m_width; j++) {
 			Json::Value blockJson;
 			Json::Value position;
-			position["x"] = Json::Value(j);
-			position["y"] = Json::Value(i);
+			position["x"] = Json::Value(std::to_string(j));
+			position["y"] = Json::Value(std::to_string(i));
 			blockJson["pos"] = position;
-			blockJson["tp"] = Json::Value(int(map[i][j].type));
-			blockJson["oId"] = Json::Value(map[i][j].owner);
-			/*Json::Value occupyPoint;
+			blockJson["tp"] = Json::Value(std::to_string(int(map[i][j].type)));
+			blockJson["oId"] = Json::Value(std::to_string(map[i][j].owner));
+			/*Json::Value occupyPoint;  暂不提供给Json
 			for (int k = 0; k < 4; k++) {
 				Json::Value occupyPointUnit;
 				occupyPointUnit["id"] = Json::Value(k + 1);
@@ -448,23 +462,23 @@ bool Map::randomInitMap() {
 			}*/
 			if (map[i][j].type == TRTower) {
 				Json::Value towerJson;
-				towerJson["id"] = Json::Value(map[i][j].owner - 1);
-				towerJson["oId"] = Json::Value(map[i][j].owner); 
+				towerJson["id"] = Json::Value(std::to_string(map[i][j].TowerIndex));
+				towerJson["oId"] = Json::Value(std::to_string(map[i][j].owner));
 				Json::Value towerPos;
-				towerPos["x"] = Json::Value(j);
-				towerPos["y"] = Json::Value(i);
+				towerPos["x"] = Json::Value(std::to_string(j));
+				towerPos["y"] = Json::Value(std::to_string(i));
 				towerJson["pos"] = towerPos;
-				towerJson["sL"] = Json::Value(1);
-				towerJson["pP"] = Json::Value(10);
-				towerJson["bP"] = Json::Value(25);
-				towerJson["hP"] = Json::Value(100);
-				towerJson["exp"] = Json::Value(0);
+				towerJson["sL"] = Json::Value(std::to_string(1));
+				towerJson["pP"] = Json::Value(std::to_string(TowerInitConfig[0].initBuildPoint));
+				towerJson["bP"] = Json::Value(std::to_string(TowerInitConfig[0].initProductPoint));
+				towerJson["hP"] = Json::Value(std::to_string(TowerInitConfig[0].initHealthPoint));
+				towerJson["exp"] = Json::Value(std::to_string(0));
 				data->currentRoundTowerJson["tower"].append(towerJson);
 				Json::Value playerJson;
-				playerJson["rk"] = playerJson["tm"] = playerJson["id"] = Json::Value(map[i][j].owner);
-				playerJson["scr"] = 1 * TOWER_SCORE;
-				playerJson["cpN"] = Json::Value(0);
-				playerJson["twN"] = Json::Value(1);
+				playerJson["rk"] = playerJson["tm"] = playerJson["id"] = Json::Value(std::to_string(map[i][j].owner));
+				playerJson["scr"] = Json::Value(std::to_string(1 * TOWER_SCORE));
+				playerJson["cpN"] = Json::Value(std::to_string(0));
+				playerJson["twN"] = Json::Value(std::to_string(1));
 				playerJson["tw"].append(towerJson["id"]);
 				data->currentRoundPlayerJson["player"].append(playerJson);
 			}
@@ -484,7 +498,7 @@ bool Map::randomInitMap() {
 ***********************************************************************************************/
 void Map::saveMapJson() {
 	TRound round = data->getRound();      //更新地图Json前记录当前回合数
-	data->currentRoundMapJson["round"] = Json::Value(round);
+	data->currentRoundMapJson["round"] = Json::Value(std::to_string(round));
 	data->mapInfoJsonRoot["body"].append(data->currentRoundMapJson);
 	data->currentRoundMapJson.clear();
 }
@@ -527,8 +541,8 @@ bool Map::withinMap(TPoint p) {
 ***********************************************************************************************/
 void Map::modifyOccupyPoint(TPlayerID oldOwner, TPlayerID newOwner, TPoint p) {
 	if (!withinMap(p)) return;  //当前方格在地图之外
-	if (oldOwner != NOTOWER) map[p.m_y][p.m_x].occupyPoint[oldOwner - 1] -= INF;
-	if (newOwner != NOTOWER) map[p.m_y][p.m_x].occupyPoint[newOwner - 1] += INF;
+	if (oldOwner != NOTOWER && oldOwner >= 1 && oldOwner <= 4) map[p.m_y][p.m_x].occupyPoint[oldOwner - 1] -= INF;
+	if (newOwner != NOTOWER && newOwner >= 1 && newOwner <= 4) map[p.m_y][p.m_x].occupyPoint[newOwner - 1] += INF;
 	for (int i = p.m_y - 5; i <= p.m_y + 5; i++) {
 		for (int j = p.m_x - 5; j <= p.m_x + 5; j++) {
 			TPoint currentPoint = { j,i };
@@ -568,8 +582,10 @@ TPlayerID Map::ownerChange(TPoint p) {
 		map[p.m_y][p.m_x].owner = PUBLIC;
 		return PUBLIC;
 	}
-	map[p.m_y][p.m_x].owner = occupyID;
-	return occupyID;
+	else {
+		map[p.m_y][p.m_x].owner = occupyID;
+		return occupyID;
+	}
 }
 
 /*****************************s******************************************************************

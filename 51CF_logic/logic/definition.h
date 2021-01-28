@@ -316,13 +316,13 @@ const TOperaNum CorpsOperaNumNeed[CORPS_ACTION_TYPE_NUM] =
 {
 	3,    //移动
 	2,    //驻扎
-	3,    //驻扎塔
+	2,    //驻扎塔
 	3,    //攻击兵团
 	3,    //攻击塔
 	3,    //兵团整编
 	INF,  //兵团解散（去掉）
 	2,    //修建塔
-	3,    //维护塔
+	2,    //维护塔
 	3     //改地形
 };
 
@@ -520,7 +520,7 @@ struct TowerInfo {
 //@@@【FC18】兵团结构体，有需要的信息再加
 struct CorpsInfo
 {
-	bool	exist;		//是否存在
+	//不需要，如果不存在就不录入信息了bool	exist;		//是否存在
 	TPoint	pos;		//兵团坐标
 	int		level;		//兵团等级
 	TCorpsID		ID;	//兵团ID
@@ -558,6 +558,16 @@ struct PlayerInfo
 	TLevel DefenceLevel;          //防御等级
 	size_t maxControlNumber;    //最大控制数
 	set<TCellID> cells; //所有的细胞
+};
+
+
+//Info改传这个东西vector<vector<>> 方便快捷
+struct mapBlock                                 //【FC18】地图方格类
+{
+	terrainType type;                           //【FC18】地块类型，对应terrainType枚举类
+	vector<int> occupyPoint;                    //【FC18】各玩家的占有属性值，秩为玩家序号-1
+	int owner;                                  //【FC18】所属玩家序号，-1为过渡TRANSITION，-2为公共PUBLIC
+	int TowerIndex;								//@@@【FC18】位于该单元格的塔的下标，对应data里的myTowers
 };
 
 //【FC18】地图单元格信息结构体
@@ -785,7 +795,8 @@ struct Info
 	vector<CorpsInfo> corpsInfo;
 
 	//【FC18】地图信息
-	vector<vector<mapBlockInfo>> mapInfo;
+	//vector<vector<mapBlockInfo>> mapInfo;
+	const vector<vector<mapBlock>>* mapInfo;
 
 	//FC15的
 	BaseMap* mapInfo;

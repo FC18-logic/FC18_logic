@@ -15,7 +15,8 @@ void outputResult(Game& game, vector<Player_Code>& players) {
 
 	vector<TPlayerID> rank = game.getRank();   //游戏结果排名(vector)
 	for (size_t i = 0; i < rank.size(); ++i) {
-		ofs << players[rank[i]].getName() << endl;   //按排名输出每个名次的玩家name
+		if (rank[i] > players.size() || rank[i] <= 0) continue;
+		ofs << "rank：" << rank[i] << " --> " << players[rank[i] - 1].getName() << endl;   //按排名输出每个名次的玩家name
 	}
 }
 
@@ -117,7 +118,7 @@ int main(int argc, char** argv)
 	if (players.size() != 4) 
 	{
 		cout << "[Error] Player num not accord with requirements!\n";
-		cout << "Player num should be 4, however, there are" << players.size() << endl;
+		cout << "Player num should be 4, however, there are " << players.size() << " players." << endl;
 		return 5;
 	}
 	cout << "[Info] " << valid_cnt << " players loaded." << endl;
@@ -136,11 +137,11 @@ int main(int argc, char** argv)
 
 	Controller controller(G, players);
 
-	for (int i = 0; i < players.size(); i++)
-	{
+	//旧代码//for (int i = 0; i < players.size(); i++)
+	//旧代码//{
 		//旧代码//controller.getData()->root["head"]["playerInfo"][i]["name"] = players[i].getName();
-		controller.getData()->commandJsonRoot["head"]["playerInfo"][i]["name"] = players[i].getName();
-	}
+		//旧代码//controller.getData()->commandJsonRoot["head"]["playerInfo"][i]["name"] = players[i].getName();
+	//旧代码//}
 	// main
 	//一个回合一个回合的跑
 	while (controller.isValid())
