@@ -455,7 +455,7 @@ bool Map::randomInitMap() {
 			Json::Value blockJson;
 			Json::Value position;
 			position["x"] = Json::Value(std::to_string(j));
-			position["y"] = Json::Value(std::to_string(i));
+			position["z"] = Json::Value(std::to_string(i));
 			blockJson["pos"] = position;
 			blockJson["tp"] = Json::Value(std::to_string(int(map[i][j].type)));
 			blockJson["oId"] = Json::Value(std::to_string(map[i][j].owner));
@@ -472,7 +472,7 @@ bool Map::randomInitMap() {
 				towerJson["oId"] = Json::Value(std::to_string(map[i][j].owner));
 				Json::Value towerPos;
 				towerPos["x"] = Json::Value(std::to_string(j));
-				towerPos["y"] = Json::Value(std::to_string(i));
+				towerPos["z"] = Json::Value(std::to_string(i));
 				towerJson["pos"] = towerPos;
 				towerJson["sL"] = Json::Value(std::to_string(1));
 				towerJson["pP"] = Json::Value(std::to_string(TowerInitConfig[0].initBuildPoint));

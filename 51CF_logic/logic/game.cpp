@@ -1353,7 +1353,7 @@ void Game::saveJson() {
 		Json::Value towerPos;
 		TPoint position = currentTowerInfo.position;
 		towerPos["x"] = Json::Value(std::to_string(position.m_x));
-		towerPos["y"] = Json::Value(std::to_string(position.m_y));
+		towerPos["z"] = Json::Value(std::to_string(position.m_y));
 		towerJson["pos"] = towerPos;
 		towerJson["sL"] = Json::Value(std::to_string(currentTowerInfo.level));
 		towerJson["pP"] = Json::Value(std::to_string(currentTowerInfo.productPoint));
@@ -1368,6 +1368,12 @@ void Game::saveJson() {
 		}
 		data.currentRoundTowerJson["tower"] .append(towerJson);
 	}
+	for (TTowerID u : data.newTower) {
+		data.currentRoundTowerJson["newT"].append(u);
+	}
+	for (TTowerID u : data.dieTower) {
+		data.currentRoundTowerJson["dieT"].append(u);
+	}
 	data.infoJsonRoot["body"]["towerInfo"].append(data.currentRoundTowerJson);
 	data.currentRoundTowerJson.clear();
 
@@ -1381,7 +1387,7 @@ void Game::saveJson() {
 		Json::Value corpsPos;
 		TPoint position = currentCorpsInfo.pos;
 		corpsPos["x"] = Json::Value(std::to_string(position.m_x));
-		corpsPos["y"] = Json::Value(std::to_string(position.m_y));
+		corpsPos["z"] = Json::Value(std::to_string(position.m_y));
 		corpsJson["pos"] = corpsPos;
 		corpsJson["sL"] = Json::Value(std::to_string(currentCorpsInfo.level));
 		corpsJson["mp"] = Json::Value(std::to_string(currentCorpsInfo.movePoint));
@@ -1397,6 +1403,12 @@ void Game::saveJson() {
 		}
 		data.currentRoundCorpsJson["corps"].append(corpsJson);
 	}
+	for (TCorpsID u : data.newCorps) {
+		data.currentRoundCorpsJson["newC"].append(u);
+	}
+	for (TCorpsID u : data.dieCorps) {
+		data.currentRoundCorpsJson["dieC"].append(u);
+	}
 	data.infoJsonRoot["body"]["corpsInfo"].append(data.currentRoundCorpsJson);
 	data.currentRoundCorpsJson.clear();
 
@@ -1407,7 +1419,7 @@ void Game::saveJson() {
 			mapBlockInfo currentBlockInfo = data.gameMap.ShowInfo(j, i);
 			Json::Value blockPos;
 			blockPos["x"] = Json::Value(std::to_string(j));
-			blockPos["y"] = Json::Value(std::to_string(i));
+			blockPos["z"] = Json::Value(std::to_string(i));
 			blockJson["pos"] = blockPos;
 			blockJson["tp"] = Json::Value(std::to_string(currentBlockInfo.type));
 			blockJson["oId"] = Json::Value(std::to_string(currentBlockInfo.owner));

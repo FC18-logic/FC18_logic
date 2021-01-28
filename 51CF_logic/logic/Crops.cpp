@@ -45,6 +45,7 @@ Crops::Crops(DATA::Data* _data, corpsType type, battleCorpsType battletype, cons
 	m_data->corps[m_position.m_y][m_position.m_x].push_back(this);
 	m_data->players[m_PlayerID].addCrops(m_myID);
 	m_data->totalCorps++;
+	m_data->newCorps.insert(m_myID);//记录新产生的兵团序号
 }
 
 /*
@@ -619,6 +620,7 @@ void Crops::KillCorps()
 		}
 	}
 	m_bAlive = false;
+	m_data->dieCorps.insert(m_myID);   //记录死亡兵团ID
 }
 
 //建筑兵修塔

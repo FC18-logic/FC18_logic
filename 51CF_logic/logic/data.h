@@ -50,6 +50,13 @@ namespace DATA                                         //@@@【FC18】名空间
 		Map gameMap;                                   //@@@【FC18】当前的地图
 		TRound totalRounds;                            //【FC18】当前的回合数
 
+
+		set<TTowerID> newTower;                //【FC18】每回合的新塔
+		set<TTowerID> dieTower;                //【FC18】每回合被消灭的塔
+		set<TCorpsID> newCorps;                //【FC18】每回合的新兵团
+		set<TCorpsID> dieCorps;                //【FC18】每回合被消灭的兵团
+
+
 		//关于写JSON文档
 		Json::Value commandJsonRoot;                   //【FC18】所有回合命令的Json根节点
 		Json::Value infoJsonRoot;                      //【FC18】所有回合玩家、防御塔和兵团Json的根节点

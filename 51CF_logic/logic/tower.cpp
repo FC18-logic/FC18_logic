@@ -26,6 +26,8 @@ Tower::Tower(DATA::Data* _data, TPlayerID m_playid, TPoint pos) :m_data(_data)
 	m_data->players->getTower().insert(m_id); //塔下标从0开始
 	//by jyp : m_data->gameMap.map[m_position.m_x][m_position.m_y].TowerIndex = m_id;
 	m_data->gameMap.map[m_position.m_y][m_position.m_x].TowerIndex = m_id;
+	//by jyp : 记录新建的塔ID
+	m_data->newTower.insert(m_id);
 	//等待调用更新occupypoint的函数
 	//等待调用更新owner的函数
 }
@@ -176,6 +178,8 @@ bool Tower::Be_Attacked(TPlayerID enemy_id,THealthPoint hp_decrease)
 			m_data->totalTowers--;
 			m_data->players->getTower().erase(m_PlayerID);
 			m_data->gameMap.map[m_position.m_y][m_position.m_x].TowerIndex = NOTOWER;
+			//by jyp : 记录被摧毁的塔的ID
+			m_data->dieTower.insert(m_id);
 			//等待调用更新occupypoint的函数
 
 		}

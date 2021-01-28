@@ -235,6 +235,12 @@ namespace DAGAN
 		data->currentRoundCorpsJson.clear();
 		data->currentRoundMapJson.clear();
 
+		//清空上一回合塔增加、塔消失、兵团增加、兵团消失的数据
+		data->newTower.clear();
+		data->dieTower.clear();
+		data->newCorps.clear();
+		data->dieCorps.clear();
+
 		//data内的回合数据更新+1
 		volatile TRound dataRound = data->addRound();
 		//Json更新data中的回合数据，此时game中回合数据还保持在上一回合
@@ -373,6 +379,11 @@ namespace DAGAN
 	void Controller::jsonChange(TPlayerID id, Command& c) {
 		if (c.cmdType == corpsCommand) {
 			Json::Value newCmd;
+			Json::Value pos;
+			TPoint point = data->myCorps[c.parameters[1]].getPos();
+			pos["x"] = Json::Value(std::to_string(point.m_x));
+			pos["z"] = Json::Value(std::to_string(point.m_y));
+			newCmd["spot"] = pos;
 			newCmd["oId"] = Json::Value(std::to_string(id));
 			newCmd["cT"] = Json::Value(std::to_string(int(corpsCommand)));
 			newCmd["tp"] = Json::Value(std::to_string(int(c.parameters[0])));
@@ -387,16 +398,28 @@ namespace DAGAN
 			case(CStationTower):
 				break;
 			case(CAttackCorps):
+				TPoint point2 = data->myCorps[c.parameters[2]].getPos();
+				pos["x"] = Json::Value(std::to_string(point2.m_x));
+				pos["z"] = Json::Value(std::to_string(point2.m_y));
+				newCmd["pos"] = pos;
 				newCmd["dEC"] = Json::Value(std::to_string(int(c.parameters[2])));
-				TPoint dirTPoint = data->myCorps[c.parameters[2]].getPos() - data->myCorps[c.parameters[1]].getPos();
+				TPoint dirTPoint = point2 - point;
 				newCmd["dir"] = Json::Value(std::to_string(std::atan2(dirTPoint.m_y, dirTPoint.m_x)));
 				break;
 			case(CAttackTower):
+				TPoint point2 = data->myTowers[c.parameters[2]].getPosition();
+				pos["x"] = Json::Value(std::to_string(point2.m_x));
+				pos["z"] = Json::Value(std::to_string(point2.m_y));
+				newCmd["pos"] = pos;
 				newCmd["dET"] = Json::Value(std::to_string(int(c.parameters[2])));
-				TPoint dirTPoint = data->myTowers[c.parameters[2]].getPosition() - data->myCorps[c.parameters[1]].getPos();
+				TPoint dirTPoint = point2 - point;
 				newCmd["dir"] = Json::Value(std::to_string(std::atan2(dirTPoint.m_y, dirTPoint.m_x)));
 				break;
 			case(CRegroup):
+				TPoint point2 = data->myCorps[c.parameters[2]].getPos();
+				pos["x"] = Json::Value(std::to_string(point2.m_x));
+				pos["z"] = Json::Value(std::to_string(point2.m_y));
+				newCmd["pos"] = pos;
 				newCmd["dFC"] = Json::Value(std::to_string(int(c.parameters[2])));
 				break;
 			case(CBuild):
@@ -411,6 +434,7 @@ namespace DAGAN
 		}
 		else if (c.type == towerCommand) {
 			Json::Value newCmd;
+			Json::Value pos;
 			newCmd["oId"] = Json::Value(std::to_string(id));
 			newCmd["cT"] = Json::Value(std::to_string(int(towerCommand)));
 			newCmd["tp"] = Json::Value(std::to_string(int(c.parameters[0])));
@@ -421,13 +445,21 @@ namespace DAGAN
 				newCmd["pT"] = Json::Value(std::to_string(int(c.parameters[2])));
 				break;
 			case(TAttackCorps):
+				TPoint point = data->myCorps[c.parameters[2]].getPos();
+				pos["x"] = Json::Value(std::to_string(point.m_x));
+				pos["z"] = Json::Value(std::to_string(point.m_y));
+				newCmd["pos"] = pos;
 				newCmd["dEC"] = Json::Value(std::to_string(int(c.parameters[2])));
-				TPoint dirTPoint = data->myCorps[c.parameters[2]].getPos() - data->myTowers[c.parameters[1]].getPosition();
+				TPoint dirTPoint = point - data->myTowers[c.parameters[1]].getPosition();
 				newCmd["dir"] = Json::Value(std::to_string(std::atan2(dirTPoint.m_y, dirTPoint.m_x)));
 				break;
 			case(TAttackTower):
+				TPoint point = data->myTowers[c.parameters[2]].getPosition();
+				pos["x"] = Json::Value(std::to_string(point.m_x));
+				pos["z"] = Json::Value(std::to_string(point.m_y));
+				newCmd["pos"] = pos;
 				newCmd["dET"] = Json::Value(std::to_string(int(c.parameters[2])));
-				TPoint dirTPoint = data->myTowers[c.parameters[2]].getPosition() - data->myTowers[c.parameters[1]].getPosition();
+				TPoint dirTPoint = point - data->myTowers[c.parameters[1]].getPosition();
 				newCmd["dir"] = Json::Value(std::to_string(std::atan2(dirTPoint.m_y, dirTPoint.m_x)));
 				break;
 			default:;
