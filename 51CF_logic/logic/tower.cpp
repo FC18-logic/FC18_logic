@@ -197,7 +197,7 @@ bool Tower::Be_Attacked(TPlayerID enemy_id,THealthPoint hp_decrease)
 			{
 				m_staycrops[i]->ChangeOwner(enemy_id);
 				int num = m_data->players[enemy_id].getElCorpsNum() + 1;
-				m_data->players[ID].setElCorpsNum(num);
+				m_data->players[enemy_id].setElCorpsNum(num);
 			}
 			else
 			{
@@ -216,5 +216,9 @@ void Tower::Recover()
 {
 	struct TowerConfig levelInfo = TowerInitConfig[m_level-1];
 	m_healthpoint += floor(levelInfo.initHealthPoint/3);
+	if(m_healthpoint > levelInfo.initHealthPoint)
+	{
+		m_healthpoint = levelInfo.initHealthPoint;
+	}
 }
 

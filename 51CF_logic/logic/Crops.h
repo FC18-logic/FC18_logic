@@ -42,7 +42,7 @@ public:
 	//兵团操作
 
 	bool Move(int dir);					//作战兵团移动 返回是否成功移动
-	bool Attack(int type, int ID);	//兵团攻击
+	bool Attack(int type, TCorpsID ID);	//兵团攻击
 	bool MergeCrops(TCorpsID ID);				//整编兵团 返回是否整编成功
 	bool GoRest();								//兵团进入驻扎休整状态
 	bool StationInTower();						//玩家驻扎所在位置的己方塔
@@ -52,6 +52,7 @@ public:
 	void ChangeOwner(TPlayerID newowner);		//兵团改变所属
 	void KillCorps();							//兵团死亡
 	void newRound();							//新回合开始
+	void haveCmd();								//接受命令 退出自动休整状态
 
 	//获取兵团属性
 
@@ -63,6 +64,7 @@ public:
 	int getLevel() { return m_level; }		//获取当前兵团的星级（从0开始）
 	TPoint getPos() { return m_position; }	//获取当前兵团的位置
 	battleCorpsType getbattleType() { return m_BattleType; }	//获取当前战斗兵团的类型
+	TPlayerID getPlayerID() { return m_PlayerID; }				//获取兵团所属阵营
 	
 protected:
 

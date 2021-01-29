@@ -589,7 +589,19 @@ namespace DAGAN
 		//需要return返回命令执行是否成功<bool>
 		bool bCmdSucs = false;
 		TCorpsID id = c.parameters[1];
+
+		//如果兵团id越界
+		if(id>=data->myCorps.size())
+			return false;
+
+		//如果兵团id不属于该玩家
+		if(data->myCorps[id].getPlayerID() != ID)
+		{
+			return false;
+		}
+
 		if (id < 0 ||id >= data->myCorps.size()) return false;  //防止玩家命令越界
+		data->myCorps[id].haveCmd();
 		switch (c.parameters[0]) {
 		case(CMove):
 			//兵团移动的操作
@@ -616,6 +628,8 @@ namespace DAGAN
 			{
 				int type = c.parameters[0];
 				TCorpsID enemyid = c.parameters[2];
+				if(enemyid>data->myCorps.size())
+					return false;
 				bCmdSucs = data->myCorps[id].Attack(type,enemyid);
 			}
 			break;
@@ -641,6 +655,11 @@ namespace DAGAN
 		case(CChangeTerrain):
 			//兵团改变方格地形的操作
 			{
+				//如果地形参数不符合要求
+				if(c.parameters[2]<0||c.parameters[2]>5)
+				{
+					return false;
+				}
 				terrainType type = (terrainType)c.parameters[2];
 				bCmdSucs = data->myCorps[id].ChangeTerrain(type);
 			}
