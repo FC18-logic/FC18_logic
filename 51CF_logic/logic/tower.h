@@ -57,16 +57,16 @@ public:
 		return false;
 	}
 	//设置新生产任务
-	void set_producttype(productType m_protype);
+	bool set_producttype(productType m_protype);
 	//设置攻击目标
 	bool set_attacktarget(int crop_id);
 
 
 	/*信息获取*/
 	//获取所属玩家ID
-	const TPlayerID showPlayerID() { return m_PlayerID; }
+	const TPlayerID getPlayerID() { return m_PlayerID; }
 	//获取塔位置
-	const TPoint showPosition() { return m_position; }
+	const TPoint getPosition() { return m_position; }
 	//获取塔等级
 	int getLevel() { return m_level; }
 	//获取塔当前是否存活（等级小于1即被摧毁）

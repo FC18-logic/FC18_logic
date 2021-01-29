@@ -738,25 +738,28 @@ namespace DAGAN
 		//需要return返回命令执行是否成功<bool>
 		bool bCmdSucs = false;
 		TCorpsID id = c.parameters[1];
-		if (id < 0 || id >= data->myTowers.size()) return false;  //防止玩家命令越界
+		//塔id越界
+		if (id < 0 || id >= data->myTowers.size())
+			return false;  
 		switch (c.parameters[0]) {
 		case(TProduct):
-			//塔生产任务的操作
+			//设置生产任务
+			//bCmdSucs = data->myTowers[id].set_producttype(c.parameters[2]);
+			//return bCmdSucs;
 			break;
 		case(TAttackCorps):
-			//塔攻击兵团的操作
-			if (c.parameters[2] < 0 || c.parameters[2] >= data->myCorps.size()) return false;   //越界：操作数非法
+			//by lxj：函数内包含此判断
+			//设置攻击目标
+			//越界：操作数非法
+			//if (c.parameters[2] < 0 || c.parameters[2] >= data->myCorps.size()) 
+			//	return false;   
+			bCmdSucs = data->myTowers[id].set_attacktarget(c.parameters[2]);
+			return bCmdSucs;
 			break;
-		//case(TAttackTower):
-			//塔攻击防御塔的操作
-			//if (c.parameters[2] < 0 || c.parameters[2] >= data->myTowers.size()) return false;   //越界：操作数非法
-			//break;
 		default:
 			return false;
 		}
 	}
-
-
 	/***********************************************************************************************
 	*函数名 :【FC18】getGameRank获取更新游戏排名函数函数
 	*函数功能描述 : 计算玩家游戏排名，得到降序排序放到Game::Rank里面

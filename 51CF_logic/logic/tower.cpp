@@ -27,7 +27,7 @@ Tower::Tower(DATA::Data* _data, TPlayerID m_playid, TPoint pos) :m_data(_data)
 	//by jyp : 记录新建的塔ID
 	m_data->newTower.insert(m_id);
 	//更新occupypoint/owner
-	m_data->gameMap.modifyOccupyPoint(m_data->gameMap.map[m_position.m_y][m_position.m_x].owner, m_playid, m_position);
+	m_data->gameMap.modifyOccupyPoint(m_data->gameMap.map[m_position.m_y][m_position.m_x].owner, m_PlayerID, m_position);
 }
 /*
 名称：set_all
@@ -110,18 +110,19 @@ void Tower::product_crops(productType protype)
 	}
 		
 }
-
 /*
 名称：set_producttype
 功能：结算上一回合生产任务完成情况/设置新的生产任务
 参数：待设置生产任务 
-返回值：上一回合生产任务是否完成
+返回值：是否设置成功
 by lxj
 */
-void Tower::set_producttype(productType m_protype)
+bool Tower::set_producttype(productType m_protype)
 {
 	set_level();
-	if (m_productconsume <= 0) //上一回合生产任务完成
+	if (m_producttype < 0 || m_producttype>5)//生产任务类型越界
+		return false;
+	if (protask_finish() == true)//上一回合生产任务完成
 	{
 		if (m_producttype < 5) //当前任务为生产兵团    
 			product_crops(m_producttype);
@@ -129,9 +130,7 @@ void Tower::set_producttype(productType m_protype)
 		{
 			m_level += 1;//完成后塔上升一级
 			if (m_level > MAX_TOWER_LEVEL) //不得超过最大等级
-			{
 				m_level = MAX_TOWER_LEVEL;
-			}
 			set_all(m_level);
 		}
 	}
@@ -140,7 +139,7 @@ void Tower::set_producttype(productType m_protype)
 		if (m_producttype == m_protype) //继续上一回合的完成任务
 		{
 			m_productconsume -= m_productpoint;
-			return;
+			return true;
 		}
 	}
 	m_producttype = m_protype;
@@ -155,6 +154,7 @@ void Tower::set_producttype(productType m_protype)
 		m_productconsume = 40 * m_level;
 		m_productconsume -= m_productpoint;
 	}
+	return true;
 }
 /*
 名称：get_towerbp
@@ -193,7 +193,7 @@ bool Tower::Be_Attacked(TPlayerID enemy_id,THealthPoint hp_decrease)
 			//by jyp : 记录被摧毁的塔的ID
 			m_data->dieTower.insert(m_id);
 			//更新occupypoint/owner
-			m_data->gameMap.modifyOccupyPoint(m_data->gameMap.map[m_position.m_y][m_position.m_x].owner, m_playid, m_position);
+			m_data->gameMap.modifyOccupyPoint(m_data->gameMap.map[m_position.m_y][m_position.m_x].owner, m_PlayerID, m_position);
 		}
 		//塔被攻占
 		else
@@ -230,6 +230,7 @@ by lxj
 */
 bool Tower::set_attacktarget(int crop_id) 
 {
+	//攻击失败
 	if (crop_id < 0 || crop_id > m_data->totalCorps - 1)//id越界
 		return false;
 	Crops enemy = m_data->myCorps[crop_id];
