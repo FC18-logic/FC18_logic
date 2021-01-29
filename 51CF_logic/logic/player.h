@@ -44,6 +44,14 @@ public:
 	int getRank() { return rank; }
 	//【FC18】设置玩家排名
 	void setRank(int Rank) { rank = Rank; }
+	//【FC18】获取玩家姓名
+	string getName() { return name; }
+	//【FC18】设置玩家姓名
+	void setName(string Name) { name = Name; }
+	//【FC18】获取玩家积分
+	TScore getScore() { return score; }
+	//【FC18】设置玩家积分
+	void setScore(TScore Score) { score = Score; }
 
 	//FC15的
 	TResourceD totalResource();//获取所有塔资源数的总和
@@ -67,9 +75,10 @@ private:
 	int deadRound;                                                          //【FC18】死掉的回合
 	DATA::Data* data;                                                       //【FC18】数据的存储与共享
 	TPlayerID m_id;                                                         //【FC18】玩家ID
-	int conqueTowerNum;                                                     //@@@【FC18】玩家占领防御塔数
-	int eliminateCorpsNum;                                                  //@@@【FC18】玩家消灭敌军兵团数量
-	int captureCorpsNum;     
+	string name;                                                            //【FC18】玩家的姓名
+	int conqueTowerNum;                                                     //【FC18】玩家占领防御塔数
+	int eliminateCorpsNum;                                                  //【FC18】玩家消灭敌军兵团数量
+	int captureCorpsNum;                                                    //【FC18】被俘虏的兵团数
 	//@@@【FC18】玩家俘虏敌军兵团数量
 	//@@@【FC18】指向当前玩家所有防御塔的set数据结构，参考原来的std::set<TCellID> m_cells
 	std::set<TTowerID> m_tower;
@@ -78,6 +87,7 @@ private:
 	std::set<TCorpsID> m_crops;//由兵团类内部修改
 	
 	int rank;   //【FC18】玩家排名
+	int score;  //【FC18】玩家积分
 	//FC15的
 	std::set<TCellID> m_cells;//当前细胞
 	TResourceD m_techPoint;//科技点数

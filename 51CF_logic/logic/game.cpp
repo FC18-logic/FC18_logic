@@ -10,22 +10,22 @@
 bool Game::init(string file, string json_file, vector<string> players_name)   //[【FC18】接着用，改好了
 {
 	//【FC18】Json文件名
-	cmd_json_filename = json_file.append("_cmd.json");
-	info_json_filename = json_file.append("_info.json");
-	mapinfo_json_filename = json_file.append("_map.json");
+	cmd_json_filename = json_file.append("log_info.json");
+	info_json_filename = json_file.append("everyround_info.json");
+	mapinfo_json_filename = json_file.append("map_info.json");
 	//#json
 	roundTime.push_back(clock());
 	Json::Value Head;     //【FC18】
 	Json::Value Body;     //【FC18】
-	data.commandJsonRoot["head"] = Head;   //【FC18】
-	data.commandJsonRoot["body"] = Body;   //【FC18】
-	data.infoJsonRoot["body"]    = Body;   //【FC18】
+	//data.commandJsonRoot["head"] = Head;   //【FC18】
+	//data.commandJsonRoot["body"] = Body;   //【FC18】
+	//data.infoJsonRoot["body"]    = Body;   //【FC18】
 	data.mapInfoJsonRoot["head"] = Head;   //【FC18】
 	data.mapInfoJsonRoot["body"] = Body;   //【FC18】
 	data.currentRoundCommandJson["round"] = Json::Value(std::to_string(0));   //【FC18】
-	data.currentRoundCorpsJson["round"]   = Json::Value(std::to_string(0));   //【FC18】
-	data.currentRoundTowerJson["round"]   = Json::Value(std::to_string(0));   //【FC18】
-	data.currentRoundPlayerJson["round"]  = Json::Value(std::to_string(0));   //【FC18】
+	//data.currentRoundCorpsJson["round"]   = Json::Value(std::to_string(0));   //【FC18】
+	//data.currentRoundTowerJson["round"]   = Json::Value(std::to_string(0));   //【FC18】
+	//data.currentRoundPlayerJson["round"]  = Json::Value(std::to_string(0));   //【FC18】
 	data.currentRoundMapJson["round"]     = Json::Value(std::to_string(0));   //【FC18】
 
 
@@ -108,20 +108,26 @@ bool Game::init(string file, string json_file, vector<string> players_name)   //
 	//旧代码//data.root["head"]["totalRounds"] = currentRound + 1;
 	//旧代码//data.root["body"].append(data.currentRoundJson);
 	//旧代码//data.currentRoundJson.clear();
-	data.commandJsonRoot["head"]["totalRounds"] = Json::Value(std::to_string(totalRounds));  //初始化为0回合
-	data.commandJsonRoot["body"].append(data.currentRoundCommandJson);
+	//data.commandJsonRoot["head"]["totalRounds"] = Json::Value(std::to_string(totalRounds));  //初始化为0回合
+	//data.commandJsonRoot["body"].append(data.currentRoundCommandJson);
+	data.commandJsonRoot.append(data.currentRoundCommandJson);
 	data.currentRoundCommandJson.clear();
 
 
 	data.gameMap.saveMapJson();
 	
-	data.infoJsonRoot["body"]["corpsInfo"].append(data.currentRoundCorpsJson);
+
+	Json::Value roundInfo;
+	//data.infoJsonRoot["body"]["corpsInfo"].append(data.currentRoundCorpsJson);
+	roundInfo["corps"] = data.currentRoundCorpsJson;
 	data.currentRoundCorpsJson.clear();
-	data.infoJsonRoot["body"]["towerInfo"].append(data.currentRoundTowerJson);
+	//data.infoJsonRoot["body"]["towerInfo"].append(data.currentRoundTowerJson);
+	roundInfo["tower"] = data.currentRoundTowerJson;
 	data.currentRoundTowerJson.clear();
-	data.infoJsonRoot["body"]["playerInfo"].append(data.currentRoundPlayerJson);
+	//data.infoJsonRoot["body"]["playerInfo"].append(data.currentRoundPlayerJson);
+	roundInfo["player"] = data.currentRoundPlayerJson;
 	data.currentRoundPlayerJson.clear();
-	
+	data.infoJsonRoot.append(roundInfo);
 
 	//输出到文件 #json 
 	Json::FastWriter sw_cmd,sw_info,sw_map;
@@ -1315,6 +1321,8 @@ Info Game::generatePlayerInfo(TPlayerID id) {
 ***********************************************************************************************/
 void Game::saveJson() {
 	//保存这一轮的用户命令数据
+	Json::Value roundInfo;  //当前回合数据
+	roundInfo["round"] = data.getRound();   //在这里增加回合数
 	data.commandJsonRoot["body"].append(data.currentRoundCommandJson);
 	data.currentRoundCommandJson.clear();
 
@@ -1323,24 +1331,26 @@ void Game::saveJson() {
 		Json::Value playerJson;
 		Player currentPlayer = data.players[i];
 		playerJson["id"] = Json::Value(std::to_string(currentPlayer.getId()));
-		playerJson["tm"] = Json::Value(std::to_string(currentPlayer.getId()));
-		playerJson["rk"] = Json::Value(std::to_string(currentPlayer.getRank()));
-		playerJson["scr"] = Json::Value(std::to_string(currentPlayer.getPlayerScore()));
-		Json::Value rankJson;
-		rankJson["rk"] = playerJson["rk"];
-		rankJson["scr"] = playerJson["scr"];
+		playerJson["nm"] = Json::Value(currentPlayer.getName());
 		playerJson["cpN"] = Json::Value(std::to_string(currentPlayer.getCrops().size()));
 		playerJson["twN"] = Json::Value(std::to_string(currentPlayer.getTower().size()));
-		for (TCorpsID i : currentPlayer.getCrops()) {
+		playerJson["scr"] = Json::Value(std::to_string(currentPlayer.getScore()));
+		playerJson["rk"] = Json::Value(std::to_string(currentPlayer.getRank()));
+		//Json::Value rankJson;
+		//rankJson["rk"] = playerJson["rk"];
+		//rankJson["scr"] = playerJson["scr"];
+		/*for (TCorpsID i : currentPlayer.getCrops()) {
 			playerJson["cp"].append(Json::Value(std::to_string(i)));
 		}
 		for (TTowerID i : currentPlayer.getTower()) {
 			playerJson["tw"].append(Json::Value(std::to_string(i)));
-		}
-		data.currentRoundPlayerJson["player"].append(playerJson);
-		data.currentRoundPlayerJson["rank"].append(rankJson);
+		}*/
+		//data.currentRoundPlayerJson["player"].append(playerJson);
+		data.currentRoundPlayerJson.append(playerJson);
+		//data.currentRoundPlayerJson["rank"].append(rankJson);
 	}
-	data.infoJsonRoot["body"]["playerInfo"].append(data.currentRoundPlayerJson);
+	//data.infoJsonRoot["body"]["playerInfo"].append(data.currentRoundPlayerJson);
+	roundInfo["player"] = data.currentRoundPlayerJson;
 	data.currentRoundPlayerJson.clear();
 
 	//保存这一轮结束的防御塔数据
@@ -1349,32 +1359,43 @@ void Game::saveJson() {
 		Json::Value towerJson;
 		TowerInfo currentTowerInfo = data.myTowers[i].ShowInfo();
 		towerJson["id"] = Json::Value(std::to_string(currentTowerInfo.ID));
-		towerJson["oId"] = Json::Value(std::to_string(currentTowerInfo.ownerID));
-		Json::Value towerPos;
 		TPoint position = currentTowerInfo.position;
-		towerPos["x"] = Json::Value(std::to_string(position.m_x));
-		towerPos["z"] = Json::Value(std::to_string(position.m_y));
-		towerJson["pos"] = towerPos;
-		towerJson["sL"] = Json::Value(std::to_string(currentTowerInfo.level));
+		towerJson["x"] = Json::Value(std::to_string(position.m_x));
+		towerJson["z"] = Json::Value(std::to_string(position.m_y));
+		towerJson["oId"] = Json::Value(std::to_string(currentTowerInfo.ownerID));
 		towerJson["pP"] = Json::Value(std::to_string(currentTowerInfo.productPoint));
-		towerJson["bP"] = Json::Value(std::to_string(currentTowerInfo.battlePoint));
-		towerJson["hP"] = Json::Value(std::to_string(currentTowerInfo.healthPoint));
-		towerJson["exp"] = Json::Value(std::to_string(currentTowerInfo.experPoint));
-		if (currentTowerInfo.pdtType != NOTASK) {    //确认一下没有生产任务怎么样
+		//if (currentTowerInfo.pdtType != NOTASK) {    //确认一下没有生产任务怎么样
 			Json::Value production;
-			production["pT"] = Json::Value(std::to_string(currentTowerInfo.pdtType));
-			production["pC"] = Json::Value(std::to_string(currentTowerInfo.productConsume));
+			if (data.myTowers[i].protask_finish() == true)  //生产任务完成
+			{
+				production["pT"] = Json::Value(std::to_string(NOTASK));
+				production["pC"] = Json::Value(std::to_string(-1));
+			}
+			else 
+			{
+				production["pT"] = Json::Value(std::to_string(currentTowerInfo.pdtType));
+				production["pC"] = Json::Value(std::to_string(currentTowerInfo.productConsume));
+			}
 			towerJson["pdt"] = production;
-		}
-		data.currentRoundTowerJson["tower"] .append(towerJson);
+		//}
+		towerJson["hP"] = Json::Value(std::to_string(currentTowerInfo.healthPoint));
+		towerJson["bP"] = Json::Value(std::to_string(currentTowerInfo.battlePoint));
+		towerJson["exp"] = Json::Value(std::to_string(currentTowerInfo.experPoint));
+		towerJson["sL"] = Json::Value(std::to_string(currentTowerInfo.level));
+		if (data.newTower.find(currentTowerInfo.ID) != data.newTower.end())
+			towerJson["nT"] = Json::Value(to_string(1));
+		else
+			towerJson["nT"] = Json::Value(to_string(0));
+		data.currentRoundTowerJson.append(towerJson);
 	}
-	for (TTowerID u : data.newTower) {
+	/*for (TTowerID u : data.newTower) {
 		data.currentRoundTowerJson["newT"].append(u);
 	}
 	for (TTowerID u : data.dieTower) {
 		data.currentRoundTowerJson["dieT"].append(u);
-	}
-	data.infoJsonRoot["body"]["towerInfo"].append(data.currentRoundTowerJson);
+	}*/
+	//data.infoJsonRoot["body"]["towerInfo"].append(data.currentRoundTowerJson);
+	roundInfo["tower"] = data.currentRoundTowerJson;
 	data.currentRoundTowerJson.clear();
 
 	//保存这一轮结束的兵团数据
@@ -1383,44 +1404,53 @@ void Game::saveJson() {
 		Json::Value corpsJson;
 		CorpsInfo currentCorpsInfo = data.myCorps[i].ShowInfo();
 		corpsJson["id"] = Json::Value(std::to_string(currentCorpsInfo.ID));
-		corpsJson["oId"] = Json::Value(std::to_string(currentCorpsInfo.owner));
-		Json::Value corpsPos;
 		TPoint position = currentCorpsInfo.pos;
-		corpsPos["x"] = Json::Value(std::to_string(position.m_x));
-		corpsPos["z"] = Json::Value(std::to_string(position.m_y));
-		corpsJson["pos"] = corpsPos;
-		corpsJson["sL"] = Json::Value(std::to_string(currentCorpsInfo.level));
-		corpsJson["mp"] = Json::Value(std::to_string(currentCorpsInfo.movePoint));
+		corpsJson["x"] = Json::Value(std::to_string(position.m_x));
+		corpsJson["z"] = Json::Value(std::to_string(position.m_y));
+		corpsJson["oId"] = Json::Value(std::to_string(currentCorpsInfo.owner));
 		if (currentCorpsInfo.type == Battle) {
-			corpsJson["tp"] = Json::Value(std::to_string(int(Battle)));
+			corpsJson["tp"] = Json::Value(std::to_string(currentCorpsInfo.m_BattleType));
+			corpsJson["lP"] = Json::Value(std::to_string(-1));
+			corpsJson["mp"] = Json::Value(std::to_string(currentCorpsInfo.movePoint));
+			corpsJson["bP"] = Json::Value(std::to_string(data.myCorps[i].getCE()));
 			corpsJson["hP"] = Json::Value(std::to_string(currentCorpsInfo.HealthPoint));
-			corpsJson["Btp"] = Json::Value(std::to_string(currentCorpsInfo.m_BattleType));
 		}
 		else if (currentCorpsInfo.type == Construct) {
-			corpsJson["tp"] = Json::Value(std::to_string(int(Construct)));
-			corpsJson["bP"] = Json::Value(std::to_string(currentCorpsInfo.BuildPoint));
-			corpsJson["Ctp"] = Json::Value(std::to_string(currentCorpsInfo.m_BuildType));
+			corpsJson["tp"] = Json::Value(std::to_string(currentCorpsInfo.m_BuildType + 3));
+			corpsJson["lP"] = Json::Value(std::to_string(currentCorpsInfo.BuildPoint));
+			corpsJson["mp"] = Json::Value(std::to_string(currentCorpsInfo.movePoint));
+			corpsJson["bP"] = Json::Value(std::to_string(-1));
+			corpsJson["hP"] = Json::Value(std::to_string(-1));
 		}
-		data.currentRoundCorpsJson["corps"].append(corpsJson);
+		corpsJson["sL"] = Json::Value(std::to_string(currentCorpsInfo.level));
+		if (data.newCorps.find(currentCorpsInfo.ID) != data.newCorps.end()) {
+			corpsJson["nC"] = Json::Value(std::to_string(1));
+		}
+		else
+			corpsJson["nC"] = Json::Value(std::to_string(0));
+		data.currentRoundCorpsJson.append(corpsJson);
 	}
-	for (TCorpsID u : data.newCorps) {
+	/*for (TCorpsID u : data.newCorps) {
 		data.currentRoundCorpsJson["newC"].append(u);
 	}
 	for (TCorpsID u : data.dieCorps) {
 		data.currentRoundCorpsJson["dieC"].append(u);
-	}
-	data.infoJsonRoot["body"]["corpsInfo"].append(data.currentRoundCorpsJson);
+	}*/
+	//data.infoJsonRoot["body"]["corpsInfo"].append(data.currentRoundCorpsJson);
+	roundInfo["corps"] = data.currentRoundCorpsJson;
 	data.currentRoundCorpsJson.clear();
+
+	data.infoJsonRoot.append(roundInfo);
 
 	//保存这一轮的地图数据
 	for (int i = 0; i < data.gameMap.getHeigth(); i++) {
 		for (int j = 0; j < data.gameMap.getWidth(); j++) {
 			Json::Value blockJson;
 			mapBlockInfo currentBlockInfo = data.gameMap.ShowInfo(j, i);
-			Json::Value blockPos;
-			blockPos["x"] = Json::Value(std::to_string(j));
-			blockPos["z"] = Json::Value(std::to_string(i));
-			blockJson["pos"] = blockPos;
+			//Json::Value blockPos;
+			blockJson["x"] = Json::Value(std::to_string(j));
+			blockJson["z"] = Json::Value(std::to_string(i));
+			//blockJson["pos"] = blockPos;
 			blockJson["tp"] = Json::Value(std::to_string(currentBlockInfo.type));
 			blockJson["oId"] = Json::Value(std::to_string(currentBlockInfo.owner));
 			data.currentRoundMapJson["map"].append(blockJson);

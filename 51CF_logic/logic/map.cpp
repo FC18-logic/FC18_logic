@@ -194,7 +194,7 @@ bool Map::readMap(ifstream& inMap, bool enableOutput, std::vector<std::string> p
 
 	//rankInfo
 	//更新当前回合的排名信息JSON，不知道第5名无名氏玩家为什么也在Json里，但是暂时照着FC15原码修改了
-	Json::Value rankInfoJson;
+	/*Json::Value rankInfoJson;
 	Json::Value rankUnit;
 	for (int i = 1; i < 5; i++) {
 		rankUnit["rk"] = Json::Value(std::to_string(i));
@@ -204,26 +204,26 @@ bool Map::readMap(ifstream& inMap, bool enableOutput, std::vector<std::string> p
 	rankUnit["rk"] = Json::Value(std::to_string(0));
 	rankUnit["scr"] = Json::Value(std::to_string(-INF));
 	rankInfoJson.append(rankUnit);
-	data->currentRoundPlayerJson["rankInfo"] = rankInfoJson;
+	data->currentRoundPlayerJson["rankInfo"] = rankInfoJson;*/
 
 
 	//初始化阵营
 	if (enableOutput)
 		cout << "init team......" << endl;
 	inMap >> data->totalPlayers;
-	data->commandJsonRoot["head"]["totalPlayers"] = Json::Value(std::to_string(data->totalPlayers)); //#json
+	//data->commandJsonRoot["head"]["totalPlayers"] = Json::Value(std::to_string(data->totalPlayers)); //#json
 	data->players = new Player[data->totalPlayers];
 
 
 
 
-	for (int i = 1; i < 5; i++) {
+	/*for (int i = 1; i < 5; i++) {
 		Json::Value playerJson;
 		playerJson["id"] = Json::Value(std::to_string(i));
 		playerJson["team"] = Json::Value(std::to_string(i));
 		playerJson["name"] = Json::Value(players_name[i]);
 		data->commandJsonRoot["head"]["playerInfo"].append(playerJson);
-	}
+	}*/
 
 
 	//#json add
@@ -234,20 +234,26 @@ bool Map::readMap(ifstream& inMap, bool enableOutput, std::vector<std::string> p
 	{
 		data->players[i].setdata(data);
 		data->players[i].setID(i + 1);
+		data->players[i].setName(players_name[i]);
+		Json::Value playerJson;
+		playerJson["id"] = Json::Value(std::to_string(i + 1));
+		playerJson["nm"] = Json::Value(players_name[i]);
+		playerJson["cpN"] = Json::Value(std::to_string(0));
+		playerJson["twN"] = Json::Value(std::to_string(1));
+		playerJson["scr"] = Json::Value(std::to_string(1 * TOWER_SCORE));
+		playerJson["rk"] = Json::Value(std::to_string(i + 1));
+		data->currentRoundPlayerJson.append(playerJson);
 
 		Json::Value paj;
 		paj["oId"] = Json::Value(std::to_string(i + 1));
-		paj["id"] = Json::Value(std::to_string(-1));
-		paj["cT"] = Json::Value(std::to_string(-1));
 		paj["tp"] = Json::Value(std::to_string(-1));
-		paj["pT"] = Json::Value(std::to_string(-1));
-		paj["dEC"] = Json::Value(std::to_string(-1));
-		paj["dFC"] = Json::Value(std::to_string(-1));
-		paj["dET"] = Json::Value(std::to_string(-1));
-		paj["dFT"] = Json::Value(std::to_string(-1));
+		paj["id"] = Json::Value(std::to_string(-1));
+		paj["x"] = Json::Value(std::to_string(-1));
+		paj["z"] = Json::Value(std::to_string(-1));
+		paj["rst"] = Json::Value(std::to_string(0));
 		paj["dT"] = Json::Value(std::to_string(-1));
-		paj["dir"] = Json::Value(std::to_string(0.0));
-		paj["mv"] = Json::Value(std::to_string(-1));
+		paj["pT"] = Json::Value(std::to_string(-1));
+		paj["aid"] = Json::Value(std::to_string(-1));
 		data->currentRoundCommandJson["command"].append(paj);
 	}
 
@@ -453,10 +459,10 @@ bool Map::randomInitMap() {
 	for (int i = 0; i < m_height; i++) {
 		for (int j = 0; j < m_width; j++) {
 			Json::Value blockJson;
-			Json::Value position;
-			position["x"] = Json::Value(std::to_string(j));
-			position["z"] = Json::Value(std::to_string(i));
-			blockJson["pos"] = position;
+			//Json::Value position;
+			blockJson["x"] = Json::Value(std::to_string(j));
+			blockJson["z"] = Json::Value(std::to_string(i));
+			//blockJson["pos"] = position;
 			blockJson["tp"] = Json::Value(std::to_string(int(map[i][j].type)));
 			blockJson["oId"] = Json::Value(std::to_string(map[i][j].owner));
 			/*Json::Value occupyPoint;  暂不提供给Json
@@ -469,24 +475,29 @@ bool Map::randomInitMap() {
 			if (map[i][j].type == TRTower) {
 				Json::Value towerJson;
 				towerJson["id"] = Json::Value(std::to_string(map[i][j].TowerIndex));
+				//Json::Value towerPos;
+				towerJson["x"] = Json::Value(std::to_string(j));
+				towerJson["z"] = Json::Value(std::to_string(i));
+				//towerJson["pos"] = towerPos;
 				towerJson["oId"] = Json::Value(std::to_string(map[i][j].owner));
-				Json::Value towerPos;
-				towerPos["x"] = Json::Value(std::to_string(j));
-				towerPos["z"] = Json::Value(std::to_string(i));
-				towerJson["pos"] = towerPos;
-				towerJson["sL"] = Json::Value(std::to_string(1));
 				towerJson["pP"] = Json::Value(std::to_string(TowerInitConfig[0].initBuildPoint));
-				towerJson["bP"] = Json::Value(std::to_string(TowerInitConfig[0].initProductPoint));
+				Json::Value production;
+				production["pT"] = Json::Value(std::to_string(NOTASK));
+				production["pC"] = Json::Value(std::to_string(-1));
+				towerJson["pdt"] = production;
 				towerJson["hP"] = Json::Value(std::to_string(TowerInitConfig[0].initHealthPoint));
+				towerJson["bP"] = Json::Value(std::to_string(TowerInitConfig[0].initProductPoint));
 				towerJson["exp"] = Json::Value(std::to_string(0));
-				data->currentRoundTowerJson["tower"].append(towerJson);
-				Json::Value playerJson;
+				towerJson["sL"] = Json::Value(std::to_string(1));
+				towerJson["nT"] = Json::Value(std::to_string(1));
+				data->currentRoundTowerJson.append(towerJson);
+				/*Json::Value playerJson;
 				playerJson["rk"] = playerJson["tm"] = playerJson["id"] = Json::Value(std::to_string(map[i][j].owner));
 				playerJson["scr"] = Json::Value(std::to_string(1 * TOWER_SCORE));
 				playerJson["cpN"] = Json::Value(std::to_string(0));
 				playerJson["twN"] = Json::Value(std::to_string(1));
 				playerJson["tw"].append(towerJson["id"]);
-				data->currentRoundPlayerJson["player"].append(playerJson);
+				data->currentRoundPlayerJson["player"].append(playerJson);*/
 			}
 			data->currentRoundMapJson["map"].append(blockJson);
 		}

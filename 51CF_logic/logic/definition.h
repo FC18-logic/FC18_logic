@@ -8,7 +8,7 @@
 #define TRANSITION -1   //过渡地形区域
 #define PUBLIC 0      //公共地形区域
 #define NOTOWER -1    //当前方格没有防御塔
-#define NOTASK  -1    //当前防御塔无生产任务
+//#define NOTASK  -1    //当前防御塔无生产任务
 #define OUTOFRANGE -2  //当前方格在地图之外
 
 
@@ -178,6 +178,23 @@ enum CorpsCommandEnum
 	CChangeTerrain = 9,       //改变方格地形                                     √
 };
 
+//【FC18】命令在Json中的代号(J表示Json代号)
+enum CmdJsonNumber
+{
+	JMove = 0,
+	JStation = 1,
+	JStationTower = 2,
+	JAttackCorps = 3,
+	JAttackTower = 4,
+	JRegroup = 5,
+	JDissolve = 6,
+	JBuild = 7,
+	JRepair = 8,
+	JChangeTerrain = 9,
+	JProduct = 10,
+	JTowerAttackCorps = 11,
+	JTowerSttackTower = 12
+};
 
 //【FC18】兵团移动的方向
 enum corpsMoveDir
@@ -205,7 +222,8 @@ enum productType
 	PCavalry       = 2,       //生产骑兵         1star-骑兵兵团
 	PBuilder       = 3,       //生产建造者        1-建造者兵团
 	PExtender      = 4,       //生产开拓者        1-开拓者兵团
-	PUpgrade       = 5        //塔升级任务      塔等级+1（max=8)
+	PUpgrade       = 5,       //塔升级任务      塔等级+1（max=8)
+	NOTASK         = -1
 };
 
 

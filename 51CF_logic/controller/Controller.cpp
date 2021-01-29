@@ -41,6 +41,17 @@ namespace DAGAN
 		}
 	};
 
+	struct configCmdTool { //写Json文档的Cmd部分统一接口需要
+		int from_id = -1;
+		int cm_type = -1;
+		int getcm_id = -1;
+		int aim_x = -1;
+		int aim_z = -1;
+		int result = 0;
+		int dT = -1;
+		int pT = -1;
+		int another_id = -1;
+	};
 
 	void Controller::run(char* json_filename)
 	{
@@ -245,9 +256,9 @@ namespace DAGAN
 		volatile TRound dataRound = data->addRound();
 		//Json更新data中的回合数据，此时game中回合数据还保持在上一回合
 		data->currentRoundCommandJson["round"] = Json::Value(std::to_string(dataRound));
-		data->currentRoundPlayerJson["round"] = Json::Value(std::to_string(dataRound));
-		data->currentRoundTowerJson["round"] = Json::Value(std::to_string(dataRound));
-		data->currentRoundCorpsJson["round"] = Json::Value(std::to_string(dataRound));
+		//data->currentRoundPlayerJson["round"] = Json::Value(std::to_string(dataRound));
+		//data->currentRoundTowerJson["round"] = Json::Value(std::to_string(dataRound));
+		//data->currentRoundCorpsJson["round"] = Json::Value(std::to_string(dataRound));
 		data->currentRoundMapJson["round"] = Json::Value(std::to_string(dataRound));
 		int playerSize = game_.getTotalPlayerNum();
 		volatile TRound round = game_.getCurrentRound() + 1;
@@ -358,8 +369,8 @@ namespace DAGAN
 		//#json save，保存Json存档数据
 		{
 			game_.roundTime.push_back(clock());
-			data->currentRoundCommandJson["runDuration"] =
-				Json::Value(std::to_string(int(game_.roundTime[game_.roundTime.size() - 1] - game_.roundTime[game_.roundTime.size() - 2])));
+			//data->currentRoundCommandJson["runDuration"] =
+				//Json::Value(std::to_string(int(game_.roundTime[game_.roundTime.size() - 1] - game_.roundTime[game_.roundTime.size() - 2])));
 			game_.saveJson();//保存及写入Json文档
 		}
 	}
@@ -377,95 +388,139 @@ namespace DAGAN
 	
 	
 	void Controller::jsonChange(TPlayerID id, Command& c) {
+		configCmdTool newCmd;
+		newCmd.from_id = id;
+		newCmd.getcm_id = c.parameters[1];
 		if (c.cmdType == corpsCommand) {
-			Json::Value newCmd;
-			Json::Value pos;
+			//Json::Value newCmd;
+			//Json::Value pos;
 			TPoint point = data->myCorps[c.parameters[1]].getPos();
-			pos["x"] = Json::Value(std::to_string(point.m_x));
-			pos["z"] = Json::Value(std::to_string(point.m_y));
-			newCmd["spot"] = pos;
-			newCmd["oId"] = Json::Value(std::to_string(id));
-			newCmd["cT"] = Json::Value(std::to_string(int(corpsCommand)));
-			newCmd["tp"] = Json::Value(std::to_string(int(c.parameters[0])));
-			newCmd["id"] = Json::Value(std::to_string(int(c.parameters[1])));
+			//pos["x"] = Json::Value(std::to_string(point.m_x));
+			//pos["z"] = Json::Value(std::to_string(point.m_y));
+			//newCmd["spot"] = pos;
+			//newCmd["oId"] = Json::Value(std::to_string(id));
+			//newCmd["cT"] = Json::Value(std::to_string(int(corpsCommand)));
+			//newCmd["tp"] = Json::Value(std::to_string(int(c.parameters[0])));
+			//newCmd["id"] = Json::Value(std::to_string(int(c.parameters[1])));
 			switch (c.parameters[0])  //第0个参数
 			{
 			case(CMove):
-				newCmd["mv"] = Json::Value(std::to_string(int(c.parameters[2])));
-				newCmd["dir"] = Json::Value(std::to_string(std::atan2(DAGAN::moveDir[c.parameters[2]].m_y, DAGAN::moveDir[c.parameters[2]].m_x)));
+				newCmd.cm_type = JMove;
+				newCmd.aim_x = point.m_x + DAGAN::moveDir[c.parameters[2]].m_x;
+				newCmd.aim_z = point.m_y + DAGAN::moveDir[c.parameters[2]].m_y;
+				//newCmd["mv"] = Json::Value(std::to_string(int(c.parameters[2])));
+				//newCmd["dir"] = Json::Value(std::to_string(std::atan2(DAGAN::moveDir[c.parameters[2]].m_y, DAGAN::moveDir[c.parameters[2]].m_x)));
 				break;
 			case(CStation):
+				newCmd.cm_type = JStation;
+				break;
 			case(CStationTower):
+				newCmd.cm_type = JStationTower;
 				break;
 			case(CAttackCorps):
+				newCmd.cm_type = JAttackCorps;
 				TPoint point2 = data->myCorps[c.parameters[2]].getPos();
-				pos["x"] = Json::Value(std::to_string(point2.m_x));
-				pos["z"] = Json::Value(std::to_string(point2.m_y));
-				newCmd["pos"] = pos;
-				newCmd["dEC"] = Json::Value(std::to_string(int(c.parameters[2])));
-				TPoint dirTPoint = point2 - point;
-				newCmd["dir"] = Json::Value(std::to_string(std::atan2(dirTPoint.m_y, dirTPoint.m_x)));
+				newCmd.aim_x = point2.m_x;
+				newCmd.aim_z = point2.m_y;
+				newCmd.another_id = c.parameters[2];
+				//pos["x"] = Json::Value(std::to_string(point2.m_x));
+				//pos["z"] = Json::Value(std::to_string(point2.m_y));
+				//newCmd["pos"] = pos;
+				//newCmd["dEC"] = Json::Value(std::to_string(int(c.parameters[2])));
+				//TPoint dirTPoint = point2 - point;
+				//newCmd["dir"] = Json::Value(std::to_string(std::atan2(dirTPoint.m_y, dirTPoint.m_x)));
+				if (data->dieCorps.find(c.parameters[2]) != data->dieCorps.end()) newCmd.result = 1;
 				break;
 			case(CAttackTower):
+				newCmd.cm_type = JAttackTower;
 				TPoint point2 = data->myTowers[c.parameters[2]].getPosition();
-				pos["x"] = Json::Value(std::to_string(point2.m_x));
-				pos["z"] = Json::Value(std::to_string(point2.m_y));
-				newCmd["pos"] = pos;
-				newCmd["dET"] = Json::Value(std::to_string(int(c.parameters[2])));
-				TPoint dirTPoint = point2 - point;
-				newCmd["dir"] = Json::Value(std::to_string(std::atan2(dirTPoint.m_y, dirTPoint.m_x)));
+				newCmd.aim_x = point2.m_x;
+				newCmd.aim_z = point2.m_y;
+				newCmd.another_id = c.parameters[2];
+				//pos["x"] = Json::Value(std::to_string(point2.m_x));
+				//pos["z"] = Json::Value(std::to_string(point2.m_y));
+				//newCmd["pos"] = pos;
+				//newCmd["dET"] = Json::Value(std::to_string(int(c.parameters[2])));
+				//TPoint dirTPoint = point2 - point;
+				//newCmd["dir"] = Json::Value(std::to_string(std::atan2(dirTPoint.m_y, dirTPoint.m_x)));
+				if (data->dieTower.find(c.parameters[2]) != data->dieTower.end()) newCmd.result = 1;
 				break;
 			case(CRegroup):
-				TPoint point2 = data->myCorps[c.parameters[2]].getPos();
-				pos["x"] = Json::Value(std::to_string(point2.m_x));
-				pos["z"] = Json::Value(std::to_string(point2.m_y));
-				newCmd["pos"] = pos;
-				newCmd["dFC"] = Json::Value(std::to_string(int(c.parameters[2])));
+				newCmd.cm_type = JRegroup;
+				//TPoint point2 = data->myCorps[c.parameters[2]].getPos();
+				newCmd.another_id = c.parameters[2];
+				//pos["x"] = Json::Value(std::to_string(point2.m_x));
+				//pos["z"] = Json::Value(std::to_string(point2.m_y));
+				//newCmd["pos"] = pos;
+				//newCmd["dFC"] = Json::Value(std::to_string(int(c.parameters[2])));
+				//if (data->dieCorps.find(c.parameters[2]) != data->dieCorps.end()) newCmd.result = -1;
 				break;
 			case(CBuild):
+				newCmd.cm_type = JBuild;
+				break;
 			case(CRepair):
+				newCmd.cm_type = JRepair;
 				break;
 			case(CChangeTerrain):
-				newCmd["dT"] = Json::Value(std::to_string(int(c.parameters[2])));
+				newCmd.cm_type = JChangeTerrain;
+				//newCmd["dT"] = Json::Value(std::to_string(int(c.parameters[2])));
+				newCmd.dT = c.parameters[2];
 				break;
-			default:;
+			default:return;
 			}
-			data->currentRoundCommandJson["command"].append(newCmd);
+			//data->currentRoundCommandJson["command"].append(newCmd);
 		}
 		else if (c.type == towerCommand) {
-			Json::Value newCmd;
-			Json::Value pos;
-			newCmd["oId"] = Json::Value(std::to_string(id));
-			newCmd["cT"] = Json::Value(std::to_string(int(towerCommand)));
-			newCmd["tp"] = Json::Value(std::to_string(int(c.parameters[0])));
-			newCmd["id"] = Json::Value(std::to_string(int(c.parameters[1])));
+			//Json::Value newCmd;
+			//Json::Value pos;
+			//newCmd["oId"] = Json::Value(std::to_string(id));
+			//newCmd["cT"] = Json::Value(std::to_string(int(towerCommand)));
+			//newCmd["tp"] = Json::Value(std::to_string(int(c.parameters[0])));
+			//newCmd["id"] = Json::Value(std::to_string(int(c.parameters[1])));
 			switch (c.parameters[0]) 
 			{
 			case(TProduct):
-				newCmd["pT"] = Json::Value(std::to_string(int(c.parameters[2])));
+				newCmd.cm_type = JProduct;
+				newCmd.pT = c.parameters[2];
+				//newCmd["pT"] = Json::Value(std::to_string(int(c.parameters[2])));
 				break;
 			case(TAttackCorps):
-				TPoint point = data->myCorps[c.parameters[2]].getPos();
-				pos["x"] = Json::Value(std::to_string(point.m_x));
-				pos["z"] = Json::Value(std::to_string(point.m_y));
-				newCmd["pos"] = pos;
-				newCmd["dEC"] = Json::Value(std::to_string(int(c.parameters[2])));
-				TPoint dirTPoint = point - data->myTowers[c.parameters[1]].getPosition();
-				newCmd["dir"] = Json::Value(std::to_string(std::atan2(dirTPoint.m_y, dirTPoint.m_x)));
+				newCmd.cm_type = JAttackCorps;
+				TPoint point2 = data->myCorps[c.parameters[2]].getPos();
+				newCmd.aim_x = point2.m_x;
+				newCmd.aim_z = point2.m_y;
+				if (data->dieCorps.find(c.parameters[2]) != data->dieCorps.end()) newCmd.result = 1;
+				//pos["x"] = Json::Value(std::to_string(point.m_x));
+				//pos["z"] = Json::Value(std::to_string(point.m_y));
+				//newCmd["pos"] = pos;
+				//newCmd["dEC"] = Json::Value(std::to_string(int(c.parameters[2])));
+				//TPoint dirTPoint = point2 - data->myTowers[c.parameters[1]].getPosition();
+				//newCmd["dir"] = Json::Value(std::to_string(std::atan2(dirTPoint.m_y, dirTPoint.m_x)));
 				break;
-			case(TAttackTower):
-				TPoint point = data->myTowers[c.parameters[2]].getPosition();
-				pos["x"] = Json::Value(std::to_string(point.m_x));
-				pos["z"] = Json::Value(std::to_string(point.m_y));
-				newCmd["pos"] = pos;
-				newCmd["dET"] = Json::Value(std::to_string(int(c.parameters[2])));
-				TPoint dirTPoint = point - data->myTowers[c.parameters[1]].getPosition();
-				newCmd["dir"] = Json::Value(std::to_string(std::atan2(dirTPoint.m_y, dirTPoint.m_x)));
-				break;
-			default:;
+			//case(TAttackTower):
+				//TPoint point = data->myTowers[c.parameters[2]].getPosition();
+				//pos["x"] = Json::Value(std::to_string(point.m_x));
+				//pos["z"] = Json::Value(std::to_string(point.m_y));
+				//newCmd["pos"] = pos;
+				//newCmd["dET"] = Json::Value(std::to_string(int(c.parameters[2])));
+				//TPoint dirTPoint = point - data->myTowers[c.parameters[1]].getPosition();
+				//newCmd["dir"] = Json::Value(std::to_string(std::atan2(dirTPoint.m_y, dirTPoint.m_x)));
+				//break;
+			default:return;
 			}
-			data->currentRoundCommandJson["command"].append(newCmd);
+			//data->currentRoundCommandJson["command"].append(newCmd);
 		}
+		Json::Value newCommand;
+		newCommand["oId"] = newCmd.from_id;
+		newCommand["tp"] = newCmd.cm_type;
+		newCommand["id"] = newCmd.getcm_id;
+		newCommand["x"] = newCmd.aim_x;
+		newCommand["z"] = newCmd.aim_z;
+		newCommand["rst"] = newCmd.result;
+		newCommand["dT"] = newCmd.dT;
+		newCommand["pT"] = newCmd.pT;
+		newCommand["aid"] = newCmd.another_id;
+		data->currentRoundCommandJson["command"].append(newCommand);
 	}
 	/***********************************************************************************************
 	*函数名 :【FC18】moreCommand判断玩家还能否继续下一条指令
@@ -628,8 +683,8 @@ namespace DAGAN
 			{
 				int type = c.parameters[0];
 				TCorpsID enemyid = c.parameters[2];
-				if(enemyid>data->myCorps.size())
-					return false;
+				if (type == CAttackCorps && (enemyid < 0 || enemyid >= data->myCorps.size())) return false;   //越界：操作数非法
+				if (type == CAttackTower && (enemyid < 0 || enemyid >= data->myTowers.size())) return false;   //越界：操作数非法
 				bCmdSucs = data->myCorps[id].Attack(type,enemyid);
 			}
 			break;
@@ -637,6 +692,7 @@ namespace DAGAN
 			//兵团整编的操作
 			{
 				TCorpsID target = c.parameters[2];
+				if (target < 0 || target >= data->myCorps.size()) return false;     //越界：操作数非法
 				bCmdSucs = data->myCorps[id].MergeCrops(target);
 			}
 			break;
@@ -656,7 +712,7 @@ namespace DAGAN
 			//兵团改变方格地形的操作
 			{
 				//如果地形参数不符合要求
-				if(c.parameters[2]<0||c.parameters[2]>5)
+				if(c.parameters[2]<1||c.parameters[2]>5)
 				{
 					return false;
 				}
@@ -666,7 +722,6 @@ namespace DAGAN
 			break;
 		default:
 			return false;
-			break;
 		}
 		return bCmdSucs;
 	}
@@ -689,13 +744,14 @@ namespace DAGAN
 			break;
 		case(TAttackCorps):
 			//塔攻击兵团的操作
+			if (c.parameters[2] < 0 || c.parameters[2] >= data->myCorps.size()) return false;   //越界：操作数非法
 			break;
-		case(TAttackTower):
+		//case(TAttackTower):
 			//塔攻击防御塔的操作
-			break;
+			//if (c.parameters[2] < 0 || c.parameters[2] >= data->myTowers.size()) return false;   //越界：操作数非法
+			//break;
 		default:
 			return false;
-			break;
 		}
 	}
 
@@ -721,6 +777,7 @@ namespace DAGAN
 			playerRanker.ELCorpsNum = newPlayer.getElCorpsNum();
 			playerRanker.CPCorpsNum = newPlayer.getCqCorpsNum();
 			Ranker.push_back(playerRanker);
+			data->players[i].setScore(playerRanker.score);
 		}
 		std::sort(Ranker.begin(), Ranker.end(), rankCmp::compare);  //对玩家排序，按名次升序排序
 		for (int i = 1; i <= 4; i++) {

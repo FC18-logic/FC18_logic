@@ -80,8 +80,16 @@ public:
 		info.battlePoint = m_battlepoint;
 		info.experPoint = m_experpoint;
 		info.level = m_level;
-		info.pdtType = m_producttype;
-		info.productConsume = m_productconsume;
+		if(protask_finish() == true)
+		{
+			info.pdtType = NOTASK;
+			info.productConsume = -1;
+		}
+		else
+		{
+			info.pdtType = m_producttype;
+			info.productConsume = m_productconsume;
+		}
 		return info;
 	}
 	//»ñÈ¡×¤Ôú±øÍÅ

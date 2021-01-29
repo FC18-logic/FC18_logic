@@ -30,7 +30,7 @@ int main(int argc, char** argv)
 #endif // FC15_DEBUG
 	char json_filename[1024];
 	//旧代码//strftime(json_filename, sizeof(json_filename), "../log_json/log_%Y%m%d_%H%M%S.json", localtime(&t));
-	strftime(json_filename, sizeof(json_filename), "../log_json/log_%Y%m%d_%H%M%S", localtime(&t));
+	strftime(json_filename, sizeof(json_filename), "../log_json/log_%Y%m%d_%H%M%S/", localtime(&t));
 	string  config_filename =
 #ifdef _MSC_VER
 		//旧代码//"../config_msvc.ini";

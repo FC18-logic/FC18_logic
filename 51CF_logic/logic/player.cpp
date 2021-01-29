@@ -180,7 +180,7 @@ void Player::Kill()
 *作者 : 姜永鹏
 ***********************************************************************************************/
 int Player::getPlayerScore() {
-	if (isAlive() == false)   //玩家已经出局，根据出局的回合数记录进行排名
+	if (isAlive() == false)   //玩家已经出局，根据出局的回合数记录进行分值
 		return deadRound - MAX_ROUND;
 	TScore corpsScore, towerScore;
 	corpsScore = towerScore = 0;
