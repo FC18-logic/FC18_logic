@@ -457,6 +457,7 @@ namespace DAGAN
 				break;
 			case(CBuild):
 				newCmd.cm_type = JBuild;
+				newCmd.another_id = data->myTowers.size() - 1;
 				break;
 			case(CRepair):
 				newCmd.cm_type = JRepair;
