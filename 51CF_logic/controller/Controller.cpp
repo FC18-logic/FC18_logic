@@ -744,8 +744,8 @@ namespace DAGAN
 		switch (c.parameters[0]) {
 		case(TProduct):
 			//设置生产任务
-			//bCmdSucs = data->myTowers[id].set_producttype(c.parameters[2]);
-			//return bCmdSucs;
+			bCmdSucs = data->myTowers[id].set_producttype(enum productType(c.parameters[2]));
+			return bCmdSucs;
 			break;
 		case(TAttackCorps):
 			//by lxj：函数内包含此判断
