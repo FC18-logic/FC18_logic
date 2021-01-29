@@ -22,14 +22,26 @@ Tower::Tower(DATA::Data* _data, TPlayerID m_playid, TPoint pos) :m_data(_data)
 	m_productconsume = INF;
 	//更新data
 	m_data->totalTowers++;
-	//by jyp : m_data->players->getTower().insert(m_PlayerID);
 	m_data->players->getTower().insert(m_id); //塔下标从0开始
-	//by jyp : m_data->gameMap.map[m_position.m_x][m_position.m_y].TowerIndex = m_id;
 	m_data->gameMap.map[m_position.m_y][m_position.m_x].TowerIndex = m_id;
 	//by jyp : 记录新建的塔ID
 	m_data->newTower.insert(m_id);
-	//等待调用更新occupypoint的函数
-	//等待调用更新owner的函数
+	//更新occupypoint/owner
+	m_data->gameMap.modifyOccupyPoint(m_data->gameMap.map[m_position.m_y][m_position.m_x].owner, m_playid, m_position);
+}
+/*
+名称：set_all
+功能：根据等级更新生产力、生命值、战斗力、升级所需经验值、攻击范围
+参数：当前等级
+by lxj
+*/
+void Tower::set_all(int level)
+{
+	m_productpoint = TowerInitConfig[level - 1].initBuildPoint;
+	m_healthpoint = TowerInitConfig[level - 1].initHealthPoint;
+	m_battlepoint = TowerInitConfig[level - 1].initProductPoint;
+	m_upgradexper = TowerInitConfig[level - 1].upgradeExper;
+	m_attackrange = TowerInitConfig[level - 1].battleRegion;
 }
 /*
 名称：level_upgrade
@@ -180,8 +192,8 @@ bool Tower::Be_Attacked(TPlayerID enemy_id,THealthPoint hp_decrease)
 			m_data->gameMap.map[m_position.m_y][m_position.m_x].TowerIndex = NOTOWER;
 			//by jyp : 记录被摧毁的塔的ID
 			m_data->dieTower.insert(m_id);
-			//等待调用更新occupypoint的函数
-
+			//更新occupypoint/owner
+			m_data->gameMap.modifyOccupyPoint(m_data->gameMap.map[m_position.m_y][m_position.m_x].owner, m_playid, m_position);
 		}
 		//塔被攻占
 		else
@@ -189,7 +201,6 @@ bool Tower::Be_Attacked(TPlayerID enemy_id,THealthPoint hp_decrease)
 			set_all(m_level);
 			m_PlayerID = enemy_id;
 		}
-
 		//俘虏驻扎工程兵并修改data
 		for(int i = 0; i<m_staycrops.size(); i++)
 		{
@@ -210,8 +221,33 @@ bool Tower::Be_Attacked(TPlayerID enemy_id,THealthPoint hp_decrease)
 	}
 	return false;
 }
-
-
+/*
+名称：set_attacktarget
+功能：设置攻击目标
+参数：目标兵团id
+返回值：是否攻击成功
+by lxj
+*/
+bool Tower::set_attacktarget(int crop_id) 
+{
+	if (crop_id < 0 || crop_id > m_data->totalCorps - 1)//id越界
+		return false;
+	Crops enemy = m_data->myCorps[crop_id];
+	if (enemy.bAlive() == false)//兵团死亡
+		return false;
+	if (getDist(enemy.getPos(), m_position) > m_attackrange)//超出攻击范围
+		return false;
+	//攻击成功
+	float deta = 0.04 * ((float)m_battlepoint - enemy.getCE());
+	int crop_lost = floor(28 * pow(2.71828, deta));
+	enemy.BeAttacked(crop_lost, m_PlayerID);
+	return true;
+}
+/*
+名称：Recover
+功能：修理塔回复生命值
+by lmx
+*/
 void Tower::Recover()
 {
 	struct TowerConfig levelInfo = TowerInitConfig[m_level-1];
