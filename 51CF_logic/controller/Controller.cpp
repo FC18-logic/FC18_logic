@@ -24,14 +24,14 @@ namespace DAGAN
 		int CQTowerNum;//攻占塔数
 		int ELCorpsNum;//消灭兵团数
 		int CPCorpsNum;//俘虏兵团数
-		bool compare(rankCmp a, rankCmp b) {  //重载的比较运算符，用于排名
-			if (a.score > b.score) return true;
-			else if (a.score == b.score) {
-				if (a.CQTowerNum > b.CQTowerNum) return true;
-				else if (a.CQTowerNum == b.CQTowerNum) {
-					if (a.ELCorpsNum > b.ELCorpsNum) return true;
-					else if (a.ELCorpsNum == b.ELCorpsNum) {
-						if (a.CPCorpsNum > b.CPCorpsNum) return true;
+		bool operator < (rankCmp b) {  //重载的比较运算符，用于排名
+			if (score > b.score) return true;
+			else if (score == b.score) {
+				if (CQTowerNum > b.CQTowerNum) return true;
+				else if (CQTowerNum == b.CQTowerNum) {
+					if (ELCorpsNum > b.ELCorpsNum) return true;
+					else if (ELCorpsNum == b.ELCorpsNum) {
+						if (CPCorpsNum > b.CPCorpsNum) return true;
 						else {
 							return generateRanInt(0, 1);   //在0,1间返回随机数来随机给出排名
 						}
@@ -40,6 +40,7 @@ namespace DAGAN
 			}
 		}
 	};
+
 
 	struct configCmdTool { //写Json文档的Cmd部分统一接口需要
 		int from_id = -1;
@@ -395,6 +396,7 @@ namespace DAGAN
 			//Json::Value newCmd;
 			//Json::Value pos;
 			TPoint point = data->myCorps[c.parameters[1]].getPos();
+			TPoint point2;
 			//pos["x"] = Json::Value(std::to_string(point.m_x));
 			//pos["z"] = Json::Value(std::to_string(point.m_y));
 			//newCmd["spot"] = pos;
@@ -419,7 +421,7 @@ namespace DAGAN
 				break;
 			case(CAttackCorps):
 				newCmd.cm_type = JAttackCorps;
-				TPoint point2 = data->myCorps[c.parameters[2]].getPos();
+				point2 = data->myCorps[c.parameters[2]].getPos();
 				newCmd.aim_x = point2.m_x;
 				newCmd.aim_z = point2.m_y;
 				newCmd.another_id = c.parameters[2];
@@ -433,7 +435,7 @@ namespace DAGAN
 				break;
 			case(CAttackTower):
 				newCmd.cm_type = JAttackTower;
-				TPoint point2 = data->myTowers[c.parameters[2]].getPosition();
+				point2 = data->myTowers[c.parameters[2]].getPosition();
 				newCmd.aim_x = point2.m_x;
 				newCmd.aim_z = point2.m_y;
 				newCmd.another_id = c.parameters[2];
@@ -472,6 +474,7 @@ namespace DAGAN
 			//data->currentRoundCommandJson["command"].append(newCmd);
 		}
 		else if (c.type == towerCommand) {
+			TPoint point2;
 			//Json::Value newCmd;
 			//Json::Value pos;
 			//newCmd["oId"] = Json::Value(std::to_string(id));
@@ -487,7 +490,7 @@ namespace DAGAN
 				break;
 			case(TAttackCorps):
 				newCmd.cm_type = JAttackCorps;
-				TPoint point2 = data->myCorps[c.parameters[2]].getPos();
+				point2 = data->myCorps[c.parameters[2]].getPos();
 				newCmd.aim_x = point2.m_x;
 				newCmd.aim_z = point2.m_y;
 				if (data->dieCorps.find(c.parameters[2]) != data->dieCorps.end()) newCmd.result = 1;
@@ -790,7 +793,7 @@ namespace DAGAN
 			Ranker.push_back(playerRanker);
 			data->players[i].setScore(playerRanker.score);
 		}
-		std::sort(Ranker.begin(), Ranker.end(), rankCmp::compare);  //对玩家排序，按名次升序排序
+		std::sort(Ranker.begin(), Ranker.end());  //对玩家排序，按名次升序排序
 		for (int i = 1; i <= 4; i++) {
 			int Rank = 0;
 			for (int j = 0; j < 4; j++) {

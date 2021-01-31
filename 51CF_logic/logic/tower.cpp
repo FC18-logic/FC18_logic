@@ -29,7 +29,7 @@ Tower::Tower(DATA::Data* _data, TPlayerID m_playid, TPoint pos) :m_data(_data)
 	//by jyp : 记录新建的塔ID
 	m_data->newTower.insert(m_id);
 	//更新occupypoint/owner
-	m_data->gameMap.modifyOccupyPoint(m_data->gameMap.map[m_position.m_y][m_position.m_x].owner, m_PlayerID, m_position);
+	m_data->gameMap.modifyOccupyPoint(NOTOWER, m_PlayerID, m_position);
 }
 /*
 名称：set_all

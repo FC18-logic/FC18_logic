@@ -53,6 +53,7 @@ namespace DAGAN {
 			player_ai = NULL;
 		}
 		hDLL = _LOADDLL(file_name.c_str());                        //加载AI代码动态链接库（DLL）
+		//cout << file_name << "being loading" << endl;
 		if (NULL != hDLL)
 		{
 			player_ai = (TPlayerAi)_GETFUNC(hDLL, "player_ai");    //加载DLL成功，更新玩家ai代码的函数指针

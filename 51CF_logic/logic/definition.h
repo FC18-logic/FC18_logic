@@ -814,7 +814,7 @@ struct Info
 
 	//【FC18】地图信息
 	//vector<vector<mapBlockInfo>> mapInfo;
-	const vector<vector<mapBlock>>* mapInfo;
+	const vector<vector<mapBlock>>* gameMapInfo;
 
 	//FC15的
 	BaseMap* mapInfo;

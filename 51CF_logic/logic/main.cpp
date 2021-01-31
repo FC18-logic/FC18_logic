@@ -26,7 +26,7 @@ int main(int argc, char** argv)
 	time_t t = time(0);//记录时间
 	strftime(buffer, sizeof(buffer), "../log_txt/log_%Y%m%d_%H%M%S.txt", localtime(&t));
 #ifdef FC15_DEBUG
-	freopen(buffer, "w", stdout);  //Debug模式，写入新的txt空文件
+	//freopen(buffer, "w", stdout);  //Debug模式，写入新的txt空文件
 #endif // FC15_DEBUG
 	char json_filename[1024];
 	//旧代码//strftime(json_filename, sizeof(json_filename), "../log_json/log_%Y%m%d_%H%M%S.json", localtime(&t));
@@ -144,6 +144,7 @@ int main(int argc, char** argv)
 	//旧代码//}
 	// main
 	//一个回合一个回合的跑
+	system("pause");
 	while (controller.isValid())
 	{
 		for (int i = 1; i <= 4; i++)

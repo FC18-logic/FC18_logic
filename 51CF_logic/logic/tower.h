@@ -82,7 +82,7 @@ public:
 	//获取塔经验值
 	TExperPoint getExperPoint() { return m_experpoint; }
 	//获取塔攻击范围
-	int getExperPoint() { return m_attackrange; }
+	int getAttackRange() { return m_attackrange; }
 
 
 	/*提供防御塔信息*/

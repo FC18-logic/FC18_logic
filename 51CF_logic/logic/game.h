@@ -41,6 +41,8 @@ public:
 	void setGameOver() {}
 
 	void setPlayerID(TPlayerID id){ curPlayer = id; }				//【FC18】设置当前回合玩家ID
+	void printGameMap();                                             //【FC18】输出当前游戏地图
+
 
 	//FC15的
 	vector<Info> generateInfo();

@@ -390,6 +390,7 @@ bool Map::randomInitMap() {
 			else map[j][i].owner = PUBLIC;
 		}
 	}
+
 	////////////////////////////////////////////////////////
 	//【FC18】为每个势力生成防御塔                        //
 	//随机防御塔：每个势力的初始领地中随机生成一个防御塔  //
@@ -564,8 +565,8 @@ void Map::modifyOccupyPoint(TPlayerID oldOwner, TPlayerID newOwner, TPoint p) {
 		for (int j = p.m_x - 5; j <= p.m_x + 5; j++) {
 			TPoint currentPoint = { j,i };
 			TDist dist = getDist(currentPoint, p);
-			if (data->getRound() == 0 && map[i][j].owner == PUBLIC) continue;  //开局不改变公共地盘的占有属性值
 			if (!withinMap(currentPoint) || dist < 1 || dist > 5) continue;//点不在图上，离塔太近或太远
+			if (data->getRound() == 0 && map[i][j].owner == PUBLIC) continue;  //开局不改变公共地盘的占有属性值
 			if (oldOwner != NOTOWER) map[i][j].occupyPoint[oldOwner - 1] -= TowerOccupyPoint[dist - 1];
 			if (newOwner != NOTOWER) map[i][j].occupyPoint[newOwner - 1] += TowerOccupyPoint[dist - 1];
 			ownerChange(currentPoint);

@@ -6,6 +6,9 @@
 #include <ctime>
 #include <cmath> 
 #include <math.h>
+#include <stdio.h>
+#include <Windows.h>
+#include <iomanip>
 
 bool Game::init(string file, string json_file, vector<string> players_name)   //[【FC18】接着用，改好了
 {
@@ -69,6 +72,7 @@ bool Game::init(string file, string json_file, vector<string> players_name)   //
 		return false;
 	}
 
+	printGameMap();
 
 	/****************************FC15的旧代码****************************
 	if (!data.gameMap.init(in, _MAX_RESOURCE_, true))
@@ -1306,7 +1310,7 @@ Info Game::generatePlayerInfo(TPlayerID id) {
 			info.mapInfo[i].push_back(newBlock);
 		}
 	}*///直接传地图指针给玩家，常量指针，玩家不可修改！
-	info.mapInfo = &data.gameMap.map;
+	info.gameMapInfo = &data.gameMap.map;
 
 	return info;
 }
@@ -1497,4 +1501,31 @@ bool Game::goNext() {
 	playerAlive = aliveNum;//更新游戏存活人数
 	if (playerAlive <= 1)  return false;
 	else return true;
+}
+
+
+/***********************************************************************************************
+*函数名 :【FC18】printGameMap游戏地图输出函数
+*函数功能描述 : 将不同地形以不同颜色的代号输出于控制台，方便获取地图概况
+*函数参数 : 无
+*函数返回值 : 无
+*作者 : 姜永鹏
+***********************************************************************************************/
+void Game::printGameMap() {
+	for (int i = 0; i < data.gameMap.getHeigth(); i++) {
+		for (int j = 0; j < data.gameMap.getWidth(); j++) {
+			std::cout.setf(std::ios::fixed, std::ios::floatfield);
+			switch (data.gameMap.map[i][j].type) {
+			case(0):SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), FOREGROUND_INTENSITY | FOREGROUND_RED); break;
+			case(1):SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), FOREGROUND_INTENSITY | FOREGROUND_GREEN); break;
+			case(2):SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), FOREGROUND_INTENSITY | FOREGROUND_BLUE); break;
+			case(3):SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), FOREGROUND_INTENSITY | FOREGROUND_RED | FOREGROUND_GREEN); break;
+			case(4):SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), FOREGROUND_INTENSITY | FOREGROUND_RED | FOREGROUND_BLUE); break;
+			case(5):SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), FOREGROUND_INTENSITY | FOREGROUND_GREEN | FOREGROUND_BLUE); break;
+			}
+			std::cout << setprecision(5) << int(data.gameMap.map[i][j].type) << " ";
+		}
+		std::cout << "\n";
+	}
+	std::cout << "\n\n";
 }
