@@ -746,6 +746,8 @@ namespace DAGAN
 		//塔id越界
 		if (id < 0 || id >= data->myTowers.size())
 			return false;  
+		if (data->myTowers[id].getexsit() == false)
+			return false;
 		switch (c.parameters[0]) {
 		case(TProduct):
 			//设置生产任务，任务种类不越界就判定成功
