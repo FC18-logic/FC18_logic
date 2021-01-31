@@ -181,7 +181,7 @@ int Crops::AttackCrops(Crops* enemy)
 		for(int i = 0; i<m_data->corps[m_position.m_y][m_position.m_x].size(); i++)
 		{
 			colleage = m_data->corps[m_position.m_y][m_position.m_x][i];
-			if(colleage->m_type == Battle&&colleage->m_PlayerID == m_PlayerID)
+			if(colleage->m_type == Battle&&colleage->m_PlayerID == enemy->m_PlayerID)
 				enemy = colleage;
 		}
 	}
@@ -238,6 +238,7 @@ bool Crops::BeAttacked(int attack,TPlayerID ID)
 		for(int i = 0; i<m_data->corps[m_position.m_y][m_position.m_x].size(); i++)
 		{
 			colleage = m_data->corps[m_position.m_y][m_position.m_x][i];
+			//如果工程兵和正在被攻击的战斗兵是同一玩家的兵团
 			if(colleage->m_type == Construct&&colleage->m_PlayerID == m_PlayerID)
 				colleage->BeAttacked(0,ID);
 		}
@@ -429,6 +430,7 @@ bool Crops::GoRest()
 		return false;
 	}
 
+	//如果之前没有处在驻扎状态中，则先将变量清零并进入驻扎状态
 	if(!m_bResting)
 	{
 		m_PeaceNum = 0;//开始计数
@@ -496,9 +498,7 @@ int Crops::AttackTower(class Tower *enemy)
 	//获取塔的战斗力
 	TowerCE = enemy->get_towerbp();
 	int myCE = getCE();//兵团战斗力
-	//敌人已阵亡或不在射程范围内，在上一层主调函数中判断过了
-	//添加代码
-	//
+	
 	float deta = 0.04*((float)myCE-TowerCE);
 	int mylost = floor(28*pow(2.71828,-deta));
 	int enemylost = floor(30*pow(2.71828,deta))*corpsAttackTowerGain[m_BattleType][m_level];
@@ -719,7 +719,8 @@ bool Crops::BuildTower()
 		//新建一个防御塔
 		Tower newTower(m_data, m_PlayerID, m_position);
 		m_data->myTowers.push_back(newTower);
-		m_BuildPoint--;  //by jyp 工程兵团劳动力-1
+		//开拓者没有劳动力属性 by lmx
+		//m_BuildPoint--;  //by jyp 工程兵团劳动力-1
 		return true;
 	}
 	return false;
