@@ -24,6 +24,9 @@ Tower::Tower(DATA::Data* _data, TPlayerID m_playid, TPoint pos) :m_data(_data)
 	set_all(m_level);
 	m_experpoint = 0;//初始经验值为0
 	m_productconsume = INF;
+	upgrade_finish = false;
+	for (int i = 0; i < 6; i++)
+		task_cache[i] = 0;
 	//更新data
 	m_data->totalTowers++;
 	m_data->players[m_PlayerID - 1].getTower().insert(m_id);
@@ -50,6 +53,21 @@ void Tower::set_all(int level)
 	m_attackrange = TowerInitConfig[level - 1].battleRegion;
 }
 /*
+名称：upgrade
+功能：完成塔升级生产任务时执行的操作
+by lxj
+*/
+void Tower::upgrade()
+{
+	if (upgrade_finish == true)
+		return;
+	m_level++;
+	if (m_level > MAX_TOWER_LEVEL) //不得超过最大等级
+		m_level = MAX_TOWER_LEVEL;
+	set_all(m_level);
+	upgrade_finish == true;
+}
+/*
 名称：level_upgrade
 功能：根据当前经验值更新等级
 返回值：是否升级
@@ -61,7 +79,7 @@ bool Tower::set_level()
 	upgrade = false;
 	//回合开始累加上一回合所得经验值
 	int bonus = 0;
-	int m_round = m_data->getRound();
+	int m_round = m_data->getRound() - 1;
 	if (m_round >= 0 && m_round < 100)
 		bonus = 5;
 	if (m_round >= 100 && m_round < 200)
@@ -118,36 +136,42 @@ void Tower::product_crops(productType protype)
 }
 /*
 名称：set_producttype
-功能：结算上一回合生产任务完成情况/设置新的生产任务
+功能：设置新的生产任务
 参数：待设置生产任务 
 返回值：是否设置成功
 by lxj
 */
 bool Tower::set_producttype(productType m_protype)
 {
-	set_level();
-	if (m_producttype < 0 || m_producttype>5)//生产任务类型越界
+	upgrade_finish = false;
+	//生产任务类型越界：任务暂停一回合
+	if (int(m_producttype) < 0 || int(m_producttype) > 5)
 		return false;
-	if (protask_finish() == true)//上一回合生产任务完成
+	//缓存上一回合任务的进度
+	task_cache[int(m_producttype)] = m_productconsume;
+	m_producttype = m_protype;
+	//新设置生产任务为完成状态
+	if (task_cache[(int)m_producttype] <= 0) 
 	{
-		if (m_producttype < 5) //当前任务为生产兵团    
-			product_crops(m_producttype);
-		if (m_producttype == PUpgrade)//当前任务为升级项目
+		if (m_producttype < 5)
 		{
+<<<<<<< Updated upstream
 			m_level += 1;//完成后塔上升一级
 			if (m_level > MAX_TOWER_LEVEL) //不得超过最大等级
 				m_level = MAX_TOWER_LEVEL;
 			set_all(m_level);      //满级后执行升级命令将恢复该等级的最佳性能
-		}
-	}
-	else //未完成
-	{
-		if (m_producttype == m_protype) //继续上一回合的完成任务
-		{
+=======
+			m_productconsume = TowerProductCost[m_producttype];
 			m_productconsume -= m_productpoint;
-			return true;
+>>>>>>> Stashed changes
+		}
+		if (m_producttype == PUpgrade)
+		{
+			m_productconsume = 40 * m_level;
+			m_productconsume -= m_productpoint;
 		}
 	}
+<<<<<<< Updated upstream
 	m_producttype = m_protype;
 	//更新新一回合生产任务的生产力消耗值
 	if (m_producttype >= 0 && m_producttype < 5)
@@ -156,8 +180,11 @@ bool Tower::set_producttype(productType m_protype)
 		m_productconsume -= m_productpoint;
 	}
 	if (m_producttype == PUpgrade)
+=======
+	else
+>>>>>>> Stashed changes
 	{
-		m_productconsume = 40 * m_level;
+		m_productconsume = task_cache[int(m_producttype)];
 		m_productconsume -= m_productpoint;
 	}
 	return true;
@@ -227,6 +254,18 @@ bool Tower::Be_Attacked(TPlayerID enemy_id,THealthPoint hp_decrease)
 				m_data->players[enemy_id - 1].setElCorpsNum(num);
 			}
 		}
+		//从驻扎兵团中移除战斗兵团
+		for (vector<Crops*>::iterator it = m_staycrops.begin(); it != m_staycrops.end(); )
+		{
+			if ((*it)->getType() == Battle)
+			{
+				it = m_staycrops.erase(it);
+			}
+			else
+			{
+				++it;
+			}
+		}
 		return true;
 	}
 	return false;
@@ -266,6 +305,21 @@ void Tower::Recover()
 	if(m_healthpoint >= levelInfo.initHealthPoint)
 	{
 		m_healthpoint = levelInfo.initHealthPoint;
+	}
+}
+void Tower::remove_crop(TCorpsID crop_id) 
+{
+	Crops* temp = &(m_data->myCorps[crop_id]);
+	for (vector<Crops*>::iterator it = m_staycrops.begin(); it != m_staycrops.end(); )
+	{
+		if ((*it) == temp)
+		{
+			it = m_staycrops.erase(it);
+		}
+		else
+		{
+			++it;
+		}
 	}
 }
 

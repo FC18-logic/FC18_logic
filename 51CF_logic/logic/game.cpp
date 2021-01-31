@@ -1044,7 +1044,22 @@ void Game::transPhase()
 
 void Game::beginPhase()
 {
-
+	//by lxj
+	//初始化1：回合开始累加上轮经验值并完成塔的升级
+	//初始化2：回合开始时判断上一轮生产任务是否完成并结算生产回报
+	for (int i = 0; i < data.myTowers.size(); i++) 
+	{
+		Tower temp = data.myTowers[i];
+		temp.set_level();
+		if (temp.protask_finish() == true)//上一回合生产任务完成
+		{
+			productType m_producttype = temp.getprotype();
+			if (m_producttype < 5) //所完成生产任务为生产兵团    
+				temp.product_crops(m_producttype);
+			if (m_producttype == PUpgrade)//所完成生产任务为升级项目
+				temp.upgrade();
+		}
+	}	
 }
 
 

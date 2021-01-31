@@ -32,16 +32,10 @@ private:
 
 	//辅助属性
 	TExperPoint			m_upgradexper;//升级到下一级所需经验值
-	int					m_productconsume;//当前生产任务对应得生产力消耗值	
-	vector <Crops*>    m_staycrops;//储存驻扎兵团指针
-	
-	/*辅助操作*/
-	//根据等级更新塔的属性
-	void set_all(int level);
-	//每回合初始根据经验值判断是否升级
-	bool set_level();
-	//生产兵团
-	void product_crops(productType protype);
+	int					m_productconsume;//当前生产任务对应的生产力消耗值	
+	vector <Crops*>     m_staycrops;//储存驻扎兵团指针
+	bool				upgrade_finish;//升级任务是否结算(避免重复升级)
+	int					task_cache[6];//缓存未完成任务进度：储存任务的生产力消耗值（若为0，则为完成状态）
 public:
 	Tower(void);
 	~Tower(void);
@@ -50,6 +44,10 @@ public:
 	//Tower(Tower& tower);
 
 	/*塔操作*/
+	//根据等级更新塔的属性
+	void set_all(int level);
+	//每回合初始根据经验值判断是否升级
+	bool set_level();
 	//判断上一轮生产任务是否完成
 	bool protask_finish()
 	{
@@ -59,8 +57,13 @@ public:
 	}
 	//设置新生产任务
 	bool set_producttype(productType m_protype);
+	//生产兵团
+	void product_crops(productType protype);
+	//塔升级
+	void upgrade();
 	//设置攻击目标
 	bool set_attacktarget(int crop_id);
+
 
 
 	/*信息获取*/
@@ -76,6 +79,8 @@ public:
 	vector<Crops*> getCrops() { return m_staycrops; }
 	//获取塔生产力
 	TProductPoint getProductPoint() { return m_productpoint; }
+	//获取塔生产任务
+	productType	getprotype() { return m_producttype; }
 	//获取塔生命值
 	THealthPoint getHealthPoint() { return m_healthpoint; }
 	//获取塔战斗力
@@ -120,5 +125,7 @@ public:
 	void input_staycrops(Crops* newcrop) { m_staycrops.push_back(newcrop); }
 	//修理塔回复生命值
 	void Recover();
+	//删除驻扎兵团
+	void remove_crop(TCorpsID crop_id);
 };
 #endif
