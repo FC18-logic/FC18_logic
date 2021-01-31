@@ -155,7 +155,7 @@ bool Game::init(string file, string json_file, vector<string> players_name)   //
 void Game::DebugPhase()
 {
 	cout << "*************** DEBUG 信息 ***************" << endl;
-	cout << "Round " << totalRounds << " " << std::ceil(totalRounds / 4) << endl;
+	cout << "Round " << totalRounds << " " << std::ceil(totalRounds / 4.0) << endl;
 	cout << "玩家剩余： " << playerAlive << " / " << totalPlayers << endl;
 	cout << "玩家信息：" << endl;
 	for (int i = 0; i < data.totalPlayers; ++i)
@@ -873,7 +873,7 @@ void Game::regeneratePhase()
 	***************************************************/
 	//兵团操作
 	//所有属于该玩家的兵团回复HP MP
-	for (TCorpsID i : data.players[curPlayer].getCrops())
+	for (TCorpsID i : data.players[curPlayer - 1].getCrops())
 	{
 		data.myCorps[i].newRound();
 	}
@@ -1271,7 +1271,7 @@ Info Game::generatePlayerInfo(TPlayerID id) {
 	info.myID = id;
 	info.totalPlayers = getTotalPlayerNum();
 	info.playerAlive = getTotalPlayerAlive();
-	info.totalRounds = ceil(data.getRound() / 4);     //比game的round计数要提前1回合，把小回合数除以每轮4个小回合，得到大回合数传给选手
+	info.totalRounds = ceil(data.getRound() / 4.0);     //比game的round计数要提前1回合，把小回合数除以每轮4个小回合，得到大回合数传给选手
 	info.totalTowers = data.getTotalTower();
 	info.totalCorps = data.getTotalCorp();
 

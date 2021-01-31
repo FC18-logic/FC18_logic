@@ -24,6 +24,7 @@ namespace DAGAN
 		int CQTowerNum;//攻占塔数
 		int ELCorpsNum;//消灭兵团数
 		int CPCorpsNum;//俘虏兵团数
+		int randomCode;//随机码
 		bool operator < (rankCmp& b) {  //重载的比较运算符，用于排名
 			if (score > b.score) return true;
 			else if (score == b.score) {
@@ -33,7 +34,7 @@ namespace DAGAN
 					else if (ELCorpsNum == b.ELCorpsNum) {
 						if (CPCorpsNum > b.CPCorpsNum) return true;
 						else {
-							return false;   //在0,1间返回随机数来随机给出排名
+							return (randomCode > b.randomCode);   //在0,1间返回随机数来随机给出排名
 						}
 					}
 				}
@@ -790,6 +791,17 @@ namespace DAGAN
 			playerRanker.CQTowerNum = newPlayer.getCqTowerNum();
 			playerRanker.ELCorpsNum = newPlayer.getElCorpsNum();
 			playerRanker.CPCorpsNum = newPlayer.getCqCorpsNum();
+			bool ok = false;
+			do {
+				ok = false;
+				playerRanker.randomCode = generateRanInt(0, 1000);
+				for (int cnt = 0; cnt < i; cnt++) {
+					if (playerRanker.randomCode == Ranker[cnt].randomCode) {
+						ok = true;
+						break;
+					}
+				}
+			} while (ok);
 			Ranker.push_back(playerRanker);
 			data->players[i].setScore(playerRanker.score);
 		}
@@ -802,7 +814,7 @@ namespace DAGAN
 					break;
 				}
 			}
-			data->players[i].setRank(Rank);
+			data->players[i - 1].setRank(Rank);
 			game_.getRank()[i - 1] = Rank;
 		}
 	}
