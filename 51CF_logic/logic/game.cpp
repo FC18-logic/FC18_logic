@@ -177,7 +177,7 @@ void Game::DebugPhase()
 	cout << "塔信息" << endl;
 	for (int i = 0; i < data.myTowers.size(); i++) {
 		if (!data.myTowers[i].getexsit()) continue;
-		cout << "塔 " << i << " ： " << "主人：" << data.myTowers[i].getOwnerID() << " 位于：(" << data.myTowers[i].getPosition().m_x << "," << data.myTowers[i].getPosition().m_y
+		cout << "塔 " << i << " ： " << "主人：" << data.myTowers[i].getPlayerID() << " 位于：(" << data.myTowers[i].getPosition().m_x << "," << data.myTowers[i].getPosition().m_y
 			<< ") 等级：" << data.myTowers[i].getLevel() << " 生产力：" << data.myTowers[i].getProductPoint() << " 战斗力：" << data.myTowers[i].getBattlePoint() << " 生命值：" << data.myTowers[i].getHealthPoint()
 			<< " 经验值：" << data.myTowers[i].getExperPoint() << " 生产：" << ((data.myTowers[i].ShowInfo().pdtType >= 0 && data.myTowers[i].ShowInfo().pdtType <= 5) ? ProductCmd[data.myTowers[i].ShowInfo().pdtType] : "N/A")
 			<< " 任务消耗：" << ((data.myTowers[i].ShowInfo().pdtType >= 0 && data.myTowers[i].ShowInfo().pdtType <= 5) ? data.myTowers[i].ShowInfo().productConsume:0) << endl;

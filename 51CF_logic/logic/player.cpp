@@ -193,7 +193,7 @@ int Player::getPlayerScore() {
 	}
 	for (TTowerID i : m_tower)
 	{
-		towerScore += TOWER_SCORE * (data->myTowers[i].getLevel() + 1);             //防御塔等级从0开始[!!!反复确认]
+		towerScore += TOWER_SCORE * (data->myTowers[i].getLevel());             //防御塔等级从0开始[!!!反复确认]
 	}
 	return corpsScore + towerScore;
 }

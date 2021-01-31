@@ -323,7 +323,7 @@ namespace DAGAN
 				else continue; //指令执行失败，丢弃，读取下一条
 			}
 			else if (c.type == towerCommand) {
-				if (c.parameters.size() != towerOperaNumNeed[c.parameters[0]]) continue;   //判断操作合法性
+				if (c.parameters.size() != towerOperaNumNeed[c.parameters[0]]) continue;   //判断操作数的数量是否合法
 				if (towerBanned.find(c.parameters[1]) != towerBanned.end()) continue; //这个塔当前回合不能再操作，请求驳回
 				if (handleTowerCommand(id, c) == true) {   //记录不能再进行其他操作的塔序号
 					jsonChange(id, c);   //更新有效的指令Json
@@ -647,7 +647,7 @@ namespace DAGAN
 		TCorpsID id = c.parameters[1];
 
 		//如果兵团id越界
-		if(id>=data->myCorps.size())
+		if(id < 0 || id >= data->myCorps.size())
 			return false;
 
 		//如果兵团id不属于该玩家
@@ -656,7 +656,12 @@ namespace DAGAN
 			return false;
 		}
 
-		if (id < 0 ||id >= data->myCorps.size()) return false;  //防止玩家命令越界
+		//兵团已死亡，判定命令失败
+		if (data->myCorps[id].bAlive() == false)
+		{
+			return false;
+		}
+
 		data->myCorps[id].haveCmd();
 		switch (c.parameters[0]) {
 		case(CMove):
@@ -713,7 +718,7 @@ namespace DAGAN
 			//兵团改变方格地形的操作
 			{
 				//如果地形参数不符合要求
-				if(c.parameters[2]<1||c.parameters[2]>5)
+				if(c.parameters[2] < 1 || c.parameters[2] > 5)
 				{
 					return false;
 				}
@@ -743,7 +748,7 @@ namespace DAGAN
 			return false;  
 		switch (c.parameters[0]) {
 		case(TProduct):
-			//设置生产任务
+			//设置生产任务，任务种类不越界就判定成功
 			bCmdSucs = data->myTowers[id].set_producttype(enum productType(c.parameters[2]));
 			return bCmdSucs;
 			break;
