@@ -3,52 +3,11 @@
 #include "user_toolbox.h"
 #include <iostream>
 #include <vector>
-
-TTowerID getMyMaxTower(Info& info)
-{
-	TResourceD maxResource = 0.0;
-	TTowerID maxTower = -1;
-	for (TTowerID tower : info.playerInfo[info.myID].towers)
-	{
-		if (info.towerInfo[tower].resource > maxResource)
-		{
-			maxResource = info.towerInfo[tower].resource;
-			maxTower = tower;
-		}
-	}
-	return maxTower;
-}
-
-//开局策略
-void beginPhase(Info& info)
-{
-	TPlayerID id = info.myID;
-	TTowerID maxTower = getMyMaxTower(info);
-	if (info.round == 5)
-	{
-		for (TTowerID tower : info.playerInfo[id].towers)
-		{
-			if (tower != maxTower)
-				info.myCommandList.addCommand(addLine, tower, maxTower);
-		}
-	}
-	if (info.round == 8)
-	{
-		info.myCommandList.addCommand(addLine, maxTower, 12);
-	}
-	if (info.playerInfo[info.myID].technologyPoint > StrategyChangeCost[Normal][Grow])
-	{
-		info.myCommandList.addCommand(changeStrategy, maxTower, Grow);
-	}
-	if (info.lineInfo[maxTower][12].exist && info.lineInfo[maxTower][12].state == Arrived)
-	{
-		if (info.towerInfo[12].occupyOwner != id)
-			info.myCommandList.addCommand(cutLine, maxTower, 12, info.lineInfo[maxTower][12].resource - (info.towerInfo[12].occupyPoint + info.towerInfo[12].resource / 3 + 2));
-	}
-}
-
-
-
+//玩家ai代码写在player_ai中，此函数每回合运行1次，用于每回合获取玩家的命令
+//游戏通过Info型实参给玩家player_ai函数传递信息，包括场上塔、兵团、地图等部分信息
+//玩家通过info.myCommandList.addCommmand(<命令类型>,<参数列表:参数1,参数2...>)添加命令
+//每回合命令最多不超过10条，myCommandList的addCommand方法已经对此有限制，超过10条的命令自动抛弃
+//如果玩家修改参数，使得最后传回游戏的myCommandlist中有超过10条命令，游戏会自动判定玩家出局
 void player_ai(Info& info)
 {
 
