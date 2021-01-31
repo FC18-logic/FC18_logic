@@ -24,15 +24,8 @@ Player::Player(Player& _player)// copy构造player
 	eliminateCorpsNum = _player.getElCorpsNum();
 	captureCorpsNum = _player.getCqCorpsNum();
 
-	data = nullptr;   //避免浅复制
+	data = _player.data;   //避免浅复制?
 
-	//FC15的
-	//m_cells = _player.cells();
-	//m_techPoint = _player.techPoint();
-	//m_RegenerationLevel = _player.getRegenerationLevel();
-	//m_ExtraControlLevel = _player.getExtraControlLevel();
-	//m_DefenceLevel = _player.getDefenceLevel();
-	//m_MoveLevel = _player.getMoveLevel();
 }
 
 
@@ -180,6 +173,7 @@ void Player::Kill()
 *作者 : 姜永鹏
 ***********************************************************************************************/
 int Player::getPlayerScore() {
+
 	if (isAlive() == false)   //玩家已经出局，根据出局的回合数记录进行分值
 		return deadRound - MAX_ROUND;
 	TScore corpsScore, towerScore;

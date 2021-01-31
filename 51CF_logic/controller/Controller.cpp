@@ -24,7 +24,7 @@ namespace DAGAN
 		int CQTowerNum;//攻占塔数
 		int ELCorpsNum;//消灭兵团数
 		int CPCorpsNum;//俘虏兵团数
-		bool operator < (rankCmp b) {  //重载的比较运算符，用于排名
+		bool operator < (rankCmp& b) {  //重载的比较运算符，用于排名
 			if (score > b.score) return true;
 			else if (score == b.score) {
 				if (CQTowerNum > b.CQTowerNum) return true;
@@ -33,7 +33,7 @@ namespace DAGAN
 					else if (ELCorpsNum == b.ELCorpsNum) {
 						if (CPCorpsNum > b.CPCorpsNum) return true;
 						else {
-							return generateRanInt(0, 1);   //在0,1间返回随机数来随机给出排名
+							return false;   //在0,1间返回随机数来随机给出排名
 						}
 					}
 				}

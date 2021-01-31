@@ -1324,10 +1324,11 @@ Info Game::generatePlayerInfo(TPlayerID id) {
 *作者 : 姜永鹏
 ***********************************************************************************************/
 void Game::saveJson() {
+	cout << "begin json" << endl;
 	//保存这一轮的用户命令数据
 	Json::Value roundInfo;  //当前回合数据
-	roundInfo["round"] = data.getRound();   //在这里增加回合数
-	data.commandJsonRoot["body"].append(data.currentRoundCommandJson);
+	roundInfo["round"] = Json::Value(std::to_string(data.getRound()));   //在这里增加回合数
+	data.commandJsonRoot.append(data.currentRoundCommandJson);
 	data.currentRoundCommandJson.clear();
 
 	//保存这一轮结束的玩家数据
@@ -1356,6 +1357,8 @@ void Game::saveJson() {
 	//data.infoJsonRoot["body"]["playerInfo"].append(data.currentRoundPlayerJson);
 	roundInfo["player"] = data.currentRoundPlayerJson;
 	data.currentRoundPlayerJson.clear();
+
+	cout << "player json finished" << endl;
 
 	//保存这一轮结束的防御塔数据
 	for (int i = 0; i < data.myTowers.size(); i++) {
@@ -1402,6 +1405,8 @@ void Game::saveJson() {
 	roundInfo["tower"] = data.currentRoundTowerJson;
 	data.currentRoundTowerJson.clear();
 
+	cout << "tower json finished" << endl;
+
 	//保存这一轮结束的兵团数据
 	for (int i = 0; i < data.myCorps.size(); i++) {
 		if (data.myCorps[i].bAlive() == false) continue;    //兵团没了，就不记录信息
@@ -1443,8 +1448,9 @@ void Game::saveJson() {
 	//data.infoJsonRoot["body"]["corpsInfo"].append(data.currentRoundCorpsJson);
 	roundInfo["corps"] = data.currentRoundCorpsJson;
 	data.currentRoundCorpsJson.clear();
-
 	data.infoJsonRoot.append(roundInfo);
+
+	cout << "corps json finished" << endl;
 
 	//保存这一轮的地图数据
 	for (int i = 0; i < data.gameMap.getHeigth(); i++) {
@@ -1462,6 +1468,8 @@ void Game::saveJson() {
 	}
 	data.mapInfoJsonRoot["body"].append(data.currentRoundMapJson);
 	data.currentRoundMapJson.clear();
+
+	cout << "map json finished" << endl;
 
 	//输出到文件 #json 
 	Json::FastWriter sw_cmd, sw_info, sw_map;

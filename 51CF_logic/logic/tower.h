@@ -12,7 +12,7 @@ class Tower
 {
 private:
 	//游戏信息
-	DATA::Data* const		m_data;
+	DATA::Data* 		m_data;
 
 	//塔信息
 	static TTowerID		ID;
@@ -47,6 +47,7 @@ public:
 	~Tower(void);
 	//塔构造函数
 	Tower(DATA::Data* _data, TPlayerID m_playid, TPoint pos);
+	//Tower(Tower& tower);
 
 	/*塔操作*/
 	//判断上一轮生产任务是否完成

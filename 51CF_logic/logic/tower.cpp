@@ -8,6 +8,10 @@ Tower::Tower(void) :m_data(nullptr)
 Tower::~Tower(void)
 {
 }
+//Tower::Tower(Tower& tower) {
+	//m_PlayerID = tower.getPlayerID();
+	//////////////////////////
+//}
 //构造函数：塔属性初始化
 Tower::Tower(DATA::Data* _data, TPlayerID m_playid, TPoint pos) :m_data(_data)
 {
@@ -22,7 +26,7 @@ Tower::Tower(DATA::Data* _data, TPlayerID m_playid, TPoint pos) :m_data(_data)
 	m_productconsume = INF;
 	//更新data
 	m_data->totalTowers++;
-	m_data->players->getTower().insert(m_id); //塔下标从0开始
+	m_data->players[m_PlayerID - 1].getTower().insert(m_id);
 	m_data->gameMap.map[m_position.m_y][m_position.m_x].TowerIndex = m_id;
 	//by jyp:塔被建立之后，修改方格地形为塔
 	m_data->gameMap.map[m_position.m_y][m_position.m_x].type = TRTower;
@@ -146,7 +150,7 @@ bool Tower::set_producttype(productType m_protype)
 	}
 	m_producttype = m_protype;
 	//更新新一回合生产任务的生产力消耗值
-	if (m_producttype < 5)
+	if (m_producttype >= 0 && m_producttype < 5)
 	{
 		m_productconsume = TowerProductCost[m_producttype];
 		m_productconsume -= m_productpoint;
@@ -190,7 +194,7 @@ bool Tower::Be_Attacked(TPlayerID enemy_id,THealthPoint hp_decrease)
 			m_exsit = false;
 			//更新data
 			m_data->totalTowers--;
-			m_data->players->getTower().erase(m_id);
+			m_data->players[m_PlayerID - 1].getTower().erase(m_id);
 			m_data->gameMap.map[m_position.m_y][m_position.m_x].TowerIndex = NOTOWER;
 			m_data->gameMap.map[m_position.m_y][m_position.m_x].type = TRPlain;  //by jyp: 塔被摧毁之后统一修改方格地形为平原
 			//by jyp : 记录被摧毁的塔的ID
@@ -202,8 +206,8 @@ bool Tower::Be_Attacked(TPlayerID enemy_id,THealthPoint hp_decrease)
 		else
 		{
 			set_all(m_level);
-			m_data->players[m_PlayerID].getTower().erase(m_id);//修改原拥有者的塔列表
-			m_data->players[enemy_id].getTower().insert(m_id);//修改新拥有者的塔列表
+			m_data->players[m_PlayerID - 1].getTower().erase(m_id);//修改原拥有者的塔列表
+			m_data->players[enemy_id - 1].getTower().insert(m_id);//修改新拥有者的塔列表
 			m_data->gameMap.modifyOccupyPoint(m_PlayerID, enemy_id, m_position);//修改方格塔易主造成的占有属性值重新分配
 			m_PlayerID = enemy_id;
 		}
@@ -213,14 +217,14 @@ bool Tower::Be_Attacked(TPlayerID enemy_id,THealthPoint hp_decrease)
 			if(m_staycrops[i]->getType() == Construct)
 			{
 				m_staycrops[i]->ChangeOwner(enemy_id);
-				int num = m_data->players[enemy_id].getCqCorpsNum() + 1;
-				m_data->players[enemy_id].setCqCorpsNum(num);
+				int num = m_data->players[enemy_id - 1].getCqCorpsNum() + 1;
+				m_data->players[enemy_id - 1].setCqCorpsNum(num);
 			}
 			else
 			{
 				m_staycrops[i]->KillCorps();
-				int num = m_data->players[enemy_id].getElCorpsNum() + 1;
-				m_data->players[enemy_id].setElCorpsNum(num);
+				int num = m_data->players[enemy_id - 1].getElCorpsNum() + 1;
+				m_data->players[enemy_id - 1].setElCorpsNum(num);
 			}
 		}
 		return true;

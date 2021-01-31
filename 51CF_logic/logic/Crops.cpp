@@ -43,7 +43,7 @@ Crops::Crops(DATA::Data* _data, corpsType type, battleCorpsType battletype, cons
 	}
 	m_bResting = true;//兵团生产出来后默认休整
 	m_data->corps[m_position.m_y][m_position.m_x].push_back(this);
-	m_data->players[m_PlayerID].addCrops(m_myID);
+	m_data->players[m_PlayerID - 1].addCrops(m_myID);
 	m_data->totalCorps++;
 	m_data->newCorps.insert(m_myID);//记录新产生的兵团序号
 }
@@ -91,7 +91,7 @@ bool Crops::Move(int dir)
 			return false;
 		}
 	}
-
+	if (m_data->gameMap.withinMap({ next_x,next_y }) == false) return false;  //by jyp要前往的位置不在地图内，判断失败
 	//判断目标位置是否存在己方塔
 	bool haveTower = false;
 	int index = m_data->gameMap.map[next_y][next_x].TowerIndex;
@@ -221,8 +221,8 @@ bool Crops::BeAttacked(int attack,TPlayerID ID)
 	if(m_type == Construct)
 	{
 		ChangeOwner(ID);
-		int num = m_data->players[ID].getCqCorpsNum() + 1;
-		m_data->players[ID].setCqCorpsNum(num);
+		int num = m_data->players[ID - 1].getCqCorpsNum() + 1;
+		m_data->players[ID - 1].setCqCorpsNum(num);
 		return true;
 	}
 	//战斗兵
@@ -231,8 +231,8 @@ bool Crops::BeAttacked(int attack,TPlayerID ID)
 	if(m_HealthPoint<=0)
 	{
 		KillCorps();
-		int num = m_data->players[ID].getElCorpsNum() + 1;
-		m_data->players[ID].setElCorpsNum(num);
+		int num = m_data->players[ID - 1].getElCorpsNum() + 1;
+		m_data->players[ID - 1].setElCorpsNum(num);
 		//同一位置的工程兵被俘虏
 		Crops* colleage = NULL;
 		for(int i = 0; i<m_data->corps[m_position.m_y][m_position.m_x].size(); i++)
@@ -508,8 +508,8 @@ int Crops::AttackTower(class Tower *enemy)
 	IsTowerDestroy = enemy->Be_Attacked(m_PlayerID, enemylost);
 	if(IsTowerDestroy/*&&!(enemy->getexsit())*/)
 	{
-		int num = m_data->players[m_PlayerID].getCqTowerNum() + 1;
-		m_data->players[m_PlayerID].setCqTowerNum(num);
+		int num = m_data->players[m_PlayerID - 1].getCqTowerNum() + 1;
+		m_data->players[m_PlayerID - 1].setCqTowerNum(num);
 	}
 
 	//
@@ -632,9 +632,9 @@ ChangeOwner
 */
 void Crops::ChangeOwner(TPlayerID newowner)
 {
-	m_data->players[m_PlayerID].deleteCrops(m_myID);
+	m_data->players[m_PlayerID - 1].deleteCrops(m_myID);
 	m_PlayerID = newowner;
-	m_data->players[m_PlayerID].addCrops(m_myID);
+	m_data->players[m_PlayerID - 1].addCrops(m_myID);
 }
 
 /*
@@ -645,7 +645,7 @@ void Crops::KillCorps()
 {
 	m_HealthPoint = 0;
 	m_BuildPoint = 0;
-	m_data->players[m_PlayerID].deleteCrops(m_myID);
+	m_data->players[m_PlayerID - 1].deleteCrops(m_myID);
 	m_data->totalCorps--;
 	CorpsUnit* thisplace = &(m_data->corps[m_position.m_y][m_position.m_x]);
 	CorpsUnit::iterator it;

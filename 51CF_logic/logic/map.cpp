@@ -417,8 +417,8 @@ bool Map::randomInitMap() {
 		map[towerPoint.m_y][towerPoint.m_x].TowerIndex = i;  //方格上的塔序号
 		//重复 tower构造 data->totalTowers++;                      //更新data类：更新防御塔总数
 		//@@@【FC18】[！！！这个塔的构造函数可能会改]更新data类：向防御塔向量中添加新增的防御塔
-		Tower newTower(data, i + 1, towerPoint);
-		data->myTowers.push_back(newTower);
+		Tower* newTower = new Tower(data, i + 1, towerPoint);
+		data->myTowers.push_back(*newTower);
 		//【FC18】更新player类：向player的防御塔序号向量中添加新的防御塔序号
 		//重复 tower构造 data->players[i].getTower().insert(i);
 		for (int j = 0; j < 8; j++) {  //规则：初始防御塔四周8格为道路

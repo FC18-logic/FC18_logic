@@ -15,6 +15,7 @@ public:
 	~Player();                                                              //【FC18】玩家类析构函数
 	//增加科技点数
 	void setdata(DATA::Data* d) { data = d; }                               //【FC18】设置更新数据Data
+	DATA::Data* getdata() { return data; }
 	bool isAlive() { return alive; }                                        //【FC18】判断玩家是否活着
 	int maxControlNumber();                                                 //@@@【FC18】（看规则怎么改，不知道用不用）获取最大命令条数
 	void Kill();                                                            //【FC18】设置玩家死亡
