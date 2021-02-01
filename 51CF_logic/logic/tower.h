@@ -41,14 +41,15 @@ public:
 	~Tower(void);
 	//塔构造函数
 	Tower(DATA::Data* _data, TPlayerID m_playid, TPoint pos);
-	//Tower(Tower& tower);
+	//塔复制构造函数
+	Tower(Tower& tower);
 
 	/*塔操作*/
 	//根据等级更新塔的属性
 	void set_all(int level);
 	//每回合初始根据经验值判断是否升级
 	bool set_level();
-	//判断上一轮生产任务是否完成
+	//判断上一回合生产任务是否完成
 	bool protask_finish()
 	{
 		if (m_productconsume <= 0)

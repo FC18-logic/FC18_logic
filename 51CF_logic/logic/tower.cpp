@@ -8,10 +8,37 @@ Tower::Tower(void) :m_data(nullptr)
 Tower::~Tower(void)
 {
 }
-//Tower::Tower(Tower& tower) {
-	//m_PlayerID = tower.getPlayerID();
-	//////////////////////////
-//}
+
+
+
+//塔复制构造函数
+Tower::Tower(Tower& tower) {
+	m_PlayerID = tower.getPlayerID();
+	m_position = tower.getPosition();
+	m_id = ID;
+	ID++;//这里再更新tower类的ID
+	m_exsit = true;
+	m_level = 1;//初始等级为1  
+	set_all(m_level);
+	m_experpoint = 0;//初始经验值为0
+	m_productconsume = INF;
+	upgrade_finish = false;
+	for (int i = 0; i < 6; i++)
+		task_cache[i] = 0;
+	//更新data
+	m_data->totalTowers++;
+	m_data->players[m_PlayerID - 1].getTower().insert(m_id);
+	m_data->gameMap.map[m_position.m_y][m_position.m_x].TowerIndex = m_id;
+	//by jyp:塔被建立之后，修改方格地形为塔
+	m_data->gameMap.map[m_position.m_y][m_position.m_x].type = TRTower;
+	//by jyp : 记录新建的塔ID
+	m_data->newTower.insert(m_id);
+	//更新occupypoint/owner
+	m_data->gameMap.modifyOccupyPoint(NOTOWER, m_PlayerID, m_position);
+
+}
+
+
 //构造函数：塔属性初始化
 Tower::Tower(DATA::Data* _data, TPlayerID m_playid, TPoint pos) :m_data(_data)
 {
@@ -38,6 +65,9 @@ Tower::Tower(DATA::Data* _data, TPlayerID m_playid, TPoint pos) :m_data(_data)
 	//更新occupypoint/owner
 	m_data->gameMap.modifyOccupyPoint(NOTOWER, m_PlayerID, m_position);
 }
+
+
+
 /*
 名称：set_all
 功能：根据等级更新生产力、生命值、战斗力、升级所需经验值、攻击范围
@@ -52,6 +82,10 @@ void Tower::set_all(int level)
 	m_upgradexper = TowerInitConfig[level - 1].upgradeExper;
 	m_attackrange = TowerInitConfig[level - 1].battleRegion;
 }
+
+
+
+
 /*
 名称：upgrade
 功能：完成塔升级生产任务时执行的操作
@@ -67,6 +101,10 @@ void Tower::upgrade()
 	set_all(m_level);
 	upgrade_finish == true;
 }
+
+
+
+
 /*
 名称：level_upgrade
 功能：根据当前经验值更新等级
@@ -99,6 +137,9 @@ bool Tower::set_level()
 	}
 	return upgrade;
 }
+
+
+
 /*
 名称：product_crops
 功能：生产兵团
@@ -134,6 +175,9 @@ void Tower::product_crops(productType protype)
 	}
 		
 }
+
+
+
 /*
 名称：set_producttype
 功能：设置新的生产任务
@@ -155,15 +199,8 @@ bool Tower::set_producttype(productType m_protype)
 	{
 		if (m_producttype < 5)
 		{
-<<<<<<< Updated upstream
-			m_level += 1;//完成后塔上升一级
-			if (m_level > MAX_TOWER_LEVEL) //不得超过最大等级
-				m_level = MAX_TOWER_LEVEL;
-			set_all(m_level);      //满级后执行升级命令将恢复该等级的最佳性能
-=======
 			m_productconsume = TowerProductCost[m_producttype];
 			m_productconsume -= m_productpoint;
->>>>>>> Stashed changes
 		}
 		if (m_producttype == PUpgrade)
 		{
@@ -171,24 +208,16 @@ bool Tower::set_producttype(productType m_protype)
 			m_productconsume -= m_productpoint;
 		}
 	}
-<<<<<<< Updated upstream
-	m_producttype = m_protype;
-	//更新新一回合生产任务的生产力消耗值
-	if (m_producttype >= 0 && m_producttype < 5)
-	{
-		m_productconsume = TowerProductCost[m_producttype];
-		m_productconsume -= m_productpoint;
-	}
-	if (m_producttype == PUpgrade)
-=======
 	else
->>>>>>> Stashed changes
 	{
 		m_productconsume = task_cache[int(m_producttype)];
 		m_productconsume -= m_productpoint;
 	}
 	return true;
 }
+
+
+
 /*
 名称：get_towerbp
 功能：遭到兵团进攻时，计算考虑增益后塔的战斗力
@@ -202,6 +231,10 @@ TBattlePoint Tower::get_towerbp()
 		bonus += corpsBattleGain[m_staycrops[i]->getbattleType()][0] * (m_staycrops[i]->getLevel() + 1);
 	return (m_battlepoint + bonus);
 }
+
+
+
+
 /*
 名称：Be_Attacked
 功能：兵团攻击塔时更新塔的生命值
@@ -270,6 +303,10 @@ bool Tower::Be_Attacked(TPlayerID enemy_id,THealthPoint hp_decrease)
 	}
 	return false;
 }
+
+
+
+
 /*
 名称：set_attacktarget
 功能：设置攻击目标
@@ -293,6 +330,9 @@ bool Tower::set_attacktarget(int crop_id)
 	enemy.BeAttacked(crop_lost, m_PlayerID);
 	return true;
 }
+
+
+
 /*
 名称：Recover
 功能：修理塔回复生命值
