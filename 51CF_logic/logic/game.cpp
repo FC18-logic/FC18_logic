@@ -1063,12 +1063,7 @@ void Game::beginPhase()
 				temp.product_crops(m_producttype);
 			if (m_producttype == PUpgrade)//所完成生产任务为升级项目
 				temp.upgrade();
-<<<<<<< Updated upstream
-			temp.set_producttype(NOTASK);
-=======
-			//设置为【无任务】状态
 			temp.set_notask();
->>>>>>> Stashed changes
 		}
 	}	
 }

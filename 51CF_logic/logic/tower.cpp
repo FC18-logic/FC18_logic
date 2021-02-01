@@ -47,7 +47,8 @@ Tower::Tower(DATA::Data* _data, TPlayerID m_playid, TPoint pos) :m_data(_data)
 	m_level = 1;//初始等级为1  
 	set_all(m_level);
 	m_experpoint = 0;//初始经验值为0
-	m_productconsume = INF;
+	m_producttype = NOTASK;
+	m_productconsume = 0;
 	for (int i = 0; i < 6; i++)
 		task_cache[i] = 0;
 	//更新data
@@ -181,10 +182,11 @@ by lxj
 bool Tower::set_producttype(productType m_protype)
 {
 	//生产任务类型越界：任务暂停一回合
-	if (int(m_producttype) < 0 || int(m_producttype) > 5)
+	if (int(m_protype) < 0 || int(m_protype) > 5)
 		return false;
-	//缓存上一回合任务的进度
-	task_cache[int(m_producttype)] = m_productconsume;
+	//若上一回合设置生产任务成功：缓存上一回合任务的进度
+	if (m_producttype != NOTASK)
+		task_cache[int(m_producttype)] = m_productconsume;
 	m_producttype = m_protype;
 	//新设置生产任务为完成状态
 	if (task_cache[(int)m_producttype] <= 0) 
