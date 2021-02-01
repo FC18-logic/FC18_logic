@@ -1054,7 +1054,7 @@ void Game::beginPhase()
 	//初始化2：回合开始时判断上一轮生产任务是否完成并结算生产回报
 	for (int i = 0; i < data.myTowers.size(); i++) 
 	{
-		Tower temp = data.myTowers[i];
+		Tower& temp = data.myTowers[i];
 		temp.set_level();
 		if (temp.protask_finish() == true)//上一回合生产任务完成
 		{
@@ -1063,6 +1063,7 @@ void Game::beginPhase()
 				temp.product_crops(m_producttype);
 			if (m_producttype == PUpgrade)//所完成生产任务为升级项目
 				temp.upgrade();
+			temp.set_producttype(NOTASK);
 		}
 	}	
 }
@@ -1125,63 +1126,7 @@ void Game::endPhase()
 //【冲突】因为添加兵线则还有兵线操作
 void Game::commandPhase(vector<CommandList>& command_list)
 {
-	for (int i = 0; i != playerSize; ++i)
-	{
-		controlCount[i] = 0;  //已经执行的操作个数
-		for (Command& c : command_list[i])
-		{
-			//操作数个数溢出
-			if (data.players[i].maxControlNumber() <= controlCount[i])
-				break;
-			switch (c.type)
-			{
-			case addTentacle: 
-			{
-				if (c.parameters.size() < 2)break;//操作数过少
-				TCellID source = c.parameters[0];
-				TCellID target = c.parameters[1];
-				if (data.cells[source].getPlayerID() == i)//是己方细胞
-					data.cells[source].addTentacle(target);
-				//写JSON
-			}
-			break;
-			case cutTentacle:
-			{
-				if (c.parameters.size() < 3)break;//操作数过少
-				TCellID source = c.parameters[0];
-				TCellID target = c.parameters[1];
-				TPosition pos = c.parameters[2];
-				if (data.cells[source].getPlayerID() == i)//是己方细胞
-					data.cells[source].cutTentacle(target, pos);
-				//写JSON
-			}
-			break;
-			case changeStrategy:
-			{
-				if (c.parameters.size() < 1)break;//操作数过少
-				TCellID cell = c.parameters[0];
-				CellStrategy nextStg = static_cast<CellStrategy>(c.parameters[1]);
-				if (data.cells[cell].getPlayerID() == i)//是己方细胞
-					data.cells[cell].changeStg(nextStg);
-				//写JSON
-			}
-			break;
-			case upgrade:
-			{
-				if (c.parameters.size() < 1)break;//操作数过少
-				TPlayerProperty upgradeType = static_cast<TPlayerProperty>(c.parameters[0]);
-				//直接由player访问修改塔的等级，不需要判断是否己方细胞
-				data.players[i].upgrade(upgradeType);
-				//写JSON
-			}
-			break;
-			default:
-				break;
-			}
-			controlCount[i]++;
-		}
-		
-	}
+	//FC15旧代码
 }
 
 //【不冲突】只涉及player

@@ -725,15 +725,6 @@ struct Command
 	Command() {}                                                             //【FC18】指令的析构函数
 	commandType cmdType;                                                     //【FC18】命令种类
 	vector<int> parameters;                                                  //【FC18】参数：注意所有参数是整型！
-
-
-	//FC15的
-	Command(CommandType _type, initializer_list<int> _parameters) :
-		type(_type), parameters(_parameters) {}
-	Command(CommandType _type, vector<int> _parameters) :
-		type(_type), parameters(_parameters) {}
-                                                       
-	CommandType type;
 };
 
 //【FC18】命令列表
@@ -743,7 +734,7 @@ class CommandList
 		void addCommand(commandType _FC18type, initializer_list<int> _FC18parameters)  //【FC18】由初始化列表直接添加命令
 		{
 			if (size() >= MAX_CMD_NUM) return;
-			m_commands.emplace_back(_FC18type, _FC18parameters);
+			m_commands.emplace_back( _FC18type, _FC18parameters );
 		}
 		void addCommand(commandType _FC18type, vector<int> _FC18parameters)            //【FC18】由默认向量数组添加命令（需要拷贝构造）
 		{
@@ -772,19 +763,6 @@ class CommandList
 		vector<Command>::const_iterator  begin() const { return m_commands.cbegin(); } //【FC18】返回第一条命令的常量迭代器
 		vector<Command>::const_iterator end() const { return m_commands.cend(); }      //【FC18】返回最后一条命令的常量迭代器
 
-
-		//FC15的
-		void addCommand(CommandType _type, initializer_list<int> _parameters)
-		{
-			m_commands.emplace_back(_type, _parameters);
-		}
-		void addCommand(CommandType _type, vector<int> _parameters)
-		{
-			Command c;
-			c.type = _type;
-			c.parameters = _parameters;
-			m_commands.push_back(c);
-		}
 	private:
 		vector<Command> m_commands;                                                    //【FC18】指令集vector存储
 };

@@ -21,27 +21,7 @@ int generateRanInt(int start, int end) {
 
 std::ostream& operator<<(std::ostream& os, const CommandList& cl)
 {
-	vector<string> stg2str{ "Normal","Attack","Defend","Grow" };
-	vector<string> upgrade2str{ "Regeneration","ExtendSpeed","ExtraControl","CellWall" };
-	for (const Command& c : cl)
-	{
-		switch (c.type)
-		{
-		case addTentacle:
-			os << "Add a tentacle from cell " << c.parameters[0] << " to cell " << c.parameters[1] << endl;
-			break;
-		case cutTentacle:
-			os << "Cut the tentacle from cell " << c.parameters[0] << " to cell " << c.parameters[1] << " at the postion " << c.parameters[2] << endl;
-			break;
-		case changeStrategy:
-			os << "Change the strategy of cell " << c.parameters[0] << " to " << stg2str[c.parameters[1]] << endl;
-			break;
-		case upgrade:
-			os << "Upgrade the ability of cell " << stg2str[c.parameters[0]] << endl;
-		default:
-			break;
-		}
-	}
+	//FC15¾É´úÂë
 	return os;
 }
 
