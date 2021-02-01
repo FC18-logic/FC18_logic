@@ -21,7 +21,6 @@ Tower::~Tower(void)
 	set_all(m_level);
 	m_experpoint = tower.m_experpoint;//初始经验值为0
 	m_productconsume = tower.m_productconsume;
-	upgrade_finish = false;
 	for (int i = 0; i < 6; i++)
 		task_cache[i] = 0;
 	//更新data
@@ -49,7 +48,6 @@ Tower::Tower(DATA::Data* _data, TPlayerID m_playid, TPoint pos) :m_data(_data)
 	set_all(m_level);
 	m_experpoint = 0;//初始经验值为0
 	m_productconsume = INF;
-	upgrade_finish = false;
 	for (int i = 0; i < 6; i++)
 		task_cache[i] = 0;
 	//更新data
@@ -91,13 +89,10 @@ by lxj
 */
 void Tower::upgrade()
 {
-	if (upgrade_finish == true)
-		return;
 	m_level++;
 	if (m_level > MAX_TOWER_LEVEL) //不得超过最大等级
 		m_level = MAX_TOWER_LEVEL;
 	set_all(m_level);
-	upgrade_finish == true;
 }
 
 
@@ -185,7 +180,6 @@ by lxj
 */
 bool Tower::set_producttype(productType m_protype)
 {
-	upgrade_finish = false;
 	//生产任务类型越界：任务暂停一回合
 	if (int(m_producttype) < 0 || int(m_producttype) > 5)
 		return false;

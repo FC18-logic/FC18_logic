@@ -34,7 +34,6 @@ private:
 	TExperPoint			m_upgradexper;//升级到下一级所需经验值
 	int					m_productconsume;//当前生产任务对应的生产力消耗值	
 	vector <Crops*>     m_staycrops;//储存驻扎兵团指针
-	bool				upgrade_finish;//升级任务是否结算(避免重复升级)
 	int					task_cache[6];//缓存未完成任务进度：储存任务的生产力消耗值（若为0，则为完成状态）
 public:
 	Tower(void);
@@ -49,6 +48,8 @@ public:
 	void set_all(int level);
 	//每回合初始根据经验值判断是否升级
 	bool set_level();
+	//设置【无任务】状态
+	void set_notask() { m_producttype = NOTASK; }
 	//判断上一回合生产任务是否完成
 	bool protask_finish()
 	{
