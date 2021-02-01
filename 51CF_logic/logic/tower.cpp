@@ -12,16 +12,15 @@ Tower::~Tower(void)
 
 
 //塔复制构造函数
-Tower::Tower(Tower& tower) {
-	m_PlayerID = tower.getPlayerID();
-	m_position = tower.getPosition();
-	m_id = ID;
-	ID++;//这里再更新tower类的ID
-	m_exsit = true;
-	m_level = 1;//初始等级为1  
+/*Tower::Tower(const Tower& tower):m_data(tower.m_data) {
+	m_PlayerID = tower.m_PlayerID;
+	m_position = tower.m_position;
+	m_id = tower.m_id;
+	m_exsit = tower.m_exsit;
+	m_level = tower.m_level;//初始等级为1  
 	set_all(m_level);
-	m_experpoint = 0;//初始经验值为0
-	m_productconsume = INF;
+	m_experpoint = tower.m_experpoint;//初始经验值为0
+	m_productconsume = tower.m_productconsume;
 	upgrade_finish = false;
 	for (int i = 0; i < 6; i++)
 		task_cache[i] = 0;
@@ -35,8 +34,7 @@ Tower::Tower(Tower& tower) {
 	m_data->newTower.insert(m_id);
 	//更新occupypoint/owner
 	m_data->gameMap.modifyOccupyPoint(NOTOWER, m_PlayerID, m_position);
-
-}
+}*/
 
 
 //构造函数：塔属性初始化
@@ -195,7 +193,7 @@ bool Tower::set_producttype(productType m_protype)
 	task_cache[int(m_producttype)] = m_productconsume;
 	m_producttype = m_protype;
 	//新设置生产任务为完成状态
-	/*if (task_cache[(int)m_producttype] <= 0) 
+	if (task_cache[(int)m_producttype] <= 0) 
 	{
 		if (m_producttype < 5)
 		{
@@ -212,7 +210,7 @@ bool Tower::set_producttype(productType m_protype)
 	{
 		m_productconsume = task_cache[int(m_producttype)];
 		m_productconsume -= m_productpoint;
-	}*/
+	}
 	return true;
 }
 

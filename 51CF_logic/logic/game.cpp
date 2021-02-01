@@ -1560,7 +1560,7 @@ void Game::printGameMap() {
 			case(4):SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), FOREGROUND_INTENSITY | FOREGROUND_RED | FOREGROUND_BLUE); break;
 			case(5):SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), FOREGROUND_INTENSITY | FOREGROUND_GREEN | FOREGROUND_BLUE); break;
 			}
-			std::cout << setprecision(5) << int(data.gameMap.map[i][j].owner) << " ";
+			std::cout << setprecision(5) << int(data.gameMap.map[i][j].type) << " ";
 		}
 		std::cout << "\n";
 	}

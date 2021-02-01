@@ -42,7 +42,7 @@ public:
 	//塔构造函数
 	Tower(DATA::Data* _data, TPlayerID m_playid, TPoint pos);
 	//塔复制构造函数
-	Tower(Tower& tower);
+	//Tower(const Tower& tower);
 
 	/*塔操作*/
 	//根据等级更新塔的属性

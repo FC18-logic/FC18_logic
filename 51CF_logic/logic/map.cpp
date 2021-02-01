@@ -601,7 +601,7 @@ TPlayerID Map::ownerChange(TPoint p) {
 	}
 	else {
 		for (int i = 0; i < 4; i++) {
-			if (map[p.m_y][p.m_x].occupyPoint[i] == maxOccupyPoint && data->getRound() != 0)
+			if (map[p.m_y][p.m_x].occupyPoint[i] == maxOccupyPoint && ((i + 1) != occupyID)  && data->getRound() != 0)
 			{
 				map[p.m_y][p.m_x].owner = TRANSITION;
 				return TRANSITION;

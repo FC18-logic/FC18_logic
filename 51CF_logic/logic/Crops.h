@@ -39,7 +39,7 @@ public:
 	Crops(void);
 	~Crops(void);
 	Crops(DATA::Data* _data, corpsType type, battleCorpsType battletype, constructCorpsType buildtype, TPlayerID ID, TPoint pos);
-	Crops(const Crops& corps);
+	//Crops(const Crops& corps);
 	//兵团操作
 	bool BeAttacked(int attack, TPlayerID ID);	//作战兵团受到攻击 返回是否存活 如果死亡
 	bool Move(int dir);					//作战兵团移动 返回是否成功移动

@@ -49,7 +49,7 @@ Crops::Crops(DATA::Data* _data, corpsType type, battleCorpsType battletype, cons
 }
 
 
-Crops::Crops(const Crops& corps):m_data(corps.m_data)
+/*Crops::Crops(const Crops& corps):m_data(corps.m_data)
 {
 	m_myID = corps.m_myID;
 	m_type = corps.m_type;
@@ -64,7 +64,7 @@ Crops::Crops(const Crops& corps):m_data(corps.m_data)
 	m_position = corps.m_position;
 	m_PeaceNum = corps.m_PeaceNum;
 	m_bAlive = corps.m_bAlive;
-}
+}*/
 
 
 /*
