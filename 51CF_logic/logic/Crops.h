@@ -21,24 +21,25 @@ private:
 	constructCorpsType	m_BuildType;	//建造兵用
 	TPlayerID			m_PlayerID;		//所属阵营
 
-	TMovePoint				m_MovePoint;	//行动力
-	THealthPoint			m_HealthPoint;	//生命值 归0即死亡
-	int						m_level;		//等级 从0开始
-	TBuildPoint				m_BuildPoint;	//劳动力
-	bool					m_bResting;		//是否在休整
-	TPoint					m_position;		//位置
-	int						m_PeaceNum;		//驻扎后多少个回合没有受到攻击
+	TMovePoint			m_MovePoint;	//行动力
+	THealthPoint		m_HealthPoint;	//生命值 归0即死亡
+	int					m_level;		//等级 从0开始
+	TBuildPoint			m_BuildPoint;	//劳动力
+	bool				m_bResting;		//是否在休整
+	TPoint				m_position;		//位置
+	int					m_PeaceNum;		//驻扎后多少个回合没有受到攻击
 
-	DATA::Data* const		m_data;	//游戏信息
+	DATA::Data* const	m_data;	//游戏信息
 
-	bool					m_bAlive;	//是否存活
+	bool	m_bAlive;		//是否存活
+	Tower*	m_StationTower;	//驻守塔指针，未驻守为空
 
 public:
 
 	Crops(void);
 	~Crops(void);
 	Crops(DATA::Data* _data, corpsType type, battleCorpsType battletype, constructCorpsType buildtype, TPlayerID ID, TPoint pos);
-	
+	Crops(const Crops& corps);
 	//兵团操作
 	bool BeAttacked(int attack, TPlayerID ID);	//作战兵团受到攻击 返回是否存活 如果死亡
 	bool Move(int dir);					//作战兵团移动 返回是否成功移动
@@ -72,7 +73,7 @@ protected:
 	void Recover();	//回复HP
 	int AttackCrops(Crops* enemy);			//作战兵团攻击
 	int AttackTower(class Tower *enemy);	//作战兵团攻击塔
-	void UpdatePos(TPoint targetpos);		//更新位置
+	void UpdatePos(TPoint targetpos);		//更新位置时需要进行的统一操作
 	bool IsNeighbor(TPoint point);			//判断是否相邻
 	bool IsInRange(TPoint point);			//判断是否处在攻击范围内
 };

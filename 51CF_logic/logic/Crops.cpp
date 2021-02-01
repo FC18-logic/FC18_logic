@@ -26,7 +26,7 @@ Crops::Crops(DATA::Data* _data, corpsType type, battleCorpsType battletype, cons
 	m_staticID++;
 	m_PeaceNum = 0;
 	m_level = 0;
-
+	m_StationTower = nullptr;//兵团生产出来后，需要指令才驻守当地的塔
 	m_BuildPoint = 0;
 	m_HealthPoint = 0;
 
@@ -47,6 +47,25 @@ Crops::Crops(DATA::Data* _data, corpsType type, battleCorpsType battletype, cons
 	m_data->totalCorps++;
 	m_data->newCorps.insert(m_myID);//记录新产生的兵团序号
 }
+
+
+Crops::Crops(const Crops& corps):m_data(corps.m_data)
+{
+	m_myID = corps.m_myID;
+	m_type = corps.m_type;
+	m_BattleType = corps.m_BattleType;
+	m_BuildType = corps.m_BuildType;
+	m_PlayerID = corps.m_PlayerID;
+	m_MovePoint = corps.m_MovePoint;
+	m_HealthPoint = corps.m_HealthPoint;
+	m_level = corps.m_level;
+	m_BuildPoint = corps.m_BuildPoint;
+	m_bResting = corps.m_bResting;
+	m_position = corps.m_position;
+	m_PeaceNum = corps.m_PeaceNum;
+	m_bAlive = corps.m_bAlive;
+}
+
 
 /*
 Move
@@ -91,7 +110,11 @@ bool Crops::Move(int dir)
 			return false;
 		}
 	}
-	if (m_data->gameMap.withinMap({ next_x,next_y }) == false) return false;  //by jyp要前往的位置不在地图内，判断失败
+	TPoint next_pos;
+	next_pos.m_x = next_x;
+	next_pos.m_y = next_y;
+	if (m_data->gameMap.withinMap(next_pos) == false) return false;  //by jyp要前往的位置不在地图内，判断失败
+
 	//判断目标位置是否存在己方塔
 	bool haveTower = false;
 	int index = m_data->gameMap.map[next_y][next_x].TowerIndex;
@@ -137,15 +160,7 @@ bool Crops::Move(int dir)
 			}
 		}
 	}
-	TPoint next_pos;
-	next_pos.m_x = next_x;
-	next_pos.m_y = next_y;
 	terrainType curtype = m_data->gameMap.map[curpos_y][curpos_x].type;
-	//越界
-	if(!m_data->gameMap.isPosValid(next_pos))
-	{
-		return false;
-	}
 	terrainType nexttype = m_data->gameMap.map[next_y][next_x].type;
 	float dMP = (float(CorpsMoveCost[curtype])+float(CorpsMoveCost[nexttype]))/2.0;
 	int temp = m_MovePoint - ceil(dMP);
@@ -453,7 +468,8 @@ bool Crops::StationInTower()
 		//如果塔属于己方则驻扎
 		if(m_data->myTowers[index].getPlayerID() == m_PlayerID)
 		{
-			m_data->myTowers[index].input_staycrops(this);
+			m_StationTower = &(m_data->myTowers[index]);
+			m_StationTower->input_staycrops(this);
 			bStation = true;
 		}
 	}
@@ -623,6 +639,13 @@ void Crops::UpdatePos(TPoint targetpos)
 	}
 	m_data->corps[targetpos.m_y][targetpos.m_x].push_back(this);
 	m_position = targetpos;
+	//如果驻守在塔中 则删除
+	if(m_StationTower)
+	{
+		m_StationTower->remove_crop(m_myID);
+		m_StationTower = NULL;
+	}
+
 }
 
 /*
