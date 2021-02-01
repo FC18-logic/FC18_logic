@@ -309,7 +309,7 @@ namespace DAGAN
 				if (c.parameters.size() != CorpsOperaNumNeed[c.parameters[0]]) continue;   //判断操作数合法性
 				if (corpsBanned.find(c.parameters[1]) != corpsBanned.end()) continue;     //这个兵团本回合不能再接受操作，请求驳回
 				if (handleCorpsCommand(id, c) == true) {   //记录不能再进行其他操作的兵团序号
-					jsonChange(id, c);   //更新有效的指令Json
+					//jsonChange(id, c);   //更新有效的指令Json
 					outPutCommand(id, c);  //复读被执行的命令，未执行的不复读
 					switch (c.parameters[0]) {
 					case(CStation):
@@ -328,7 +328,7 @@ namespace DAGAN
 				if (c.parameters.size() != towerOperaNumNeed[c.parameters[0]]) continue;   //判断操作数的数量是否合法
 				if (towerBanned.find(c.parameters[1]) != towerBanned.end()) continue; //这个塔当前回合不能再操作，请求驳回
 				if (handleTowerCommand(id, c) == true) {   //记录不能再进行其他操作的塔序号
-					jsonChange(id, c);   //更新有效的指令Json
+					//jsonChange(id, c);   //更新有效的指令Json
 					outPutCommand(id, c);  //复读被执行的命令，未执行的不复读
 					switch (c.parameters[0]) {
 					case(TProduct):
@@ -373,7 +373,7 @@ namespace DAGAN
 			game_.roundTime.push_back(clock());
 			//data->currentRoundCommandJson["runDuration"] =
 				//Json::Value(std::to_string(int(game_.roundTime[game_.roundTime.size() - 1] - game_.roundTime[game_.roundTime.size() - 2])));
-			game_.saveJson();//保存及写入Json文档
+			//game_.saveJson();//保存及写入Json文档
 		}
 	}
 
