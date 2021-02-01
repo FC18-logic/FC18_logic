@@ -23,6 +23,9 @@ Player::Player(Player& _player)// copyππ‘Ïplayer
 	conqueTowerNum = _player.getCqTowerNum();
 	eliminateCorpsNum = _player.getElCorpsNum();
 	captureCorpsNum = _player.getCqCorpsNum();
+	name = _player.getName();
+	rank = _player.getRank();
+	score = _player.getScore();
 
 	data = _player.data;   //±‹√‚«≥∏¥÷∆?
 

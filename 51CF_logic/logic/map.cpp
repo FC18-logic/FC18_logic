@@ -517,7 +517,9 @@ bool Map::randomInitMap() {
 void Map::saveMapJson() {
 	TRound round = data->getRound();      //更新地图Json前记录当前回合数
 	data->currentRoundMapJson["round"] = Json::Value(std::to_string(round));
-	data->mapInfoJsonRoot["body"].append(data->currentRoundMapJson);
+	data->mapInfoJsonRoot["map_logList"].append(data->currentRoundMapJson);
+	data->lastRoundMapJson.clear();
+	data->lastRoundMapJson = data->currentRoundMapJson;
 	data->currentRoundMapJson.clear();
 }
 
@@ -586,14 +588,11 @@ void Map::modifyOccupyPoint(TPlayerID oldOwner, TPlayerID newOwner, TPoint p) {
 TPlayerID Map::ownerChange(TPoint p) {
 	if (!withinMap(p)) return OUTOFRANGE;    //当前方格在地图之外
 	int maxOccupyPoint = -1, occupyID = PUBLIC;
+	int maxOccupyCnt = 0;
 	for (int i = 0; i < 4; i++) {
 		if (map[p.m_y][p.m_x].occupyPoint[i] > maxOccupyPoint) {
 			maxOccupyPoint = map[p.m_y][p.m_x].occupyPoint[i];
 			occupyID = i + 1;
-		}
-		else if (map[p.m_y][p.m_x].occupyPoint[i] == maxOccupyPoint && maxOccupyPoint != 0) {  //有相同占有属性值，过渡区域
-			map[p.m_y][p.m_x].owner = TRANSITION;
-			return TRANSITION;
 		}
 	}
 	if (maxOccupyPoint == 0) {
@@ -601,9 +600,16 @@ TPlayerID Map::ownerChange(TPoint p) {
 		return PUBLIC;
 	}
 	else {
-		map[p.m_y][p.m_x].owner = occupyID;
-		return occupyID;
+		for (int i = 0; i < 4; i++) {
+			if (map[p.m_y][p.m_x].occupyPoint[i] == maxOccupyPoint && data->getRound() != 0)
+			{
+				map[p.m_y][p.m_x].owner = TRANSITION;
+				return TRANSITION;
+			}
+		}
 	}
+	map[p.m_y][p.m_x].owner = occupyID;
+	return occupyID;
 }
 
 /*****************************s******************************************************************

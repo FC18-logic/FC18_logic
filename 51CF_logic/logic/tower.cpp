@@ -195,7 +195,7 @@ bool Tower::set_producttype(productType m_protype)
 	task_cache[int(m_producttype)] = m_productconsume;
 	m_producttype = m_protype;
 	//新设置生产任务为完成状态
-	if (task_cache[(int)m_producttype] <= 0) 
+	/*if (task_cache[(int)m_producttype] <= 0) 
 	{
 		if (m_producttype < 5)
 		{
@@ -212,7 +212,7 @@ bool Tower::set_producttype(productType m_protype)
 	{
 		m_productconsume = task_cache[int(m_producttype)];
 		m_productconsume -= m_productpoint;
-	}
+	}*/
 	return true;
 }
 

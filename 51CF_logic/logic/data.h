@@ -66,6 +66,7 @@ namespace DATA                                         //@@@【FC18】名空间
 		Json::Value currentRoundTowerJson;             //【FC18】当前回合防御塔的Json根节点
 		Json::Value currentRoundCorpsJson;             //【FC18】当前回合兵团的Json根节点
 		Json::Value currentRoundMapJson;               //【FC18】当前回合地图的Json根节点
+		Json::Value lastRoundMapJson;                  //【FC18】记录上一回合地图的Json根节点
 
 		void resetAllCnt() { players = nullptr, corps = nullptr, totalRounds = 0; totalTowers = 0; totalCorps = 0; totalPlayers = 0; }//[【FC18】data中几个关键的数据全部清零
 		TRound getRound() { return totalRounds; }      //【FC18】获取当前data正在记录第几回合的数据（小回合）

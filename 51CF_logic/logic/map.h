@@ -44,6 +44,7 @@ class Map:public BaseMap
 {
 public:
 	Map():data(nullptr){}                       //【FC18】map的默认构造函数
+    ~Map() { clearAll(); }                      //【FC18】析构函数，释放兵团资源
 	DATA::Data* getData(){ return data; }       //【FC18】map也可以访问全员共享的Data
 	void setData(DATA::Data* d) { data = d; }   //【FC18】map也可以修改全员共享的Data
 	vector<vector<mapBlock>> map;               //【FC18】游戏中实际存储的地图

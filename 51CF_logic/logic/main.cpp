@@ -5,6 +5,8 @@
 #include "player_code.h"
 #include "../controller/Controller.h"
 #include <time.h>
+#include <direct.h>
+#include <io.h>
 
 
 using namespace DAGAN;
@@ -30,7 +32,8 @@ int main(int argc, char** argv)
 #endif // FC15_DEBUG
 	char json_filename[1024];
 	//旧代码//strftime(json_filename, sizeof(json_filename), "../log_json/log_%Y%m%d_%H%M%S.json", localtime(&t));
-	strftime(json_filename, sizeof(json_filename), "../log_json/log_%Y%m%d_%H%M%S", localtime(&t));
+	strftime(json_filename, sizeof(json_filename), "../log_json/%Y%m%d_%H%M%S", localtime(&t));
+	if (0 != _access(json_filename, 0)) _mkdir(json_filename);
 	string  config_filename =
 #ifdef _MSC_VER
 		//旧代码//"../config_msvc.ini";
