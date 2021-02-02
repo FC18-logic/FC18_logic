@@ -324,7 +324,7 @@ bool Tower::set_attacktarget(int crop_id)
 	//攻击成功
 	float deta = 0.04 * ((float)m_battlepoint - enemy.getCE());
 	int crop_lost = floor(28 * pow(2.71828, deta));
-	enemy.BeAttacked(crop_lost, m_PlayerID);
+	enemy.BeAttacked(crop_lost, m_PlayerID, true);//@@@ 兵团受到攻击的函数需要一个攻击者是否存活的参数 lmx
 	return true;
 }
 

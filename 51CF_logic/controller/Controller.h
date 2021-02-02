@@ -28,7 +28,9 @@ namespace DAGAN
 		false
 #endif
 			)
-			, players_(p){ }                              //【FC18】游戏主控的构造函数，传入参数为当前游戏进程对象，以及玩家ai的vector（代码及相关信息）
+			, players_(p) {
+			Corpslastcmd.resize(5);
+		}                              //【FC18】游戏主控的构造函数，传入参数为当前游戏进程对象，以及玩家ai的vector（代码及相关信息）
 											              //【FC18】默认输出文件，游戏下一回合可以运行
 		                                                  //【FC18】NO_SILENT_MODE和FC15_DEBUG两个宏定义决定是否输出debug信息
 		void run(char* json_filename);                    //@@@【FC18】游戏单回合运行的主要部分，同时向json_filename进行文件写入
@@ -60,5 +62,6 @@ namespace DAGAN
 		bool file_output_enabled_;             //【FC18】文件输出使能，是否允许输出相关文件
 		bool silent_mode_;                     //【FC18】silent_mode_为false会输出回合数信息和每个玩家的操作信息等，用于debug
 		bool isValid_;                         //【FC18】游戏是否还能继续进行，用于判断game_over
+		vector<vector<Command>> Corpslastcmd;	//【FC18】兵团上一回合命令，用于需要延迟一回合生效的命令
 	};
 }
