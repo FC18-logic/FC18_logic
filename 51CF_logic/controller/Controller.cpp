@@ -97,9 +97,9 @@ namespace DAGAN
 		volatile TRound round = game_.getCurrentRound() + 1;
 
 		if (!silent_mode_) cout << "-=-=-=-=-=-=-=-=-=-=-= Controller: Round[" << round << "] =-=-=-=-=-=-=-=-=-=-=-=-=-" << endl;
-		if (debug_mode) {
-			game_.DebugPhase();      //@@@调试阶段：输出调试信息
-		}
+//		if (debug_mode) {
+//			game_.DebugPhase();      //@@@调试阶段：输出调试信息
+//		}
 		game_.setPlayerID(id);		//@@@设置当前玩家编号
 		game_.beginPhase();          //@@@启动阶段：玩家/塔/兵团/地图每回合开始前的准备工作放在这里,现已对FC15代码注释
 		game_.regeneratePhase();     //@@@恢复阶段：玩家/塔/兵团/地图属性要进行的恢复放在这里,现已对FC15代码注释
@@ -142,7 +142,7 @@ namespace DAGAN
 				if (corpsBanned.find(c.parameters[1]) != corpsBanned.end()) continue;     //这个兵团本回合不能再接受操作，请求驳回
 				if (handleCorpsCommand(id, c) == true) {   //记录不能再进行其他操作的兵团序号
 					//jsonChange(id, c);   //更新有效的指令Json
-					outPutCommand(id, c);  //复读被执行的命令，未执行的不复读
+//					outPutCommand(id, c);  //复读被执行的命令，未执行的不复读
 					switch (c.parameters[0]) {
 					case(CStation):
 					case(CStationTower):
@@ -161,7 +161,7 @@ namespace DAGAN
 				if (towerBanned.find(c.parameters[1]) != towerBanned.end()) continue; //这个塔当前回合不能再操作，请求驳回
 				if (handleTowerCommand(id, c) == true) {   //记录不能再进行其他操作的塔序号
 					//jsonChange(id, c);   //更新有效的指令Json
-					outPutCommand(id, c);  //复读被执行的命令，未执行的不复读
+	//				outPutCommand(id, c);  //复读被执行的命令，未执行的不复读
 					switch (c.parameters[0]) {
 					case(TProduct):
 						towerBanned.insert(c.parameters[1]);//记录不能继续操作的塔ID

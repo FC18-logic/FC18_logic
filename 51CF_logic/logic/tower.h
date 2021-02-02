@@ -59,12 +59,15 @@ public:
 	}
 	//设置新生产任务
 	bool set_producttype(productType m_protype);
+	//清空生产任务的缓存进度
+	void clear_cache(productType task_clear) { task_cache[task_clear] = 0; }
 	//生产兵团
 	void product_crops(productType protype);
 	//塔升级
 	void upgrade();
 	//设置攻击目标
 	bool set_attacktarget(int crop_id);
+	
 
 
 
