@@ -390,6 +390,7 @@ bool Crops::JudgeChangeTerrain(Command& c)
 	c.parameters.clear();
 	c.parameters.push_back(CChangeTerrain);
 	c.parameters.push_back(m_myID);
+	c.parameters.push_back(target);
 	c.parameters.push_back(m_position.m_x);
 	c.parameters.push_back(m_position.m_y);
 	if(!m_bAlive)
