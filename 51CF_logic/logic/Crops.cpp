@@ -26,7 +26,7 @@ Crops::Crops(DATA::Data* _data, corpsType type, battleCorpsType battletype, cons
 	m_staticID++;
 	m_PeaceNum = 0;
 	m_level = 0;
-	m_StationTower = nullptr;//±øÍÅÉú²ú³öÀ´ºó£¬ĞèÒªÖ¸Áî²Å×¤ÊØµ±µØµÄËş
+	m_StationTower = nullptr;//å…µå›¢ç”Ÿäº§å‡ºæ¥åï¼Œéœ€è¦æŒ‡ä»¤æ‰é©»å®ˆå½“åœ°çš„å¡”
 	m_BuildPoint = 0;
 	m_HealthPoint = 0;
 
@@ -40,11 +40,11 @@ Crops::Crops(DATA::Data* _data, corpsType type, battleCorpsType battletype, cons
 		m_MovePoint = constructMovePoint[buildtype];
 		m_BuildPoint = 3;
 	}
-	m_bResting = true;//±øÍÅÉú²ú³öÀ´ºóÄ¬ÈÏĞİÕû
+	m_bResting = true;//å…µå›¢ç”Ÿäº§å‡ºæ¥åé»˜è®¤ä¼‘æ•´
 	m_data->corps[m_position.m_y][m_position.m_x].push_back(this);
 	m_data->players[m_PlayerID - 1].addCrops(m_myID);
 	m_data->totalCorps++;
-	m_data->newCorps.insert(m_myID);//¼ÇÂ¼ĞÂ²úÉúµÄ±øÍÅĞòºÅ
+	m_data->newCorps.insert(m_myID);//è®°å½•æ–°äº§ç”Ÿçš„å…µå›¢åºå·
 }
 
 
@@ -68,9 +68,9 @@ Crops::Crops(DATA::Data* _data, corpsType type, battleCorpsType battletype, cons
 
 /*
 Move
-±øÍÅÔÚµØÍ¼ÄÚ½øĞĞÒÆ¶¯£¬ÎŞ·¨ÅĞ¶ÏÄ¿±êµØµãÊÇ·ñ´æÔÚ±ğµÄ±øÍÅ
-dx£ºx×ø±ê±ä»¯Á¿ dy£ºy×ø±ê±ä»¯Á¿
-·µ»ØÊÇ·ñÒÆ¶¯³É¹¦£¬³É¹¦Ôò¸üĞÂÎ»ÖÃ
+å…µå›¢åœ¨åœ°å›¾å†…è¿›è¡Œç§»åŠ¨ï¼Œæ— æ³•åˆ¤æ–­ç›®æ ‡åœ°ç‚¹æ˜¯å¦å­˜åœ¨åˆ«çš„å…µå›¢
+dxï¼šxåæ ‡å˜åŒ–é‡ dyï¼šyåæ ‡å˜åŒ–é‡
+è¿”å›æ˜¯å¦ç§»åŠ¨æˆåŠŸï¼ŒæˆåŠŸåˆ™æ›´æ–°ä½ç½®
 */
 bool Crops::Move(int dir)
 {
@@ -112,9 +112,9 @@ bool Crops::Move(int dir)
 	TPoint next_pos;
 	next_pos.m_x = next_x;
 	next_pos.m_y = next_y;
-	if (m_data->gameMap.withinMap(next_pos) == false) return false;  //by jypÒªÇ°ÍùµÄÎ»ÖÃ²»ÔÚµØÍ¼ÄÚ£¬ÅĞ¶ÏÊ§°Ü
+	if (m_data->gameMap.withinMap(next_pos) == false) return false;  //by jypè¦å‰å¾€çš„ä½ç½®ä¸åœ¨åœ°å›¾å†…ï¼Œåˆ¤æ–­å¤±è´¥
 
-	//ÅĞ¶ÏÄ¿±êÎ»ÖÃÊÇ·ñ´æÔÚ¼º·½Ëş
+	//åˆ¤æ–­ç›®æ ‡ä½ç½®æ˜¯å¦å­˜åœ¨å·±æ–¹å¡”
 	bool haveTower = false;
 	int index = m_data->gameMap.map[next_y][next_x].TowerIndex;
 	if(index != NOTOWER)
@@ -131,10 +131,10 @@ bool Crops::Move(int dir)
 	}
 	if(!haveTower)
 	{
-		//Ä¿±êÎ»ÖÃÊÇ·ñ´æÔÚ±ğµÄ±øÍÅ
+		//ç›®æ ‡ä½ç½®æ˜¯å¦å­˜åœ¨åˆ«çš„å…µå›¢
 		CorpsUnit targetPos = m_data->corps[next_y][next_x];
 		
-		//¹¤³Ì±øÒÆ¶¯
+		//å·¥ç¨‹å…µç§»åŠ¨
 		if(m_type == Construct)
 		{
 			for(int i = 0; i<targetPos.size(); i++)
@@ -146,7 +146,7 @@ bool Crops::Move(int dir)
 				return false;
 			}
 		}
-		//Õ½¶·±ø
+		//æˆ˜æ–—å…µ
 		else
 		{
 			for(int i = 0; i<targetPos.size(); i++)
@@ -163,14 +163,14 @@ bool Crops::Move(int dir)
 	terrainType nexttype = m_data->gameMap.map[next_y][next_x].type;
 	float dMP = (float(CorpsMoveCost[curtype])+float(CorpsMoveCost[nexttype]))/2.0;
 	int temp = m_MovePoint - ceil(dMP);
-	//ĞĞ¶¯Á¦²»¹»
+	//è¡ŒåŠ¨åŠ›ä¸å¤Ÿ
 	if(temp<0)
 	{
 		return false;
 	}
 	m_MovePoint = temp;
 
-	//ĞŞ¸ÄdataÖĞµÄÎ»ÖÃ
+	//ä¿®æ”¹dataä¸­çš„ä½ç½®
 	UpdatePos(next_pos);
 	return true;
 }
@@ -178,20 +178,20 @@ bool Crops::Move(int dir)
 
 /*
 AttackCrops
-¸Ã±øÍÅ¶ÔÁíÒ»±øÍÅ·¢Æğ¹¥»÷£¬¸ºÔğ¼ÆËã¹¥»÷Á¦¡¢¹¥»÷±øÍÅ¡¢²¢ÒÆ¶¯
-²ÎÊı enemy ÊÜ¹¥»÷±øÍÅÖ¸Õë
-·µ»ØÖµ int ¼õÉÙµÄHP
+è¯¥å…µå›¢å¯¹å¦ä¸€å…µå›¢å‘èµ·æ”»å‡»ï¼Œè´Ÿè´£è®¡ç®—æ”»å‡»åŠ›ã€æ”»å‡»å…µå›¢ã€å¹¶ç§»åŠ¨
+å‚æ•° enemy å—æ”»å‡»å…µå›¢æŒ‡é’ˆ
+è¿”å›å€¼ int å‡å°‘çš„HP
 lmx
 */
 int Crops::AttackCrops(Crops* enemy)
 {
 	int enemylost = 0;
 	int mylost = 0;
-	//Èç¹ûµĞ·½ÊÇ¹¤³Ì±ø
+	//å¦‚æœæ•Œæ–¹æ˜¯å·¥ç¨‹å…µ
 	if(enemy->m_type == Construct)
 	{
 		Crops* colleage = NULL;
-		//ÊÇ·ñ´æÔÚ»¤ÎÀ
+		//æ˜¯å¦å­˜åœ¨æŠ¤å«
 		for(int i = 0; i<m_data->corps[m_position.m_y][m_position.m_x].size(); i++)
 		{
 			colleage = m_data->corps[m_position.m_y][m_position.m_x][i];
@@ -200,23 +200,23 @@ int Crops::AttackCrops(Crops* enemy)
 		}
 	}
 
-	//Èç¹ûµĞÈËÊÇÕ½¶·±ø
+	//å¦‚æœæ•Œäººæ˜¯æˆ˜æ–—å…µ
 	if(enemy->m_type == Battle)
 	{
-		//¼ÆËãÕ½¶·Á¦
+		//è®¡ç®—æˆ˜æ–—åŠ›
 		TBattlePoint myCE = getCE();
 		TBattlePoint enemyCE = enemy->getCE();
-		//¼ÆËãËğÊ§
+		//è®¡ç®—æŸå¤±
 		float deta = 0.04*((float)myCE-enemyCE);
 		mylost = floor(28*pow(2.71828,-deta));
 		enemylost = floor(30*pow(2.71828,deta));
 	}
-	//Èç¹û¶Ô·½ËÀÍö ÔòÒÆ¶¯Î»ÖÃ
+	//å¦‚æœå¯¹æ–¹æ­»äº¡ åˆ™ç§»åŠ¨ä½ç½®
 	if(!enemy->BeAttacked(enemylost,m_PlayerID))
 	{
 		if(m_BattleType!= Archer)
 		{
-			//ÒÆ¶¯
+			//ç§»åŠ¨
 			UpdatePos(enemy->m_position);
 		}
 	}
@@ -225,13 +225,13 @@ int Crops::AttackCrops(Crops* enemy)
 
 /*
 BeAttacked
-±øÍÅÊÜµ½¹¥»÷Ê±µ÷ÓÃ£¬ÄÚ²¿µ÷ÓÃ
-²ÎÊı£ºattack ÊÜµ½µÄÉËº¦Öµ£¬enemy ·¢¶¯¹¥»÷µÄ±øÍÅÖ¸Õë
-·µ»ØÖµ£ºÊÇ·ñ´æ»î ´æ»î·µ»Øtrue
+å…µå›¢å—åˆ°æ”»å‡»æ—¶è°ƒç”¨ï¼Œå†…éƒ¨è°ƒç”¨
+å‚æ•°ï¼šattack å—åˆ°çš„ä¼¤å®³å€¼ï¼Œenemy å‘åŠ¨æ”»å‡»çš„å…µå›¢æŒ‡é’ˆ
+è¿”å›å€¼ï¼šæ˜¯å¦å­˜æ´» å­˜æ´»è¿”å›true
 */
 bool Crops::BeAttacked(int attack,TPlayerID ID)
 {
-	//·ıÂ²¹¤³Ì±ø
+	//ä¿˜è™å·¥ç¨‹å…µ
 	if(m_type == Construct)
 	{
 		ChangeOwner(ID);
@@ -239,7 +239,7 @@ bool Crops::BeAttacked(int attack,TPlayerID ID)
 		m_data->players[ID - 1].setCqCorpsNum(num);
 		return true;
 	}
-	//Õ½¶·±ø
+	//æˆ˜æ–—å…µ
 	m_PeaceNum = 0;
 	m_HealthPoint -= attack;
 	if(m_HealthPoint<=0)
@@ -247,12 +247,12 @@ bool Crops::BeAttacked(int attack,TPlayerID ID)
 		KillCorps();
 		int num = m_data->players[ID - 1].getElCorpsNum() + 1;
 		m_data->players[ID - 1].setElCorpsNum(num);
-		//Í¬Ò»Î»ÖÃµÄ¹¤³Ì±ø±»·ıÂ²
+		//åŒä¸€ä½ç½®çš„å·¥ç¨‹å…µè¢«ä¿˜è™
 		Crops* colleage = NULL;
 		for(int i = 0; i<m_data->corps[m_position.m_y][m_position.m_x].size(); i++)
 		{
 			colleage = m_data->corps[m_position.m_y][m_position.m_x][i];
-			//Èç¹û¹¤³Ì±øºÍÕıÔÚ±»¹¥»÷µÄÕ½¶·±øÊÇÍ¬Ò»Íæ¼ÒµÄ±øÍÅ
+			//å¦‚æœå·¥ç¨‹å…µå’Œæ­£åœ¨è¢«æ”»å‡»çš„æˆ˜æ–—å…µæ˜¯åŒä¸€ç©å®¶çš„å…µå›¢
 			if(colleage->m_type == Construct&&colleage->m_PlayerID == m_PlayerID)
 				colleage->BeAttacked(0,ID);
 		}
@@ -269,14 +269,14 @@ bool Crops::bAlive()
 
 /*
 getCE
-·µ»Ø¸Ã±øÍÅµÄÕ½¶·Á¦
+è¿”å›è¯¥å…µå›¢çš„æˆ˜æ–—åŠ›
 */
 TBattlePoint Crops::getCE()
 {
-	//Õ½¶·Á¦ÔöÒæ
+	//æˆ˜æ–—åŠ›å¢ç›Š
 	terrainType type = m_data->gameMap.map[m_position.m_y][m_position.m_x].type;
 	TBattlePoint Attack = CorpsBattleGain[type];
-	//×ÜÕ½¶·Á¦
+	//æ€»æˆ˜æ–—åŠ›
 	Attack += (TBattlePoint)ceil(
 		(float)(corpsBattlePoint[m_BattleType][m_level]*m_HealthPoint)
 		/(float)battleHealthPoint[m_BattleType][m_level]);
@@ -286,8 +286,8 @@ TBattlePoint Crops::getCE()
 
 /*
 Recover
-¸ù¾İÉÏÒ»»ØºÏ×´Ì¬±øÍÅ»Ø¸´ÉúÃüÁ¦£¬º¯ÊıÄÚ²¿ÅĞ¶ÏÊÇ·ñ½øĞĞ»Ö¸´
-ÎŞ²ÎÊı·µ»ØÖµ
+æ ¹æ®ä¸Šä¸€å›åˆçŠ¶æ€å…µå›¢å›å¤ç”Ÿå‘½åŠ›ï¼Œå‡½æ•°å†…éƒ¨åˆ¤æ–­æ˜¯å¦è¿›è¡Œæ¢å¤
+æ— å‚æ•°è¿”å›å€¼
 */
 void Crops::Recover()
 {
@@ -313,41 +313,41 @@ void Crops::Recover()
 
 /*
 MergeCrops
-±øÍÅÕû±à£¬·¢ÆğÕû±àµÄ±øÍÅµ÷ÓÃ£¬º¯ÊıÄÚ²¿É¾³ı¶Ô·½±øÍÅ
-²ÎÊı£º¶Ô·½±øÍÅÖ¸Õë£¬´ı¶¨ Ò²¿ÉÒÔÊÇÎ»ÖÃ»òÕßID
-·µ»ØÊÇ·ñÕû±à³É¹¦
+å…µå›¢æ•´ç¼–ï¼Œå‘èµ·æ•´ç¼–çš„å…µå›¢è°ƒç”¨ï¼Œå‡½æ•°å†…éƒ¨åˆ é™¤å¯¹æ–¹å…µå›¢
+å‚æ•°ï¼šå¯¹æ–¹å…µå›¢æŒ‡é’ˆï¼Œå¾…å®š ä¹Ÿå¯ä»¥æ˜¯ä½ç½®æˆ–è€…ID
+è¿”å›æ˜¯å¦æ•´ç¼–æˆåŠŸ
 */
 bool Crops::MergeCrops(TCorpsID targetID)
 {
 	Crops* targetCrops = NULL;
 	targetCrops = &(m_data->myCorps[targetID]);
-	//Èç¹ûÄ¿±ê¶ÓÎé²»´æÔÚ
+	//å¦‚æœç›®æ ‡é˜Ÿä¼ä¸å­˜åœ¨
 	if(targetCrops == NULL)
 		return false;
 
-	//Èç¹ûÎŞĞĞ¶¯Á¦
+	//å¦‚æœæ— è¡ŒåŠ¨åŠ›
 	if(m_MovePoint == 0)
 		return false;
 
-	//Èç¹ûÒ»·½ÒÑ¾­ÕóÍö
+	//å¦‚æœä¸€æ–¹å·²ç»é˜µäº¡
 	if(!m_bAlive||!(targetCrops->m_bAlive))
 		return false;
 
-	//Èç¹û²»Í¬ÕóÓª
+	//å¦‚æœä¸åŒé˜µè¥
 	if(m_PlayerID!=targetCrops->m_PlayerID)
 		return false;
 
-	//Èç¹ûÖÁÉÙÆäÖĞÒ»·½²»ÊÇÕ½¶·±øÍÅ£¬²»Í¬ÀàĞÍ
+	//å¦‚æœè‡³å°‘å…¶ä¸­ä¸€æ–¹ä¸æ˜¯æˆ˜æ–—å…µå›¢ï¼Œä¸åŒç±»å‹
 	if(m_type!=Battle||targetCrops->m_type!=Battle)
 		return false;
 	if(m_BattleType!=targetCrops->m_BattleType)
 		return false;
 
-	//Èç¹û²»ÊÇÁÚ¾Ó£¬¿ÉÒÔÔÚµ±Ç°¸ñ»òÕßÖÜÎ§µÄ8¸ö¸ñÀï
+	//å¦‚æœä¸æ˜¯é‚»å±…ï¼Œå¯ä»¥åœ¨å½“å‰æ ¼æˆ–è€…å‘¨å›´çš„8ä¸ªæ ¼é‡Œ
 	if(!IsNeighbor(targetCrops->m_position))
 		return false;
 
-	//Èç¹ûĞÇ¼¶²»·ûºÏÒªÇó
+	//å¦‚æœæ˜Ÿçº§ä¸ç¬¦åˆè¦æ±‚
 	int level1 = m_level+1;
 	int level2 = targetCrops->m_level+1;
 	if(level2>level1)
@@ -355,7 +355,7 @@ bool Crops::MergeCrops(TCorpsID targetID)
 	if(level1+level2 >3)
 		return false;
 
-	//Õû±à
+	//æ•´ç¼–
 	float HPSum = m_HealthPoint+targetCrops->m_HealthPoint;
 	float TotalSum = battleHealthPoint[m_BattleType][m_level]
 					+battleHealthPoint[m_BattleType][targetCrops->m_level];
@@ -369,7 +369,7 @@ bool Crops::MergeCrops(TCorpsID targetID)
 
 /*
 ResetMP
-»ØºÏ¿ªÊ¼Ê±ÖØÖÃĞĞ¶¯Á¦
+å›åˆå¼€å§‹æ—¶é‡ç½®è¡ŒåŠ¨åŠ›
 */
 void Crops::ResetMP()
 {
@@ -385,9 +385,9 @@ void Crops::ResetMP()
 
 /*
 ChangeTerrain
-½¨Öş±ø¸ÄÔìËùÔÚµ¥ÔªµØĞÎ
-²ÎÊı£ºtarget Ä¿±êµØĞÎ
-·µ»ØÊÇ·ñ¸ÄÔì³É¹¦
+å»ºç­‘å…µæ”¹é€ æ‰€åœ¨å•å…ƒåœ°å½¢
+å‚æ•°ï¼štarget ç›®æ ‡åœ°å½¢
+è¿”å›æ˜¯å¦æ”¹é€ æˆåŠŸ
 */
 bool Crops::ChangeTerrain(terrainType target)
 {
@@ -415,7 +415,7 @@ bool Crops::ChangeTerrain(terrainType target)
 
 /*
 newRound
-ĞÂ»ØºÏ¿ªÊ¼£¬»Ø¸´HPºÍMP
+æ–°å›åˆå¼€å§‹ï¼Œå›å¤HPå’ŒMP
 */
 void Crops::newRound()
 {
@@ -425,7 +425,7 @@ void Crops::newRound()
 		Recover();
 		if(!m_bResting)
 		{
-			m_PeaceNum = 0;//¿ªÊ¼¼ÆÊı
+			m_PeaceNum = 0;//å¼€å§‹è®¡æ•°
 			m_bResting = true;
 		}
 	}
@@ -433,21 +433,21 @@ void Crops::newRound()
 
 /*
 GoRest
-½øÈë×¤ÔúĞİÕû×´Ì¬
-Èç¹û¸ÃÎ»ÖÃÃ»ÓĞËşÔò·µ»Øtrue£¬ÓĞËşÔò·µ»Øfalse
+è¿›å…¥é©»æ‰ä¼‘æ•´çŠ¶æ€
+å¦‚æœè¯¥ä½ç½®æ²¡æœ‰å¡”åˆ™è¿”å›trueï¼Œæœ‰å¡”åˆ™è¿”å›false
 */
 bool Crops::GoRest()
 {
-	//Èç¹ûÓĞËş
+	//å¦‚æœæœ‰å¡”
 	if(m_data->gameMap.map[m_position.m_y][m_position.m_x].TowerIndex!=NOTOWER)
 	{
 		return false;
 	}
 
-	//Èç¹ûÖ®Ç°Ã»ÓĞ´¦ÔÚ×¤Ôú×´Ì¬ÖĞ£¬ÔòÏÈ½«±äÁ¿ÇåÁã²¢½øÈë×¤Ôú×´Ì¬
+	//å¦‚æœä¹‹å‰æ²¡æœ‰å¤„åœ¨é©»æ‰çŠ¶æ€ä¸­ï¼Œåˆ™å…ˆå°†å˜é‡æ¸…é›¶å¹¶è¿›å…¥é©»æ‰çŠ¶æ€
 	if(!m_bResting)
 	{
-		m_PeaceNum = 0;//¿ªÊ¼¼ÆÊı
+		m_PeaceNum = 0;//å¼€å§‹è®¡æ•°
 		m_bResting = true;
 	}
 	return true;
@@ -455,16 +455,16 @@ bool Crops::GoRest()
 
 /*
 StationInTower
-Èç¹û¸ÃÎ»ÖÃ´æÔÚ¼º·½ÊÆÁ¦µÄËş£¬Ôò·µ»Øtrue
+å¦‚æœè¯¥ä½ç½®å­˜åœ¨å·±æ–¹åŠ¿åŠ›çš„å¡”ï¼Œåˆ™è¿”å›true
 */
 bool Crops::StationInTower()
 {
 	bool bStation = false;
 	int index = m_data->gameMap.map[m_position.m_y][m_position.m_x].TowerIndex;
-	//Èç¹ûÑ¡Ôñ×¤ÔúµÄÎ»ÖÃÓĞËş Ôò×¤ÔúÔÚËşÖĞ
+	//å¦‚æœé€‰æ‹©é©»æ‰çš„ä½ç½®æœ‰å¡” åˆ™é©»æ‰åœ¨å¡”ä¸­
 	if(index != NOTOWER)
 	{
-		//Èç¹ûËşÊôÓÚ¼º·½Ôò×¤Ôú
+		//å¦‚æœå¡”å±äºå·±æ–¹åˆ™é©»æ‰
 		if(m_data->myTowers[index].getPlayerID() == m_PlayerID)
 		{
 			m_StationTower = &(m_data->myTowers[index]);
@@ -478,8 +478,8 @@ bool Crops::StationInTower()
 
 /*
 ShowInfo
-Ìá¹©±øÍÅĞÅÏ¢
-·µ»Ø±øÍÅĞÅÏ¢½á¹¹Ìå
+æä¾›å…µå›¢ä¿¡æ¯
+è¿”å›å…µå›¢ä¿¡æ¯ç»“æ„ä½“
 */
 struct CorpsInfo Crops::ShowInfo()
 {
@@ -495,7 +495,7 @@ struct CorpsInfo Crops::ShowInfo()
 	info.m_BuildType = Builder;
 	if (info.type == Battle) {
 		info.m_BattleType = m_BattleType;
-		info.HealthPoint = m_HealthPoint;  //Íæ¼ÒÓÃÉúÃüÖµ×Ô¼ºËãÕ½¶·Á¦£¬²»Ìá¹©
+		info.HealthPoint = m_HealthPoint;  //ç©å®¶ç”¨ç”Ÿå‘½å€¼è‡ªå·±ç®—æˆ˜æ–—åŠ›ï¼Œä¸æä¾›
 	}
 	else if (info.type == Construct) {
 		info.m_BuildType = m_BuildType;
@@ -509,17 +509,17 @@ AttackTower
 */
 int Crops::AttackTower(class Tower *enemy)
 {
-	int TowerCE;//ËşµÄÕ½¶·Á¦
-	//»ñÈ¡ËşµÄÕ½¶·Á¦
+	int TowerCE;//å¡”çš„æˆ˜æ–—åŠ›
+	//è·å–å¡”çš„æˆ˜æ–—åŠ›
 	TowerCE = enemy->get_towerbp();
-	int myCE = getCE();//±øÍÅÕ½¶·Á¦
+	int myCE = getCE();//å…µå›¢æˆ˜æ–—åŠ›
 	
 	float deta = 0.04*((float)myCE-TowerCE);
 	int mylost = floor(28*pow(2.71828,-deta));
 	int enemylost = floor(30*pow(2.71828,deta))*corpsAttackTowerGain[m_BattleType][m_level];
 
 	bool IsTowerDestroy = false;
-	//ÅĞ¶ÏËşÊÇ·ñ±»¹¥Ïİ(Õ¼Áì¡¢´İ»Ù¶¼Ëã)
+	//åˆ¤æ–­å¡”æ˜¯å¦è¢«æ”»é™·(å é¢†ã€æ‘§æ¯éƒ½ç®—)
 	IsTowerDestroy = enemy->Be_Attacked(m_PlayerID, enemylost);
 	if(IsTowerDestroy/*&&!(enemy->getexsit())*/)
 	{
@@ -539,43 +539,43 @@ int Crops::AttackTower(class Tower *enemy)
 
 /*
 Attack
-±øÍÅ·¢¶¯¹¥»÷ ·µ»ØÊÇ·ñ¹¥»÷³É¹¦
-²ÎÊı type<CorpsCommandEnum> ¹¥»÷µĞ·½±øÍÅ»òËş£¬ ID µĞ·½ID
+å…µå›¢å‘åŠ¨æ”»å‡» è¿”å›æ˜¯å¦æ”»å‡»æˆåŠŸ
+å‚æ•° type<CorpsCommandEnum> æ”»å‡»æ•Œæ–¹å…µå›¢æˆ–å¡”ï¼Œ ID æ•Œæ–¹ID
 */
 bool Crops::Attack(int type, TCorpsID ID)
 {
-	//Èç¹û²»ÊÇÕ½¶·±ø
+	//å¦‚æœä¸æ˜¯æˆ˜æ–—å…µ
 	if(m_type!=Battle)
 		return false;
 
-	//Èç¹ûÒÑ¾­ËÀÍö£¬ÒÑ¾­ÔÚcontrollerÀïÅĞ¶Ï¹ıÁË
+	//å¦‚æœå·²ç»æ­»äº¡ï¼Œå·²ç»åœ¨controlleré‡Œåˆ¤æ–­è¿‡äº†
 	//if(!m_bAlive)
 		//return false;
 
-	//ĞĞ¶¯Á¦²»×ã
+	//è¡ŒåŠ¨åŠ›ä¸è¶³
 	if(m_MovePoint == 0)
 		return false;
 
 	m_MovePoint = 0;
 
-	//ÎÒ·½HP¼õÉÙÖµ
+	//æˆ‘æ–¹HPå‡å°‘å€¼
 	int mylost = 0;
 	if(type == CAttackCorps)
 	{
 		Crops* enemy = NULL;
-		//Ñ°ÕÒµĞÈË
+		//å¯»æ‰¾æ•Œäºº
 		enemy = &m_data->myCorps[ID];
-		//µĞÈËÒÑÕóÍö
+		//æ•Œäººå·²é˜µäº¡
 		if(!enemy->m_bAlive)
 			return false;
-		//µĞÈËÍ¬ÕóÓª
+		//æ•ŒäººåŒé˜µè¥
 		if(enemy->m_PlayerID == m_PlayerID)
 			return false;
-		//µĞÈË²»ÔÚÉä³Ì·¶Î§ÄÚ
+		//æ•Œäººä¸åœ¨å°„ç¨‹èŒƒå›´å†…
 		if(!IsInRange(enemy->m_position))
 			return false;
 
-		//Èç¹ûµĞÈËËùÔÚÎ»ÖÃ´æÔÚµĞ·½ÊÆÁ¦Ëş ÓÅÏÈÓëËş½áËã
+		//å¦‚æœæ•Œäººæ‰€åœ¨ä½ç½®å­˜åœ¨æ•Œæ–¹åŠ¿åŠ›å¡” ä¼˜å…ˆä¸å¡”ç»“ç®—
 		int x = enemy->m_position.m_x;
 		int y = enemy->m_position.m_y;
 		int index = m_data->gameMap.map[y][x].TowerIndex;
@@ -589,28 +589,28 @@ bool Crops::Attack(int type, TCorpsID ID)
 	else if(type == CAttackTower)
 	{
 		class Tower* enemy = NULL;
-		//Ñ°ÕÒµĞÈË
+		//å¯»æ‰¾æ•Œäºº
 		enemy = &m_data->myTowers[ID];
-		//µĞÈËÒÑÕóÍö
+		//æ•Œäººå·²é˜µäº¡
 		if(!enemy->getexsit())
 			return false;
-		//µĞÈËÍ¬ÕóÓª
+		//æ•ŒäººåŒé˜µè¥
 		if(enemy->getPlayerID() == m_PlayerID)
 			return false;
-		//µĞÈË²»ÔÚÉä³Ì·¶Î§ÄÚ
+		//æ•Œäººä¸åœ¨å°„ç¨‹èŒƒå›´å†…
 		if(!IsInRange(enemy->getPosition()))
 			return false;
 
 		mylost = AttackTower(enemy);
 	}
-	else//Ö¸ÁîÓĞÎó
+	else//æŒ‡ä»¤æœ‰è¯¯
 		return false;
-	//¼ÆËãÉúÃüÁ¦
+	//è®¡ç®—ç”Ÿå‘½åŠ›
 	if(m_BattleType!= Archer)
 	{
 		m_HealthPoint -= mylost;
 	}
-	//Èç¹ûÒÑÕóÍö
+	//å¦‚æœå·²é˜µäº¡
 	if(m_HealthPoint <= 0)
 	{
 		KillCorps();
@@ -620,9 +620,9 @@ bool Crops::Attack(int type, TCorpsID ID)
 }
 
 /*
-UpdatePos ¸üĞÂÎ»ÖÃ
-¸üĞÂÔÚm_dataÖĞcorps¼ÇÂ¼µÄÎ»ÖÃÒÔ¼°ÀàÄÚ²¿µÄÎ»ÖÃ
-²ÎÊı ĞÂµÄÎ»ÖÃ
+UpdatePos æ›´æ–°ä½ç½®
+æ›´æ–°åœ¨m_dataä¸­corpsè®°å½•çš„ä½ç½®ä»¥åŠç±»å†…éƒ¨çš„ä½ç½®
+å‚æ•° æ–°çš„ä½ç½®
 */
 void Crops::UpdatePos(TPoint targetpos)
 {
@@ -638,7 +638,7 @@ void Crops::UpdatePos(TPoint targetpos)
 	}
 	m_data->corps[targetpos.m_y][targetpos.m_x].push_back(this);
 	m_position = targetpos;
-	//Èç¹û×¤ÊØÔÚËşÖĞ ÔòÉ¾³ı
+	//å¦‚æœé©»å®ˆåœ¨å¡”ä¸­ åˆ™åˆ é™¤
 	if(m_StationTower)
 	{
 		m_StationTower->remove_crop(m_myID);
@@ -649,8 +649,8 @@ void Crops::UpdatePos(TPoint targetpos)
 
 /*
 ChangeOwner
-¸Ä±äËùÓĞÕß ĞŞ¸ÄdataÖĞ¶ÔÓ¦µÄplayerÖĞµÄm_corps
-²ÎÊı ĞÂÖ÷ÈËID
+æ”¹å˜æ‰€æœ‰è€… ä¿®æ”¹dataä¸­å¯¹åº”çš„playerä¸­çš„m_corps
+å‚æ•° æ–°ä¸»äººID
 */
 void Crops::ChangeOwner(TPlayerID newowner)
 {
@@ -661,7 +661,7 @@ void Crops::ChangeOwner(TPlayerID newowner)
 
 /*
 KillCorps
-±øÍÅËÀÍö ĞŞ¸Äplayer¡¢dataÒÔ¼°mapÖĞµÄÊı¾İ ½«±øÍÅ×´Ì¬ÉèÖÃÎªËÀÍö
+å…µå›¢æ­»äº¡ ä¿®æ”¹playerã€dataä»¥åŠmapä¸­çš„æ•°æ® å°†å…µå›¢çŠ¶æ€è®¾ç½®ä¸ºæ­»äº¡
 */
 void Crops::KillCorps()
 {
@@ -680,10 +680,10 @@ void Crops::KillCorps()
 		}
 	}
 	m_bAlive = false;
-	m_data->dieCorps.insert(m_myID);   //¼ÇÂ¼ËÀÍö±øÍÅID
+	m_data->dieCorps.insert(m_myID);   //è®°å½•æ­»äº¡å…µå›¢ID
 }
 
-//½¨Öş±øĞŞËş
+//å»ºç­‘å…µä¿®å¡”
 bool Crops::MendTower()
 {
 	if(!m_bAlive)
@@ -693,15 +693,15 @@ bool Crops::MendTower()
 	if(m_BuildType != Builder)
 		return false;
 
-	//»ñÈ¡¸ÃÎ»ÖÃËşµÄĞÅÏ¢
+	//è·å–è¯¥ä½ç½®å¡”çš„ä¿¡æ¯
 	int index = m_data->gameMap.map[m_position.m_y][m_position.m_x].TowerIndex;
-	//Ã»ÓĞËş
+	//æ²¡æœ‰å¡”
 	if(index == NOTOWER)
 		return false;
-	//²»ÊÇ¼º·½Ëş
+	//ä¸æ˜¯å·±æ–¹å¡”
 	if(m_data->myTowers[index].getPlayerID()!=m_PlayerID)
 		return false;
-	//ËşÒÑ±»´İ»Ù
+	//å¡”å·²è¢«æ‘§æ¯
 	if(!m_data->myTowers[index].getexsit())
 		return false;
 
@@ -715,34 +715,34 @@ bool Crops::MendTower()
 	return true;
 }
 
-//¿ªÍØÕß½¨Ëş
+//å¼€æ‹“è€…å»ºå¡”
 bool Crops::BuildTower()
 {
-	if (!m_bAlive)//by jyp µ±Ç°±øÍÅËÀÍö
+	if (!m_bAlive)//by jyp å½“å‰å…µå›¢æ­»äº¡
 		return false;
-	if (m_type != Construct)//by jypµ±Ç°±øÍÅ²»ÊÇ¹¤³Ì±øÍÅ
+	if (m_type != Construct)//by jypå½“å‰å…µå›¢ä¸æ˜¯å·¥ç¨‹å…µå›¢
 		return false;
-	if (m_BuildType != Extender)//by jypµ±Ç°±øÍÅ²»ÊÇ¿ªÍØÕß
+	if (m_BuildType != Extender)//by jypå½“å‰å…µå›¢ä¸æ˜¯å¼€æ‹“è€…
 		return false;
 
-	//»ñÈ¡¸ÃÎ»ÖÃËşµÄĞÅÏ¢
+	//è·å–è¯¥ä½ç½®å¡”çš„ä¿¡æ¯
 	int index = m_data->gameMap.map[m_position.m_y][m_position.m_x].TowerIndex;
-	//Èç¹û¸ÃÎ»ÖÃÒÑ´æÔÚËş
+	//å¦‚æœè¯¥ä½ç½®å·²å­˜åœ¨å¡”
 	if(index != NOTOWER)
 		return false;
 
-	//»ñÈ¡¸ÃÎ»ÖÃËùÓĞÕßÊôĞÔ
+	//è·å–è¯¥ä½ç½®æ‰€æœ‰è€…å±æ€§
 	TPlayerID OwnerID;
 	OwnerID = m_data->gameMap.showOwner(m_position);
 	//
-	//Èç¹û¸Ãµ¥Ôª¸ñÊôÓÚ¼º·½
+	//å¦‚æœè¯¥å•å…ƒæ ¼å±äºå·±æ–¹
 	if(OwnerID != OUTOFRANGE && OwnerID == m_PlayerID)
 	{
-		//ĞÂ½¨Ò»¸ö·ÀÓùËş
+		//æ–°å»ºä¸€ä¸ªé˜²å¾¡å¡”
 		Tower newTower(m_data, m_PlayerID, m_position);
 		m_data->myTowers.push_back(newTower);
-		//¿ªÍØÕßÃ»ÓĞÀÍ¶¯Á¦ÊôĞÔ by lmx
-		m_BuildPoint--;  //by jyp ¹¤³Ì±øÍÅÀÍ¶¯Á¦-1
+		//å¼€æ‹“è€…æ²¡æœ‰åŠ³åŠ¨åŠ›å±æ€§ by lmx
+		//m_BuildPoint--;  //by jyp å·¥ç¨‹å…µå›¢åŠ³åŠ¨åŠ›-1
 		return true;
 	}
 	return false;
