@@ -49,7 +49,7 @@ public:
 	//每回合初始根据经验值判断是否升级
 	bool set_level();
 	//设置【无任务】状态
-	void set_notask() { m_producttype = NOTASK; }
+	void set_notask() { task_cache[m_producttype] = 0, m_producttype = NOTASK; }
 	//判断上一回合生产任务是否完成
 	bool protask_finish()
 	{

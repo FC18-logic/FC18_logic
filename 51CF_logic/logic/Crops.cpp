@@ -30,16 +30,15 @@ Crops::Crops(DATA::Data* _data, corpsType type, battleCorpsType battletype, cons
 	m_BuildPoint = 0;
 	m_HealthPoint = 0;
 
-	if(type == Battle)
+	if (type == Battle)
 	{
 		m_MovePoint = battleMovePoint[battletype][m_level];
 		m_HealthPoint = battleHealthPoint[battletype][m_level];
 	}
-	else{
-		if(buildtype == Construct)
-		{
-			m_BuildPoint = 3;
-		}
+	else if (type == Construct)
+	{
+		m_MovePoint = constructMovePoint[buildtype];
+		m_BuildPoint = 3;
 	}
 	m_bResting = true;//兵团生产出来后默认休整
 	m_data->corps[m_position.m_y][m_position.m_x].push_back(this);
@@ -743,7 +742,7 @@ bool Crops::BuildTower()
 		Tower newTower(m_data, m_PlayerID, m_position);
 		m_data->myTowers.push_back(newTower);
 		//开拓者没有劳动力属性 by lmx
-		//m_BuildPoint--;  //by jyp 工程兵团劳动力-1
+		m_BuildPoint--;  //by jyp 工程兵团劳动力-1
 		return true;
 	}
 	return false;

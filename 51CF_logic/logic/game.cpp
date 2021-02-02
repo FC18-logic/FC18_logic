@@ -167,13 +167,14 @@ void Game::DebugPhase()
 	{
 		cout << "玩家 " << i + 1 << " ：姓名：" << data.players[i].getName() << " 占领塔数： " << data.players[i].getCqTowerNum() << " 杀兵团数： " << data.players[i].getElCorpsNum() << " 俘兵团数： "
 			<< data.players[i].getCqCorpsNum() << " 存活：" << ((data.players[i].isAlive())?"活":"死") << " 死亡回合：" << ((data.players[i].isAlive()) ? 0 : data.players[i].getdeadRound()) << endl;
-		cout << "当前塔： ";
+		cout << "当前塔：";
 		for (TTowerID u : data.players[i].getTower())   //这个for循环遍历i号玩家所有塔的信息，塔用u来存储
 		{
 			if (!data.myTowers[u].getexsit()) continue;
 			cout << u << " ";  //塔的序号
 		}
 		cout << endl;
+		cout << "当前兵团：";
 		for (TCorpsID u : data.players[i].getCrops())   //这个for循环遍历i号玩家所有塔的信息，塔用u来存储
 		{
 			if (!data.myCorps[u].bAlive()) continue;
@@ -945,9 +946,9 @@ void Game::beginPhase()
 	//by lxj
 	//初始化1：回合开始累加上轮经验值并完成塔的升级
 	//初始化2：回合开始时判断上一轮生产任务是否完成并结算生产回报
-	for (int i = 0; i < data.myTowers.size(); i++) 
+	for (TTowerID t : data.players[curPlayer - 1].getTower()) 
 	{
-		Tower& temp = data.myTowers[i];
+		Tower& temp = data.myTowers[t];
 		temp.set_level();
 		if (temp.protask_finish() == true)//上一回合生产任务完成
 		{

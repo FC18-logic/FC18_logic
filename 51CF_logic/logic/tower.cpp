@@ -166,6 +166,9 @@ void Tower::product_crops(productType protype)
 	{
 		Crops temp(m_data, Construct, Warrior, Extender, m_PlayerID, m_position);
 		m_data->myCorps.push_back(temp);
+		//by jyp开拓者生产出后所在方格等级减小1
+		if (m_level > 1) m_level--;
+		set_all(m_level);
 	}
 		
 }

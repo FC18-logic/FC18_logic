@@ -37,8 +37,11 @@ namespace DAGAN
 							return (randomCode > b.randomCode);   //在0,1间返回随机数来随机给出排名
 						}
 					}
+					else return false;
 				}
+				else return false;
 			}
+			else return false;
 		}
 	};
 
@@ -138,7 +141,7 @@ namespace DAGAN
 				if (c.parameters.size() != CorpsOperaNumNeed[c.parameters[0]]) continue;   //判断操作数合法性
 				if (corpsBanned.find(c.parameters[1]) != corpsBanned.end()) continue;     //这个兵团本回合不能再接受操作，请求驳回
 				if (handleCorpsCommand(id, c) == true) {   //记录不能再进行其他操作的兵团序号
-					jsonChange(id, c);   //更新有效的指令Json
+					//jsonChange(id, c);   //更新有效的指令Json
 					outPutCommand(id, c);  //复读被执行的命令，未执行的不复读
 					switch (c.parameters[0]) {
 					case(CStation):
@@ -157,7 +160,7 @@ namespace DAGAN
 				if (c.parameters.size() != towerOperaNumNeed[c.parameters[0]]) continue;   //判断操作数的数量是否合法
 				if (towerBanned.find(c.parameters[1]) != towerBanned.end()) continue; //这个塔当前回合不能再操作，请求驳回
 				if (handleTowerCommand(id, c) == true) {   //记录不能再进行其他操作的塔序号
-					jsonChange(id, c);   //更新有效的指令Json
+					//jsonChange(id, c);   //更新有效的指令Json
 					outPutCommand(id, c);  //复读被执行的命令，未执行的不复读
 					switch (c.parameters[0]) {
 					case(TProduct):
@@ -202,7 +205,7 @@ namespace DAGAN
 			game_.roundTime.push_back(clock());
 			//data->currentRoundCommandJson["runDuration"] =
 				//Json::Value(std::to_string(int(game_.roundTime[game_.roundTime.size() - 1] - game_.roundTime[game_.roundTime.size() - 2])));
-			game_.saveJson();//保存及写入Json文档
+			//game_.saveJson();//保存及写入Json文档
 		}
 	}
 
@@ -658,12 +661,43 @@ namespace DAGAN
 	***********************************************************************************************/
 	void Controller::testPlayerCommand(Info& info) {
 		TPlayerID m_ID = info.myID;
-		for(TTowerID t : info.playerInfo[m_ID - 1].tower)
-			info.myCommandList.addCommand(towerCommand, {TProduct,t,PWarrior});   //让玩家的所有塔生产战士
-		for (TCorpsID c : info.playerInfo[m_ID - 1].corps)
+		for (TTowerID t : info.playerInfo[m_ID - 1].tower)
 		{
-			info.myCommandList.addCommand(corpsCommand, { CMove,c,CUp });         //让玩家的所有兵团向上移动
-			info.myCommandList.addCommand(corpsCommand, { CStation,c });          //让玩家的所有兵团
+			for (int i = 0; i < info.corpsInfo.size(); i++) {
+				if (info.corpsInfo[i].owner != m_ID && getDist(info.towerInfo[t].position, info.corpsInfo[i].pos) <= 2) {
+					info.myCommandList.addCommand(towerCommand, { TAttackCorps,info.corpsInfo[i].ID });
+					break;
+				}
+			}
+			if(info.totalRounds >= 6 && info.totalRounds < 9 && (m_ID == 1 || m_ID == 2)) info.myCommandList.addCommand(towerCommand, { TProduct,t,PBuilder});   //让玩家的所有塔生产建造者
+			if (info.totalRounds >= 6 && info.totalRounds < 9 && (m_ID == 3 || m_ID == 4)) info.myCommandList.addCommand(towerCommand, { TProduct,t,PExtender });   //让玩家的所有塔生产开拓者
+			if(info.totalRounds < 6) info.myCommandList.addCommand(towerCommand, { TProduct,t,PArcher });
+			if (info.totalRounds > 11) info.myCommandList.addCommand(towerCommand, { TProduct,t,PCavalry });
+		}
+		if (info.totalRounds < 11) {
+			for (TCorpsID c : info.playerInfo[m_ID - 1].corps)
+			{
+				info.myCommandList.addCommand(corpsCommand, { CMove,c,CUp });
+				info.myCommandList.addCommand(corpsCommand, { CMove,c,CUp });         //让玩家的所有兵团向上移动
+				info.myCommandList.addCommand(corpsCommand, { CMove,c,CRight });
+				info.myCommandList.addCommand(corpsCommand, { CStation,c });          //让玩家的所有兵团
+			}
+		}
+		if (info.totalRounds >= 11)
+		{	
+			if (m_ID == 3) {
+				for (TCorpsID t : info.playerInfo[m_ID - 1].corps)
+				{
+					info.myCommandList.addCommand(corpsCommand, { CBuild,t });
+					info.myCommandList.addCommand(corpsCommand, { CMove,t,CLeft });
+				}
+			}
+			if (m_ID == 1) {
+				for (TCorpsID t : info.playerInfo[m_ID - 1].corps)
+				{
+					info.myCommandList.addCommand(corpsCommand, { CChangeTerrain,t,TRSwamp });
+				}
+			}
 		}
 	}
 }
