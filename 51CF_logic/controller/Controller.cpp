@@ -146,7 +146,7 @@ namespace DAGAN
 				data->myCorps[corpsid].doMending(Corpslastcmd[id][i].parameters[2]);
 				break;
 			}
-			case(CChangeTerrain):////0:兵团操作类型 1：兵团序号 2：目标地形 3：位置x 4:位置y
+			case(CChangeTerrain)://0:兵团操作类型 1：兵团序号 2：目标地形 3：位置x 4:位置y
 			{
 				int x = Corpslastcmd[id][i].parameters[3];
 				int y = Corpslastcmd[id][i].parameters[4];
@@ -159,7 +159,7 @@ namespace DAGAN
 			}
 
 		}
-		Corpslastcmd[id - 1].clear();
+		Corpslastcmd[id].clear();
 
 		//执行本回合命令
 		for (Command c : commands.getCommand()) {
