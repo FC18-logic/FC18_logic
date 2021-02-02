@@ -702,113 +702,6 @@ void Game::saveJson(DATA::Data & dataLastRound, DataSupplement & dataSuppleMent)
 vector<Info> Game::generateInfo()
 {
 	vector<Info> info;
-	//PlayerInfo playerInfo;   //势力信息
-	//CellInfo cellInfo; //同学信息
-	//TentacleInfo tentacleInfo; //兵线信息
-	BaseMap* mapInfo;  //地图信息
-	//初始化其他信息
-	//info里的成员数PlayerNum个，记录所有玩家的属性、塔和兵团，也记录一些公共的信息
-	//这个是用来向玩家各自的ai提供信息的吗
-	for (int i = 0; i != data.PlayerNum; ++i)
-	{
-		Info I;
-		I.playerSize = data.PlayerNum;
-		int alive = 0;//统计存活势力个数
-		for (int j = 0; j != data.PlayerNum; ++j)
-		{
-			if (data.players[j].isAlive())
-				alive++;
-		}
-		I.playerAlive = alive;
-		I.myID = i;
-		I.cellNum = data.CellNum;
-		I.round = currentRound;
-		I.myMaxControl = data.players[i].maxControlNumber();
-		//I.mapInfo = &data.gameMap;
-		info.push_back(I);
-	}
-	//初始化阵营
-	for (int i = 0; i != data.PlayerNum; ++i)
-	{
-		PlayerInfo temp;
-		Player* curr = &data.players[i];
-		temp.alive = curr->isAlive();
-		temp.DefenceLevel = curr->getDefenceLevel();
-		temp.ExtendingSpeedLevel = curr->getMoveLevel();
-		temp.ExtraControlLevel = curr->getExtraControlLevel();
-		temp.id = i;
-		temp.maxControlNumber = curr->maxControlNumber();
-		temp.rank = std::find(Rank.begin(), Rank.end(), i + 1) - Rank.begin() + 1;
-		temp.RegenerationSpeedLevel = curr->getRegenerationLevel();
-		temp.technologyPoint = curr->techPoint();
-		temp.cells = curr->cells();
-		for (int j = 0; j != data.PlayerNum; ++j)
-		{
-			info[j].playerInfo.push_back(temp);
-		}
-	}
-
-	//初始化兵塔信息
-	for (int i = 0; i != data.CellNum; ++i)
-	{
-		CellInfo temp;
-		Cell* curr = &data.cells[i];
-		temp.id = i;
-		temp.occupyPoint = curr->getOccupyPoint();
-		temp.occupyOwner = curr->getOccupyOwner();
-		temp.owner = curr->getPlayerID();
-		temp.position = curr->getPos();
-		temp.resource = curr->getResource();
-		temp.strategy = curr->getStg();
-		temp.type = curr->getCellType();
-		temp.maxResource = curr->getCellProperty().m_maxResource;
-		temp.maxTentacleNum = curr->getCellProperty().m_maxTentacleNum;
-		temp.currTentacleNum = curr->TentacleNumber();
-		for (int j = 0; j != data.PlayerNum; ++j)
-		{
-			info[j].cellInfo.push_back(temp);
-		}
-	}
-
-	//初始化Tentacle
-	vector<TentacleInfo> templist;
-	for (int k = 0; k != data.PlayerNum; ++k)
-		for (int j = 0; j != data.CellNum; ++j)
-	{
-		info[k].tentacleInfo.push_back(templist);
-	}
-
-	for (int i = 0; i != data.CellNum; ++i)
-		for(int j = 0;j!=data.CellNum;++j)
-	{
-		TentacleInfo temp;
-		Tentacle* curr = data.tentacles[i][j];
-		if (!curr)  //i对j不存在攻击关系
-		{
-			temp.exist = false;
-			for (int k = 0; k != data.PlayerNum; ++k)
-			{
-				info[k].tentacleInfo[i].push_back(temp);
-			}
-			continue;
-		}
-		temp.backResource = curr->getBackResource();
-		temp.exist = true;
-		temp.frontResource = curr->getFrontResource();
-		temp.maxlength = curr->getLength();
-		temp.resource = curr->getResource();
-		temp.sourceCell = curr->getSourceCell();
-		temp.state = curr->getstate();
-		temp.targetCell = curr->getTargetCell();
-		for (int k = 0; k != data.PlayerNum; ++k)
-		{
-			info[k].tentacleInfo[i].push_back(temp);
-		}
-	}
-
-	//初始化地图，基类指针
-	mapInfo = &data.gameMap;
-
 	return info;
 }
 
@@ -1241,7 +1134,7 @@ Info Game::generatePlayerInfo(TPlayerID id) {
 	info.totalCorps = data.getTotalCorp();
 
 	//info中的玩家数据
-	for (int i = 0; i < getTotalPlayerNum(); i++) {
+	for (int i = 0; i < info.totalPlayers; i++) {
 		PlayerInfo newPlayer;
 		Player currentPlayer = data.players[i];
 		newPlayer.id = currentPlayer.getId();

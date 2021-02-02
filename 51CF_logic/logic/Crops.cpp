@@ -491,9 +491,9 @@ struct CorpsInfo Crops::ShowInfo()
 	info.pos = m_position;
 	info.type = m_type;
 	info.movePoint = m_MovePoint;
-	m_HealthPoint = m_BuildPoint = 0;
-	m_BattleType = Warrior;
-	m_BuildType = Builder;
+	info.HealthPoint = info.BuildPoint = 0;
+	info.m_BattleType = Warrior;
+	info.m_BuildType = Builder;
 	if (info.type == Battle) {
 		info.m_BattleType = m_BattleType;
 		info.HealthPoint = m_HealthPoint;  //玩家用生命值自己算战斗力，不提供

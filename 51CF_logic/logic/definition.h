@@ -565,17 +565,6 @@ struct PlayerInfo
 
 	//【FC18】玩家所有兵团的序号，建议也用set这种数据结构，内部按兵团序号升序来排序
 	set<TCorpsID> corps; //所有兵团
-	//@@@【FC18】其他需要添加的属性或接口
-
-
-	//FC15的
-	TResourceD technologyPoint;        //科技点数
-	TLevel RegenerationSpeedLevel;      //再生倍率等级
-	TLevel ExtendingSpeedLevel;         //延伸速度等级
-	TLevel ExtraControlLevel;           //额外操作数等级
-	TLevel DefenceLevel;          //防御等级
-	size_t maxControlNumber;    //最大控制数
-	set<TCellID> cells; //所有的细胞
 };
 
 
@@ -794,14 +783,6 @@ struct Info
 	//vector<vector<mapBlockInfo>> mapInfo;
 	const vector<vector<mapBlock>>* gameMapInfo;
 
-	//FC15的
-	BaseMap* mapInfo;
-	TRound round;
-	int playerSize;
-	int cellNum;    //细胞总数量
-	int myMaxControl;    //最大操作数
-	vector<vector<TentacleInfo> > tentacleInfo; //触手信息
-	vector<CellInfo> cellInfo; //同学信息
 };
 
 #endif // DEFINITION_H

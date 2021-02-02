@@ -104,7 +104,7 @@ public:
 		info.battlePoint = m_battlepoint;
 		info.experPoint = m_experpoint;
 		info.level = m_level;
-		if(protask_finish() == true)//没有生产任务:NOTASK=-1
+		if(m_producttype == NOTASK)//没有生产任务:NOTASK=-1
 		{
 			info.pdtType = NOTASK;
 			info.productConsume = -1;
