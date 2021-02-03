@@ -119,7 +119,8 @@ bool Tower::set_level()
 	if (m_round >= 200 && m_round <= 300)
 		bonus = 15;
 	m_experpoint += bonus;
-	if (m_level >= MAX_TOWER_LEVEL)//满级
+	//满级
+	if (m_level >= MAX_TOWER_LEVEL)
 		return false;
 	//未满级
 	if (m_experpoint >= m_upgradexper)//经验值满足升级条件
@@ -166,11 +167,11 @@ void Tower::product_crops(productType protype)
 	{
 		Crops temp(m_data, Construct, Warrior, Extender, m_PlayerID, m_position);
 		m_data->myCorps.push_back(temp);
-		//by jyp开拓者生产出后所在方格等级减小1
-		if (m_level > 1) m_level--;
+		//by jyp：开拓者生产出后所在方格等级减小1
+		if (m_level > 1) 
+			m_level--;
 		set_all(m_level);
-	}
-		
+	}	
 }
 
 
@@ -253,11 +254,12 @@ bool Tower::Be_Attacked(TPlayerID enemy_id,THealthPoint hp_decrease)
 			m_data->totalTowers--;
 			m_data->players[m_PlayerID - 1].getTower().erase(m_id);
 			m_data->gameMap.map[m_position.m_y][m_position.m_x].TowerIndex = NOTOWER;
-			m_data->gameMap.map[m_position.m_y][m_position.m_x].type = TRPlain;  //by jyp: 塔被摧毁之后统一修改方格地形为平原
+			//by jyp: 塔被摧毁之后统一修改方格地形为平原
+			m_data->gameMap.map[m_position.m_y][m_position.m_x].type = TRPlain;  
 			//by jyp : 记录被摧毁的塔的ID
 			m_data->dieTower.insert(m_id);
 			//更新occupypoint/owner
-			m_data->gameMap.modifyOccupyPoint(m_PlayerID, NOTOWER, m_position);//塔被摧毁造成的占有属性值改变
+			m_data->gameMap.modifyOccupyPoint(m_PlayerID, NOTOWER, m_position);
 		}
 		//塔被攻占
 		else
@@ -265,9 +267,15 @@ bool Tower::Be_Attacked(TPlayerID enemy_id,THealthPoint hp_decrease)
 			set_all(m_level);
 			m_data->players[m_PlayerID - 1].getTower().erase(m_id);//修改原拥有者的塔列表
 			m_data->players[enemy_id - 1].getTower().insert(m_id);//修改新拥有者的塔列表
-			m_data->gameMap.modifyOccupyPoint(m_PlayerID, enemy_id, m_position);//修改方格塔易主造成的占有属性值重新分配
+			//更新occupypoint/owner
+			m_data->gameMap.modifyOccupyPoint(m_PlayerID, enemy_id, m_position);
 			m_PlayerID = enemy_id;
 		}
+		//【规则修改】
+		//塔被摧毁或攻占后驻扎兵团消灭
+		for (int i = 0; i < m_staycrops.size(); i++)
+			m_staycrops[i]->KillCorps();
+		/*
 		//俘虏驻扎工程兵并修改data
 		for(int i = 0; i<m_staycrops.size(); i++)
 		{
@@ -297,6 +305,7 @@ bool Tower::Be_Attacked(TPlayerID enemy_id,THealthPoint hp_decrease)
 			}
 		}
 		return true;
+		*/
 	}
 	return false;
 }
@@ -324,7 +333,7 @@ bool Tower::set_attacktarget(int crop_id)
 	//攻击成功
 	float deta = 0.04 * ((float)m_battlepoint - enemy.getCE());
 	int crop_lost = floor(28 * pow(2.71828, deta));
-	enemy.BeAttacked(crop_lost, m_PlayerID, true);//@@@ 兵团受到攻击的函数需要一个攻击者是否存活的参数 lmx
+	enemy.BeAttacked(crop_lost, m_PlayerID, m_exsit);
 	return true;
 }
 

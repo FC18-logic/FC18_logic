@@ -960,7 +960,6 @@ void Game::beginPhase()
 			if (m_producttype < 6)//生产消耗缓存置零
 				temp.clear_cache(m_producttype);
 			temp.set_notask();//设置为【无任务】状态
-
 		}
 	}	
 }
