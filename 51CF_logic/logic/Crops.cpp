@@ -26,7 +26,7 @@ Crops::Crops(DATA::Data* _data, corpsType type, battleCorpsType battletype, cons
 	m_staticID++;
 	m_PeaceNum = 0;
 	m_level = 0;
-	m_StationTower = nullptr;//鍏靛洟鐢熶骇鍑烘潵鍚庯紝闇€瑕佹寚浠ゆ墠椹诲畧褰撳湴鐨勫
+	m_StationTower = nullptr;//兵团生产出来后，需要指令才驻守当地的塔
 	m_BuildPoint = 0;
 	m_HealthPoint = 0;
 
@@ -40,11 +40,11 @@ Crops::Crops(DATA::Data* _data, corpsType type, battleCorpsType battletype, cons
 		m_MovePoint = constructMovePoint[buildtype];
 		m_BuildPoint = 3;
 	}
-	m_bResting = true;//鍏靛洟鐢熶骇鍑烘潵鍚庨粯璁や紤鏁?
+	m_bResting = true;//兵团生产出来后默认休整
 	m_data->corps[m_position.m_y][m_position.m_x].push_back(this);
 	m_data->players[m_PlayerID - 1].addCrops(m_myID);
 	m_data->totalCorps++;
-	m_data->newCorps.insert(m_myID);//璁板綍鏂颁骇鐢熺殑鍏靛洟搴忓彿
+	m_data->newCorps.insert(m_myID);//记录新产生的兵团序号
 }
 
 
@@ -52,9 +52,9 @@ Crops::Crops(DATA::Data* _data, corpsType type, battleCorpsType battletype, cons
 
 /*
 Move
-鍏靛洟鍦ㄥ湴鍥惧唴杩涜绉诲姩锛屾棤娉曞垽鏂洰鏍囧湴鐐规槸鍚﹀瓨鍦ㄥ埆鐨勫叺鍥?
-dx锛歺鍧愭爣鍙樺寲閲?dy锛歽鍧愭爣鍙樺寲閲?
-杩斿洖鏄惁绉诲姩鎴愬姛锛屾垚鍔熷垯鏇存柊浣嶇疆
+兵团在地图内进行移动
+dx：x坐标变化量 dy：y坐标变化量
+返回是否移动成功，成功则更新位置
 */
 bool Crops::Move(int dir)
 {
@@ -96,9 +96,9 @@ bool Crops::Move(int dir)
 	TPoint next_pos;
 	next_pos.m_x = next_x;
 	next_pos.m_y = next_y;
-	if (m_data->gameMap.withinMap(next_pos) == false) return false;  //by jyp瑕佸墠寰€鐨勪綅缃笉鍦ㄥ湴鍥惧唴锛屽垽鏂け璐?
+	if (m_data->gameMap.withinMap(next_pos) == false) return false;  //by jyp要前往的位置不在地图内，判断失败
 
-	//鍒ゆ柇鐩爣浣嶇疆鏄惁瀛樺湪宸辨柟濉?
+	//判断目标位置是否存在己方塔
 	bool haveTower = false;
 	int index = m_data->gameMap.map[next_y][next_x].TowerIndex;
 	if(index != NOTOWER)
@@ -115,10 +115,9 @@ bool Crops::Move(int dir)
 	}
 	if(!haveTower)
 	{
-		//鐩爣浣嶇疆鏄惁瀛樺湪鍒殑鍏靛洟
+		//目标位置是否存在别的兵团
 		CorpsUnit targetPos = m_data->corps[next_y][next_x];
 		
-		//锟斤拷锟教憋拷锟狡讹拷
 		if(m_type == Construct)
 		{
 			for(int i = 0; i<targetPos.size(); i++)
@@ -130,7 +129,7 @@ bool Crops::Move(int dir)
 				return false;
 			}
 		}
-		//鎴樻枟鍏?
+		//战斗兵
 		else
 		{
 			for(int i = 0; i<targetPos.size(); i++)
@@ -147,14 +146,14 @@ bool Crops::Move(int dir)
 	terrainType nexttype = m_data->gameMap.map[next_y][next_x].type;
 	float dMP = (float(CorpsMoveCost[curtype])+float(CorpsMoveCost[nexttype]))/2.0f;
 	int temp = m_MovePoint - ceil(dMP);
-	//琛屽姩鍔涗笉澶?
-	if(temp<0)
+	//行动力不够
+	if (temp < 0)
 	{
 		return false;
 	}
 	m_MovePoint = temp;
 
-	//淇敼data涓殑浣嶇疆
+	//修改data中的位置
 	UpdatePos(next_pos);
 	m_data->changeCorps.insert(m_myID);//by jyp:记录兵团的移动力改变
 	return true;
@@ -163,20 +162,20 @@ bool Crops::Move(int dir)
 
 /*
 AttackCrops
-璇ュ叺鍥㈠鍙︿竴鍏靛洟鍙戣捣鏀诲嚮锛岃礋璐ｈ绠楁敾鍑诲姏銆佹敾鍑诲叺鍥€佸苟绉诲姩
-鍙傛暟 enemy 鍙楁敾鍑诲叺鍥㈡寚閽?
-杩斿洖鍊?int 鍑忓皯鐨凥P
+该兵团对另一兵团发起攻击，负责计算攻击力、攻击兵团、并移动
+参数 enemy 受攻击兵团指针
+返回值 int 减少的HP
 lmx
 */
 void Crops::AttackCrops(Crops* enemy)
 {
 	int enemylost = 0;
 	int mylost = 0;
-	//濡傛灉鏁屾柟鏄伐绋嬪叺
+	//如果敌方是工程兵
 	if(enemy->m_type == Construct)
 	{
 		Crops* colleage = NULL;
-		//鏄惁瀛樺湪鎶ゅ崼
+		//是否存在护卫
 		for(int i = 0; i<m_data->corps[m_position.m_y][m_position.m_x].size(); i++)
 		{
 			colleage = m_data->corps[m_position.m_y][m_position.m_x][i];
@@ -185,34 +184,34 @@ void Crops::AttackCrops(Crops* enemy)
 		}
 	}
 
-	//濡傛灉鏁屼汉鏄垬鏂楀叺
+	//如果敌人是战斗兵
 	if(enemy->m_type == Battle)
 	{
-		//璁＄畻鎴樻枟鍔?
+		//计算战斗力
 		TBattlePoint myCE = getCE();
 		TBattlePoint enemyCE = enemy->getCE();
-		//璁＄畻鎹熷け
-		double deta = 0.04*((double)myCE-enemyCE);
-		mylost = floor(28*pow(2.71828,-deta));
-		enemylost = floor(30*pow(2.71828,deta));
+		//计算损失
+		double deta = 0.04 * ((double)myCE - enemyCE);
+		mylost = floor(28 * pow(2.71828, -deta));
+		enemylost = floor(30 * pow(2.71828, deta));
 	}
-	//璁＄畻鐢熷懡鍔?
+	//计算生命力
 	if (m_BattleType != Archer)
 	{
 		m_HealthPoint -= mylost;
 		m_data->changeCorps.insert(m_myID);//by jyp:记录非弓箭手兵团生命值等的改变
 	}
-	//濡傛灉宸查樀浜?
+	//如果已阵亡
 	if (m_HealthPoint <= 0)
 	{
 		KillCorps();
 	}
-	//濡傛灉瀵规柟姝讳骸 鍒欑Щ鍔ㄤ綅缃?
-	if(!enemy->BeAttacked(enemylost,m_PlayerID,m_bAlive))
+	//如果对方死亡 则移动位置
+	if (!enemy->BeAttacked(enemylost, m_PlayerID, m_bAlive))
 	{
-		if(m_BattleType!= Archer&&m_bAlive)
+		if (m_BattleType != Archer && m_bAlive)
 		{
-			//绉诲姩
+			//移动
 			UpdatePos(enemy->m_position);
 		}
 	}
@@ -220,13 +219,13 @@ void Crops::AttackCrops(Crops* enemy)
 
 /*
 BeAttacked
-鍏靛洟鍙楀埌鏀诲嚮鏃惰皟鐢紝鍐呴儴璋冪敤
-鍙傛暟锛歛ttack 鍙楀埌鐨勪激瀹冲€硷紝enemy 鍙戝姩鏀诲嚮鐨勫叺鍥㈡寚閽? bAlive 鏀诲嚮鏂规槸鍚﹀瓨娲?
-杩斿洖鍊硷細鏄惁瀛樻椿 瀛樻椿杩斿洖true
+兵团受到攻击时调用，内部调用
+参数：attack 受到的伤害值，enemy 发动攻击的兵团指针, bAlive 攻击方是否存活
+返回值：是否存活 存活返回true
 */
 bool Crops::BeAttacked(int attack, TPlayerID ID, bool bAlive)
 {
-	//淇樿檹宸ョ▼鍏?
+	//俘虏工程兵
 	if(m_type == Construct)
 	{
 		if(bAlive){
@@ -237,7 +236,7 @@ bool Crops::BeAttacked(int attack, TPlayerID ID, bool bAlive)
 		}
 		return true;
 	}
-	//鎴樻枟鍏?
+	//战斗兵
 	m_PeaceNum = 0;
 	m_HealthPoint -= attack;
 	m_data->changeCorps.insert(m_myID);//by jyp:记录作战兵团生命值等改变
@@ -246,12 +245,12 @@ bool Crops::BeAttacked(int attack, TPlayerID ID, bool bAlive)
 		KillCorps();
 		int num = m_data->players[ID - 1].getElCorpsNum() + 1;
 		m_data->players[ID - 1].setElCorpsNum(num);
-		//鍚屼竴浣嶇疆鐨勫伐绋嬪叺琚繕铏?
+		//同一位置的工程兵被俘虏
 		Crops* colleage = NULL;
 		for(int i = 0; i<m_data->corps[m_position.m_y][m_position.m_x].size(); i++)
 		{
 			colleage = m_data->corps[m_position.m_y][m_position.m_x][i];
-			//濡傛灉宸ョ▼鍏靛拰姝ｅ湪琚敾鍑荤殑鎴樻枟鍏垫槸鍚屼竴鐜╁鐨勫叺鍥?
+			//如果工程兵和正在被攻击的战斗兵是同一玩家的兵团
 			if(colleage->m_type == Construct&&colleage->m_PlayerID == m_PlayerID)
 				colleage->BeAttacked(0,ID,bAlive);
 		}
@@ -268,14 +267,14 @@ bool Crops::bAlive()
 
 /*
 getCE
-杩斿洖璇ュ叺鍥㈢殑鎴樻枟鍔?
+返回该兵团的战斗力
 */
 TBattlePoint Crops::getCE()
 {
-	//鎴樻枟鍔涘鐩?
+	//战斗力增益
 	terrainType type = m_data->gameMap.map[m_position.m_y][m_position.m_x].type;
 	TBattlePoint Attack = CorpsBattleGain[type];
-	//鎬绘垬鏂楀姏
+	//总战斗力
 	Attack += (TBattlePoint)ceil(
 		(float)(corpsBattlePoint[m_BattleType][m_level]*m_HealthPoint)
 		/(float)battleHealthPoint[m_BattleType][m_level]);
@@ -285,8 +284,8 @@ TBattlePoint Crops::getCE()
 
 /*
 Recover
-鏍规嵁涓婁竴鍥炲悎鐘舵€佸叺鍥㈠洖澶嶇敓鍛藉姏锛屽嚱鏁板唴閮ㄥ垽鏂槸鍚﹁繘琛屾仮澶?
-鏃犲弬鏁拌繑鍥炲€?
+根据上一回合状态兵团回复生命力，函数内部判断是否进行恢复
+无参数返回值
 */
 void Crops::Recover()
 {
@@ -311,65 +310,10 @@ void Crops::Recover()
 	m_PeaceNum ++;
 }
 
-/*
-MergeCrops
-鍏靛洟鏁寸紪锛屽彂璧锋暣缂栫殑鍏靛洟璋冪敤锛屽嚱鏁板唴閮ㄥ垹闄ゅ鏂瑰叺鍥?
-鍙傛暟锛氬鏂瑰叺鍥㈡寚閽堬紝寰呭畾 涔熷彲浠ユ槸浣嶇疆鎴栬€匢D
-杩斿洖鏄惁鏁寸紪鎴愬姛
-*/
-bool Crops::MergeCrops(TCorpsID targetID)
-{
-	Crops* targetCrops = NULL;
-	targetCrops = &(m_data->myCorps[targetID]);
-	//濡傛灉鐩爣闃熶紞涓嶅瓨鍦?
-	if(targetCrops == NULL)
-		return false;
-
-	//濡傛灉鏃犺鍔ㄥ姏
-	if(m_MovePoint == 0)
-		return false;
-
-	//濡傛灉涓€鏂瑰凡缁忛樀浜?
-	if(!m_bAlive||!(targetCrops->m_bAlive))
-		return false;
-
-	//濡傛灉涓嶅悓闃佃惀
-	if(m_PlayerID!=targetCrops->m_PlayerID)
-		return false;
-
-	//濡傛灉鑷冲皯鍏朵腑涓€鏂逛笉鏄垬鏂楀叺鍥紝涓嶅悓绫诲瀷
-	if(m_type!=Battle||targetCrops->m_type!=Battle)
-		return false;
-	if(m_BattleType!=targetCrops->m_BattleType)
-		return false;
-
-	//濡傛灉涓嶆槸閭诲眳锛屽彲浠ュ湪褰撳墠鏍兼垨鑰呭懆鍥寸殑8涓牸閲?
-	if(!IsNeighbor(targetCrops->m_position))
-		return false;
-
-	//濡傛灉鏄熺骇涓嶇鍚堣姹?
-	int level1 = m_level+1;
-	int level2 = targetCrops->m_level+1;
-	if(level2>level1)
-		return false;
-	if(level1+level2 >3)
-		return false;
-
-	//鏁寸紪
-	float HPSum = m_HealthPoint+targetCrops->m_HealthPoint;
-	float TotalSum = battleHealthPoint[m_BattleType][m_level]
-					+battleHealthPoint[m_BattleType][targetCrops->m_level];
-	m_level = level1+level2-1;
-	m_HealthPoint = battleHealthPoint[m_BattleType][m_level]*HPSum/TotalSum;
-
-	m_MovePoint = 0;
-	targetCrops->KillCorps();
-	return true;
-}
 
 /*
 ResetMP
-鍥炲悎寮€濮嬫椂閲嶇疆琛屽姩鍔?
+回合开始时重置行动力
 */
 void Crops::ResetMP()
 {
@@ -393,9 +337,9 @@ void Crops::ResetMP()
 
 /*
 ChangeTerrain
-寤虹瓚鍏垫敼閫犳墍鍦ㄥ崟鍏冨湴褰?
-鍙傛暟锛歵arget 鐩爣鍦板舰
-杩斿洖鏄惁鏀归€犳垚鍔?
+建筑兵改造所在单元地形
+参数：target 目标地形
+返回是否改造成功
 */
 bool Crops::JudgeChangeTerrain(Command& c)
 {
@@ -426,7 +370,7 @@ bool Crops::JudgeChangeTerrain(Command& c)
 
 /*
 newRound
-鏂板洖鍚堝紑濮嬶紝鍥炲HP鍜孧P
+新回合开始，回复HP和MP
 */
 void Crops::newRound()
 {
@@ -436,7 +380,7 @@ void Crops::newRound()
 		Recover();
 		if(!m_bResting)
 		{
-			m_PeaceNum = 0;//寮€濮嬭鏁?
+			m_PeaceNum = 0;//开始计数
 			m_bResting = true;
 		}
 	}
@@ -444,21 +388,21 @@ void Crops::newRound()
 
 /*
 GoRest
-杩涘叆椹绘墡浼戞暣鐘舵€?
-濡傛灉璇ヤ綅缃病鏈夊鍒欒繑鍥瀟rue锛屾湁濉斿垯杩斿洖false
+进入驻扎休整状态
+如果该位置没有塔则返回true，有塔则返回false
 */
 bool Crops::GoRest()
 {
-	//濡傛灉鏈夊
+	//如果有塔
 	if(m_data->gameMap.map[m_position.m_y][m_position.m_x].TowerIndex!=NOTOWER)
 	{
 		return false;
 	}
 
-	//濡傛灉涔嬪墠娌℃湁澶勫湪椹绘墡鐘舵€佷腑锛屽垯鍏堝皢鍙橀噺娓呴浂骞惰繘鍏ラ┗鎵庣姸鎬?
-	if(!m_bResting)
+	//如果之前没有处在驻扎状态中，则先将变量清零并进入驻扎状态
+	if (!m_bResting)
 	{
-		m_PeaceNum = 0;//寮€濮嬭鏁?
+		m_PeaceNum = 0;//开始计数
 		m_bResting = true;
 	}
 	return true;
@@ -466,16 +410,16 @@ bool Crops::GoRest()
 
 /*
 StationInTower
-濡傛灉璇ヤ綅缃瓨鍦ㄥ繁鏂瑰娍鍔涚殑濉旓紝鍒欒繑鍥瀟rue
+如果该位置存在己方势力的塔，则返回true
 */
 bool Crops::StationInTower()
 {
 	bool bStation = false;
 	int index = m_data->gameMap.map[m_position.m_y][m_position.m_x].TowerIndex;
-	//濡傛灉閫夋嫨椹绘墡鐨勪綅缃湁濉?鍒欓┗鎵庡湪濉斾腑
+	//如果选择驻扎的位置有塔 则驻扎在塔中
 	if(index != NOTOWER)
 	{
-		//濡傛灉濉斿睘浜庡繁鏂瑰垯椹绘墡
+		//如果塔属于己方则驻扎
 		if(m_data->myTowers[index].getPlayerID() == m_PlayerID)
 		{
 			m_StationTower = &(m_data->myTowers[index]);
@@ -489,8 +433,8 @@ bool Crops::StationInTower()
 
 /*
 ShowInfo
-鎻愪緵鍏靛洟淇℃伅
-杩斿洖鍏靛洟淇℃伅缁撴瀯浣?
+提供兵团信息
+返回兵团信息结构体
 */
 struct CorpsInfo Crops::ShowInfo()
 {
@@ -506,7 +450,7 @@ struct CorpsInfo Crops::ShowInfo()
 	info.m_BuildType = Builder;
 	if (info.type == Battle) {
 		info.m_BattleType = m_BattleType;
-		info.HealthPoint = m_HealthPoint;  //鐜╁鐢ㄧ敓鍛藉€艰嚜宸辩畻鎴樻枟鍔涳紝涓嶆彁渚?
+		info.HealthPoint = m_HealthPoint; //玩家用生命值自己算战斗力，不提供
 	}
 	else if (info.type == Construct) {
 		info.m_BuildType = m_BuildType;
@@ -520,29 +464,29 @@ AttackTower
 */
 void Crops::AttackTower(class Tower *enemy)
 {
-	int TowerCE;//濉旂殑鎴樻枟鍔?
-	//鑾峰彇濉旂殑鎴樻枟鍔?
+	int TowerCE;//塔的战斗力
+	//获取塔的战斗力
 	TowerCE = enemy->get_towerbp();
-	int myCE = getCE();//鍏靛洟鎴樻枟鍔?
+	int myCE = getCE();//兵团战斗力
 	
 	double deta = 0.04*((double)myCE-TowerCE);
 	int mylost = floor(28*pow(2.71828,-deta));
 	int enemylost = floor(30*pow(2.71828,deta))*corpsAttackTowerGain[m_BattleType][m_level];
 
-	//璁＄畻鐢熷懡鍔?
+	//计算生命力
 	if (m_BattleType != Archer)
 	{
 		m_HealthPoint -= mylost;
 		m_data->changeCorps.insert(m_myID); //by jyp:记录非弓箭手兵团生命值等改变
 	}
-	//濡傛灉宸查樀浜?
+	//如果已阵亡
 	if (m_HealthPoint <= 0)
 	{
 		KillCorps();
 	}
 
 	bool IsTowerDestroy = false;
-	//鍒ゆ柇濉旀槸鍚﹁鏀婚櫡(鍗犻銆佹懅姣侀兘绠?
+	//判断塔是否被攻陷(占领、摧毁都算)
 	IsTowerDestroy = enemy->Be_Attacked(m_PlayerID, enemylost);
 	if(IsTowerDestroy/*&&!(enemy->getexsit())*/)
 	{
@@ -550,7 +494,6 @@ void Crops::AttackTower(class Tower *enemy)
 		m_data->players[m_PlayerID - 1].setCqTowerNum(num);
 	}
 
-	//
 	if(m_bAlive)
 	{
 		if(m_BattleType == Archer)
@@ -564,39 +507,39 @@ void Crops::AttackTower(class Tower *enemy)
 
 /*
 Attack
-鍏靛洟鍙戝姩鏀诲嚮 杩斿洖鏄惁鏀诲嚮鎴愬姛
-鍙傛暟 type<CorpsCommandEnum> 鏀诲嚮鏁屾柟鍏靛洟鎴栧锛?ID 鏁屾柟ID
+兵团发动攻击 返回是否攻击成功
+参数 type<CorpsCommandEnum> 攻击敌方兵团或塔， ID 敌方ID
 */
 bool Crops::Attack(int type, TCorpsID ID)
 {
-	//濡傛灉涓嶆槸鎴樻枟鍏?
+	//如果不是战斗兵
 	if(m_type!=Battle)
 		return false;
 
-	//琛屽姩鍔涗笉瓒?
+	//行动力不足
 	if(m_MovePoint == 0)
 		return false;
 
 	m_MovePoint = 0;
 
-	//鎴戞柟HP鍑忓皯鍊?
+	//我方HP减少值
 	int mylost = 0;
 	if(type == CAttackCorps)
 	{
 		Crops* enemy = NULL;
-		//瀵绘壘鏁屼汉
+		//寻找敌人
 		enemy = &m_data->myCorps[ID];
-		//鏁屼汉宸查樀浜?
-		if(!enemy->m_bAlive)
+		//敌人已阵亡
+		if (!enemy->m_bAlive)
 			return false;
-		//鏁屼汉鍚岄樀钀?
-		if(enemy->m_PlayerID == m_PlayerID)
+		//敌人同阵营
+		if (enemy->m_PlayerID == m_PlayerID)
 			return false;
-		//鏁屼汉涓嶅湪灏勭▼鑼冨洿鍐?
-		if(!IsInRange(enemy->m_position))
+		//敌人不在射程范围内
+		if (!IsInRange(enemy->m_position))
 			return false;
 
-		//濡傛灉鏁屼汉鎵€鍦ㄤ綅缃瓨鍦ㄦ晫鏂瑰娍鍔涘 浼樺厛涓庡缁撶畻
+		//如果敌人所在位置存在敌方势力塔 优先与塔结算
 		int x = enemy->m_position.m_x;
 		int y = enemy->m_position.m_y;
 		int index = m_data->gameMap.map[y][x].TowerIndex;
@@ -610,30 +553,30 @@ bool Crops::Attack(int type, TCorpsID ID)
 	else if(type == CAttackTower)
 	{
 		class Tower* enemy = NULL;
-		//瀵绘壘鏁屼汉
+		//寻找敌人
 		enemy = &m_data->myTowers[ID];
-		//鏁屼汉宸查樀浜?
-		if(!enemy->getexsit())
+		//敌人已阵亡
+		if (!enemy->getexsit())
 			return false;
-		//鏁屼汉鍚岄樀钀?
-		if(enemy->getPlayerID() == m_PlayerID)
+		//敌人同阵营
+		if (enemy->getPlayerID() == m_PlayerID)
 			return false;
-		//鏁屼汉涓嶅湪灏勭▼鑼冨洿鍐?
-		if(!IsInRange(enemy->getPosition()))
+		//敌人不在射程范围内
+		if (!IsInRange(enemy->getPosition()))
 			return false;
 
 		AttackTower(enemy);
 	}
-	else//鎸囦护鏈夎
+	else//指令有误
 		return false;
 
 	return true;
 }
 
 /*
-UpdatePos 鏇存柊浣嶇疆
-鏇存柊鍦╩_data涓璫orps璁板綍鐨勪綅缃互鍙婄被鍐呴儴鐨勪綅缃?
-鍙傛暟 鏂扮殑浣嶇疆
+UpdatePos 更新位置
+更新在m_data中corps记录的位置以及类内部的位置
+参数 新的位置
 */
 void Crops::UpdatePos(TPoint targetpos)
 {
@@ -649,7 +592,7 @@ void Crops::UpdatePos(TPoint targetpos)
 	}
 	m_data->corps[targetpos.m_y][targetpos.m_x].push_back(this);
 	m_position = targetpos;
-	//濡傛灉椹诲畧鍦ㄥ涓?鍒欏垹闄?
+	//如果驻守在塔中 则删除
 	if(m_StationTower)
 	{
 		m_StationTower->remove_crop(m_myID);
@@ -660,8 +603,8 @@ void Crops::UpdatePos(TPoint targetpos)
 
 /*
 ChangeOwner
-鏀瑰彉鎵€鏈夎€?淇敼data涓搴旂殑player涓殑m_corps
-鍙傛暟 鏂颁富浜篒D
+改变所有者 修改data中对应的player中的m_corps
+参数 新主人ID
 */
 void Crops::ChangeOwner(TPlayerID newowner)
 {
@@ -672,7 +615,7 @@ void Crops::ChangeOwner(TPlayerID newowner)
 
 /*
 KillCorps
-鍏靛洟姝讳骸 淇敼player銆乨ata浠ュ強map涓殑鏁版嵁 灏嗗叺鍥㈢姸鎬佽缃负姝讳骸
+兵团死亡 修改player、data以及map中的数据 将兵团状态设置为死亡
 */
 void Crops::KillCorps()
 {
@@ -691,10 +634,10 @@ void Crops::KillCorps()
 		}
 	}
 	m_bAlive = false;
-	m_data->dieCorps.insert(m_myID);    //璁板綍姝讳骸鍏靛洟ID
+	m_data->dieCorps.insert(m_myID);    //记录死亡兵团ID
 }
 
-//寤虹瓚鍏典慨濉?
+
 bool Crops::JudgeMendTower(Command& c)
 {
 	if(!m_bAlive)
@@ -704,15 +647,15 @@ bool Crops::JudgeMendTower(Command& c)
 	if(m_BuildType != Builder)
 		return false;
 
-	//鑾峰彇璇ヤ綅缃鐨勪俊鎭?
+	//获取该位置塔的信息
 	int index = m_data->gameMap.map[m_position.m_y][m_position.m_x].TowerIndex;
-	//娌℃湁濉?
+	//如果没有塔
 	if(index == NOTOWER)
 		return false;
-	//涓嶆槸宸辨柟濉?
+	//如果不是己方塔
 	if(m_data->myTowers[index].getPlayerID()!=m_PlayerID)
 		return false;
-	//濉斿凡琚懅姣?
+	//塔已摧毁
 	if(!m_data->myTowers[index].getexsit())
 		return false;
 	c.parameters.clear();
@@ -722,30 +665,30 @@ bool Crops::JudgeMendTower(Command& c)
 	return true;
 }
 
-//寮€鎷撹€呭缓濉?
+//开拓者建塔
 bool Crops::BuildTower()
 {
-	if (!m_bAlive)//by jyp 褰撳墠鍏靛洟姝讳骸
+	if (!m_bAlive)
 		return false;
-	if (m_type != Construct)//by jyp褰撳墠鍏靛洟涓嶆槸宸ョ▼鍏靛洟
+	if (m_type != Construct)
 		return false;
-	if (m_BuildType != Extender)//by jyp褰撳墠鍏靛洟涓嶆槸寮€鎷撹€?
+	if (m_BuildType != Extender)
 		return false;
 
-	//鑾峰彇璇ヤ綅缃鐨勪俊鎭?
+	//获取该位置塔的信息
 	int index = m_data->gameMap.map[m_position.m_y][m_position.m_x].TowerIndex;
-	//濡傛灉璇ヤ綅缃凡瀛樺湪濉?
-	if(index != NOTOWER)
+	//如果该位置已存在塔
+	if (index != NOTOWER)
 		return false;
 
-	//鑾峰彇璇ヤ綅缃墍鏈夎€呭睘鎬?
+	//获取该位置所有者属性
 	TPlayerID OwnerID;
 	OwnerID = m_data->gameMap.showOwner(m_position);
 	//
-	//濡傛灉璇ュ崟鍏冩牸灞炰簬宸辨柟
-	if(OwnerID != OUTOFRANGE && OwnerID == m_PlayerID)
+	//如果该单元格属于己方
+	if (OwnerID != OUTOFRANGE && OwnerID == m_PlayerID)
 	{
-		//鏂板缓涓€涓槻寰″
+		//新建一个防御塔
 		Tower newTower(m_data, m_PlayerID, m_position);
 		m_data->myTowers.push_back(newTower);
 		m_data->changeTowers.insert(m_data->myTowers.size() - 1);  //by jyp:记录新塔各项属性变化，因为工程兵直接没了，所以不记录变化了
@@ -777,7 +720,7 @@ void Crops::haveCmd()
 	m_PeaceNum = 0;
 }
 
-//
+
 void Crops::doChangingTerrain(terrainType target, int x, int y)
 {
 	m_data->gameMap.map[y][x].type = target;
@@ -789,7 +732,7 @@ void Crops::doChangingTerrain(terrainType target, int x, int y)
 	m_data->changeCorps.insert(m_myID);  //by jyp:记录工程兵团劳动力改变
 }
 
-//
+
 void Crops::doMending(int index)
 {	
 	m_BuildPoint--;
