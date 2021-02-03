@@ -555,7 +555,7 @@ struct CorpsInfo
 //@@@【FC18】玩家结构体
 struct PlayerInfo
 {
-	TPlayerID id;                        //【FC18】玩家的序号（从？[0 or 1]开始）
+	TPlayerID id;                        //【FC18】玩家的序号，请注意玩家序号从1开始，访问玩家数组请用[ID-1]
 	int rank;                            //【FC18】该选手排名（出局者直接由出局回合数给位次）|（存活者按防御塔得分和兵团得分来排名）|（同名次按防御塔攻占数、消灭敌方军团数、俘虏敌方军团数依次检索排名）|（仍有同名次者随机分配排名）
 	bool alive;                          //【FC18】玩家是否还活着
 
@@ -574,7 +574,7 @@ struct mapBlock                                 //【FC18】地图方格类
 	terrainType type;                           //【FC18】地块类型，对应terrainType枚举类
 	vector<int> occupyPoint;                    //【FC18】各玩家的占有属性值，秩为玩家序号-1
 	int owner;                                  //【FC18】所属玩家序号，-1为过渡TRANSITION，-2为公共PUBLIC
-	int TowerIndex;								//@@@【FC18】位于该单元格的塔的下标，对应data里的myTowers
+	int TowerIndex;								//@@@【FC18】位于该单元格的塔的下标，对应data里的myTowers，没有塔的时候为-1
 };
 
 //【FC18】地图单元格信息结构体

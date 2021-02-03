@@ -169,7 +169,7 @@ namespace DAGAN
 				if (corpsBanned.find(c.parameters[1]) != corpsBanned.end()) continue;     //这个兵团本回合不能再接受操作，请求驳回
 				if (handleCorpsCommand(id, c) == true) {   //记录不能再进行其他操作的兵团序号
 					//jsonChange(id, c);   //更新有效的指令Json
-//					outPutCommand(id, c);  //复读被执行的命令，未执行的不复读
+					//outPutCommand(id, c);  //复读被执行的命令，未执行的不复读
 					switch (c.parameters[0]) {
 					case(CStation):
 					case(CStationTower):
@@ -188,7 +188,7 @@ namespace DAGAN
 				if (towerBanned.find(c.parameters[1]) != towerBanned.end()) continue; //这个塔当前回合不能再操作，请求驳回
 				if (handleTowerCommand(id, c) == true) {   //记录不能再进行其他操作的塔序号
 					//jsonChange(id, c);   //更新有效的指令Json
-	//				outPutCommand(id, c);  //复读被执行的命令，未执行的不复读
+				    //outPutCommand(id, c);  //复读被执行的命令，未执行的不复读
 					switch (c.parameters[0]) {
 					case(TProduct):
 						towerBanned.insert(c.parameters[1]);//记录不能继续操作的塔ID
@@ -232,7 +232,7 @@ namespace DAGAN
 			game_.roundTime.push_back(clock());
 			//data->currentRoundCommandJson["runDuration"] =
 				//Json::Value(std::to_string(int(game_.roundTime[game_.roundTime.size() - 1] - game_.roundTime[game_.roundTime.size() - 2])));
-			//game_.saveJson();//保存及写入Json文档
+			game_.saveJson();//保存及写入Json文档
 		}
 	}
 
@@ -291,7 +291,10 @@ namespace DAGAN
 				//newCmd["dEC"] = Json::Value(std::to_string(int(c.parameters[2])));
 				//TPoint dirTPoint = point2 - point;
 				//newCmd["dir"] = Json::Value(std::to_string(std::atan2(dirTPoint.m_y, dirTPoint.m_x)));
-				if (data->dieCorps.find(c.parameters[2]) != data->dieCorps.end()) newCmd.result = 1;
+				if (data->dieCorps.find(c.parameters[1]) == data->dieCorps.end() && data->dieCorps.find(c.parameters[2]) == data->dieCorps.end()) newCmd.result = 0;     //都还在
+				else if (data->dieCorps.find(c.parameters[1]) == data->dieCorps.end() && data->dieCorps.find(c.parameters[2]) != data->dieCorps.end()) newCmd.result = 1;    //自己还在，对方没了
+				else if (data->dieCorps.find(c.parameters[1]) != data->dieCorps.end() && data->dieCorps.find(c.parameters[2]) == data->dieCorps.end()) newCmd.result = 2;    //自己没了，对方还在
+				else  newCmd.result = 3;    //都没了
 				break;
 			case(CAttackTower):
 				newCmd.cm_type = JAttackTower;
@@ -305,7 +308,10 @@ namespace DAGAN
 				//newCmd["dET"] = Json::Value(std::to_string(int(c.parameters[2])));
 				//TPoint dirTPoint = point2 - point;
 				//newCmd["dir"] = Json::Value(std::to_string(std::atan2(dirTPoint.m_y, dirTPoint.m_x)));
-				if (data->dieTower.find(c.parameters[2]) != data->dieTower.end()) newCmd.result = 1;
+				if (data->dieCorps.find(c.parameters[1]) == data->dieCorps.end() && data->dieTower.find(c.parameters[2]) == data->dieTower.end()) newCmd.result = 0;    //都还在
+				else if (data->dieCorps.find(c.parameters[1]) == data->dieCorps.end() && data->dieTower.find(c.parameters[2]) != data->dieTower.end()) newCmd.result = 1;     //自己还在，对方没了
+				else if (data->dieCorps.find(c.parameters[1]) != data->dieCorps.end() && data->dieTower.find(c.parameters[2]) == data->dieTower.end()) newCmd.result = 2;     //自己没了，对方还在
+				else  newCmd.result = 3;    //都没了
 				break;
 			case(CRegroup):
 				newCmd.cm_type = JRegroup;
@@ -353,7 +359,7 @@ namespace DAGAN
 				point2 = data->myCorps[c.parameters[2]].getPos();
 				newCmd.aim_x = point2.m_x;
 				newCmd.aim_z = point2.m_y;
-				if (data->dieCorps.find(c.parameters[2]) != data->dieCorps.end()) newCmd.result = 1;
+				if (data->dieCorps.find(c.parameters[2]) != data->dieCorps.end()) newCmd.result = 1;   //对方没了
 				//pos["x"] = Json::Value(std::to_string(point.m_x));
 				//pos["z"] = Json::Value(std::to_string(point.m_y));
 				//newCmd["pos"] = pos;
