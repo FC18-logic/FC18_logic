@@ -21,7 +21,7 @@ class Game                                                            //【FC18�
 public:
 	Game() {}														  //【FC18】当前游戏进程类构造函数
 	vector<time_t> roundTime;                                         //【FC18】游戏每回合时间   #json
-	bool init(string filename, string json_filename,vector<string> players_name);  //@@@【FC18】从文件读入信息，初始化游戏，并写第0轮的JSON
+	bool init(string filename, string json_filename,vector<string> players_name, std::ofstream& cmdF,std::ofstream& infoF);  //@@@【FC18】从文件读入信息，初始化游戏，并写第0轮的JSON
 	DATA::Data& getData() { return data; }                            //【FC18】从game类获取当前游戏信息   #json
 	vector<TPlayerID>& getRank() { return Rank; }                     //【FC18】获取当前所有玩家的排名
 	int getTotalPlayerNum() { return totalPlayers; }             //【FC18】获取当前玩家数目
@@ -35,13 +35,16 @@ public:
 	void killPlayer(TPlayerID id);                                    //@@@【FC18】杀死玩家 
 	bool isAlive(TPlayerID id) { return data.players[id].isAlive(); } //【FC18】判断玩家是否活着
 	void saveJson(DATA::Data & dataLastRound, DataSupplement & dataSuppleMent);//？？？【FC18】写入这一轮的JSON文档
-	void saveJson();                                                  //【FC18】写入这一轮的Json数据
+	void saveJson(ofstream& infoFile);                                                  //【FC18】写入这一轮的Json数据
+	void printJson();                                                 //【FC18】将JSON写入文件
 	void addRound() { totalRounds++; }               //@@@【FC18】回合数递增
 	bool goNext();                                                   //【FC18】判断还能否继续进行
 	void setGameOver() {}
 
 	void setPlayerID(TPlayerID id){ curPlayer = id; }				//【FC18】设置当前回合玩家ID
 	void printGameMap();                                             //【FC18】输出当前游戏地图
+	//std::ofstream& cmdFile;                                           //【FC18】存放指令数据的文件
+	//std::ofstream& infoFile;                                          //【FC18】存放信息数据的文件
 
 
 	//FC15的
@@ -64,9 +67,9 @@ protected:
 	vector<TPlayerID> Rank;                                           //【FC18】根据规则进行排名
 
 
-	string cmd_json_filename;                                         //【FC18】指令JSON文件名
-	string info_json_filename;                                        //【FC18】信息JSON文件名
-	string mapinfo_json_filename;                                     //【FC18】地图信息JSON文件名
+	string cmd_txt_filename;                                         //【FC18】指令TXT文件名
+	string info_txt_filename;                                        //【FC18】信息TXT文件名
+	string mapinfo_txt_filename;                                     //【FC18】地图信息TXT文件名
 
 	TPlayerID curPlayer;	//【FC18】本回合正在执行的玩家 吕梦欣
 

@@ -34,9 +34,9 @@ namespace DAGAN
 											              //【FC18】默认输出文件，游戏下一回合可以运行
 		                                                  //【FC18】NO_SILENT_MODE和FC15_DEBUG两个宏定义决定是否输出debug信息
 		void run(char* json_filename);                    //@@@【FC18】游戏单回合运行的主要部分，同时向json_filename进行文件写入
-		void run(TPlayerID id);      //@@@【FC18】运行每个玩家当前的游戏回合（小回合），然后记录玩家指令Json和变化后的信息Json
+		void run(TPlayerID id,ofstream& cmdF, ofstream& infoF);      //@@@【FC18】运行每个玩家当前的游戏回合（小回合），然后记录玩家指令Json和变化后的信息Json
         //#Json有关Json更改函数
-		void jsonChange(TPlayerID id,Command& c);                      //【FC18】在命令执行完毕（保证有效）后，传入命令进来，会对应修改命令Json的数据
+		void jsonChange(TPlayerID id,Command& c,ofstream& cmdFile);                      //【FC18】在命令执行完毕（保证有效）后，传入命令进来，会对应修改命令Json的数据
 		bool moreCommand(TPlayerID id,set<TTowerID>& tBanned,set<TCorpsID>& cBanned);//【FC18】判断某位玩家是否能继续执行下一句指令
 		void killPlayers();                                  //【FC18】判断玩家阵亡情况
 		int commandRead;                                      //【FC18】已读取命令数量

@@ -49,8 +49,8 @@ public:
 	void setData(DATA::Data* d) { data = d; }   //【FC18】map也可以修改全员共享的Data
 	vector<vector<mapBlock>> map;               //【FC18】游戏中实际存储的地图
 	//~Map();
-	bool randomInitMap();                          //【FC18】随机生成一幅地图，分配势力和设定初始塔的位置
-    bool readMap(ifstream& inMap, bool enableOutput, vector<string> players_name);   //通过文件初始化地图信息，包括读入地图数据和初始化玩家数组
+	bool randomInitMap(ofstream& cmdF,ofstream& infoF);                          //【FC18】随机生成一幅地图，分配势力和设定初始塔的位置
+    bool readMap(ifstream& inMap, ofstream& cmdF, ofstream& infoF,bool enableOutput, vector<string> players_name);   //通过文件初始化地图信息，包括读入地图数据和初始化玩家数组
 	void saveMapJson();                       //【FC18】保存地图的json数据
     mapBlockInfo ShowInfo(int x,int y);                       //【FC18】生成地图方格信息
     void modifyOccupyPoint(TPlayerID oldOwner, TPlayerID newOwner, TPoint p);       //【FC18】按塔的所有者改变修改周围方格的占有属性值

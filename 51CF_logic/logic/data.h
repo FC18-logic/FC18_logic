@@ -55,16 +55,18 @@ namespace DATA                                         //@@@【FC18】名空间
 		set<TTowerID> dieTower;                //【FC18】每回合被消灭的塔
 		set<TCorpsID> newCorps;                //【FC18】每回合的新兵团
 		set<TCorpsID> dieCorps;                //【FC18】每回合被消灭的兵团
+		set<TTowerID> changeTowers;            //【FC18】属性值改变需要记录的塔编号
+		set<TCorpsID> changeCorps;             //【FC18】属性值改变需要记录的兵团编号
 
 
 		//关于写JSON文档
-		Json::Value commandJsonRoot;                   //【FC18】所有回合命令的Json根节点
-		Json::Value infoJsonRoot;                      //【FC18】所有回合玩家、防御塔和兵团Json的根节点
-		Json::Value mapInfoJsonRoot;                   //【FC18】所有回合地图信息的Json根节点
-		Json::Value currentRoundCommandJson;           //【FC18】当前回合命令的Json根节点
-		Json::Value currentRoundPlayerJson;            //【FC18】当前回合玩家的Json根节点
-		Json::Value currentRoundTowerJson;             //【FC18】当前回合防御塔的Json根节点
-		Json::Value currentRoundCorpsJson;             //【FC18】当前回合兵团的Json根节点
+		//Json::Value commandJsonRoot;                   //【FC18】所有回合命令的Json根节点
+		//Json::Value infoJsonRoot;                      //【FC18】所有回合玩家、防御塔和兵团Json的根节点
+		//Json::Value mapInfoJsonRoot;                   //【FC18】所有回合地图信息的Json根节点
+		//Json::Value currentRoundCommandJson;           //【FC18】当前回合命令的Json根节点
+		//Json::Value currentRoundPlayerJson;            //【FC18】当前回合玩家的Json根节点
+		//Json::Value currentRoundTowerJson;             //【FC18】当前回合防御塔的Json根节点
+		//Json::Value currentRoundCorpsJson;             //【FC18】当前回合兵团的Json根节点
 		Json::Value currentRoundMapJson;               //【FC18】当前回合地图的Json根节点
 		Json::Value lastRoundMapJson;                  //【FC18】记录上一回合地图的Json根节点
 

@@ -156,6 +156,7 @@ bool Crops::Move(int dir)
 
 	//淇敼data涓殑浣嶇疆
 	UpdatePos(next_pos);
+	m_data->changeCorps.insert(m_myID);//by jyp:记录兵团的移动力改变
 	return true;
 }
 
@@ -199,6 +200,7 @@ void Crops::AttackCrops(Crops* enemy)
 	if (m_BattleType != Archer)
 	{
 		m_HealthPoint -= mylost;
+		m_data->changeCorps.insert(m_myID);//by jyp:记录非弓箭手兵团生命值等的改变
 	}
 	//濡傛灉宸查樀浜?
 	if (m_HealthPoint <= 0)
@@ -231,12 +233,14 @@ bool Crops::BeAttacked(int attack, TPlayerID ID, bool bAlive)
 			ChangeOwner(ID);
 			int num = m_data->players[ID - 1].getCqCorpsNum() + 1;
 			m_data->players[ID - 1].setCqCorpsNum(num);
+			m_data->changeCorps.insert(m_myID);//by jyp:记录工程兵团所有者改变
 		}
 		return true;
 	}
 	//鎴樻枟鍏?
 	m_PeaceNum = 0;
 	m_HealthPoint -= attack;
+	m_data->changeCorps.insert(m_myID);//by jyp:记录作战兵团生命值等改变
 	if(m_HealthPoint<=0)
 	{
 		KillCorps();
@@ -296,11 +300,12 @@ void Crops::Recover()
 	}
 	if(m_PeaceNum == 3)
 	{
-		m_HealthPoint += (int)floor(battleHealthPoint[m_BattleType][m_level]/3);
+		m_HealthPoint += (int)floor((float)battleHealthPoint[m_BattleType][m_level]/3.0F);
 		if(m_HealthPoint > battleHealthPoint[m_BattleType][m_level])
 		{
 			m_HealthPoint = battleHealthPoint[m_BattleType][m_level];
 		}
+		m_data->changeCorps.insert(m_myID);
 		return;
 	}
 	m_PeaceNum ++;
@@ -370,11 +375,19 @@ void Crops::ResetMP()
 {
 	if(m_type == Battle)
 	{
-		m_MovePoint = battleMovePoint[m_BattleType][m_level];
+		if (m_MovePoint != battleMovePoint[m_BattleType][m_level])
+		{
+			m_MovePoint = battleMovePoint[m_BattleType][m_level];
+			m_data->changeCorps.insert(m_myID);
+		}
 	}
 	else
 	{
-		m_MovePoint = constructMovePoint[m_BattleType];
+		if (m_MovePoint != constructMovePoint[m_BattleType])
+		{
+			m_MovePoint = constructMovePoint[m_BattleType];
+			m_data->changeCorps.insert(m_myID);
+		}
 	}
 }
 
@@ -520,6 +533,7 @@ void Crops::AttackTower(class Tower *enemy)
 	if (m_BattleType != Archer)
 	{
 		m_HealthPoint -= mylost;
+		m_data->changeCorps.insert(m_myID); //by jyp:记录非弓箭手兵团生命值等改变
 	}
 	//濡傛灉宸查樀浜?
 	if (m_HealthPoint <= 0)
@@ -734,6 +748,7 @@ bool Crops::BuildTower()
 		//鏂板缓涓€涓槻寰″
 		Tower newTower(m_data, m_PlayerID, m_position);
 		m_data->myTowers.push_back(newTower);
+		m_data->changeTowers.insert(m_data->myTowers.size() - 1);  //by jyp:记录新塔各项属性变化，因为工程兵直接没了，所以不记录变化了
 		KillCorps();
 		return true;
 	}
@@ -771,6 +786,7 @@ void Crops::doChangingTerrain(terrainType target, int x, int y)
 	{
 		KillCorps();
 	}
+	m_data->changeCorps.insert(m_myID);  //by jyp:记录工程兵团劳动力改变
 }
 
 //
@@ -783,4 +799,5 @@ void Crops::doMending(int index)
 	}
 
 	m_data->myTowers[index].Recover();
+	m_data->changeCorps.insert(m_myID);  //by jyp:记录工程兵团劳动力改变
 }

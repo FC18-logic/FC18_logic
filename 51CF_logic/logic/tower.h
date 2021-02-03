@@ -105,7 +105,6 @@ public:
 		info.productPoint = m_productpoint;
 		info.healthPoint = m_healthpoint;
 		info.battlePoint = m_battlepoint;
-		info.experPoint = m_experpoint;
 		info.level = m_level;
 		if(m_producttype == NOTASK)//没有生产任务:NOTASK=-1
 		{

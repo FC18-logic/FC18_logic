@@ -38,15 +38,15 @@ bool Map::init(const TMapID& filename,TResourceI _MAX_RESOURCE_)
 *函数返回值 : false--读入地图失败，true--读入地图成功
 *作者 : 姜永鹏
 ***********************************************************************************************/
-bool Map::readMap(ifstream& inMap, bool enableOutput, std::vector<std::string> players_name) {
+bool Map::readMap(ifstream& inMap, ofstream& cmdF,ofstream& infoF, bool enableOutput, std::vector<std::string> players_name) {
 	data->resetAllCnt();             //初始化过程为第0回合
 	//初始化地图高度、宽度
 	if (enableOutput)
 		cout << "init map......" << endl;
 	inMap >> m_height;
 	inMap >> m_width;
-	data->mapInfoJsonRoot["head"]["height"] = Json::Value(std::to_string(m_height));
-	data->mapInfoJsonRoot["head"]["width"] = Json::Value(std::to_string(m_width));
+	//data->mapInfoJsonRoot["head"]["height"] = Json::Value(std::to_string(m_height));
+	//data->mapInfoJsonRoot["head"]["width"] = Json::Value(std::to_string(m_width));
 
 
 	//rankInfo
@@ -86,22 +86,22 @@ bool Map::readMap(ifstream& inMap, bool enableOutput, std::vector<std::string> p
 	//#json add
 	//初始化玩家信息JSON
 	//初始化玩家操作JSON
-	Json::Value playerActionJson; //
+	//Json::Value playerActionJson; 
 	for (int i = 0; i < data->totalPlayers; ++i)
 	{
 		data->players[i].setdata(data);
 		data->players[i].setID(i + 1);
 		data->players[i].setName(players_name[i]);
-		Json::Value playerJson;
+		/*Json::Value playerJson;
 		playerJson["id"] = Json::Value(std::to_string(i + 1));
 		playerJson["nm"] = Json::Value(players_name[i]);
 		playerJson["cpN"] = Json::Value(std::to_string(0));
 		playerJson["twN"] = Json::Value(std::to_string(1));
 		playerJson["scr"] = Json::Value(std::to_string(1 * TOWER_SCORE));
 		playerJson["rk"] = Json::Value(std::to_string(i + 1));
-		data->currentRoundPlayerJson.append(playerJson);
+		data->currentRoundPlayerJson.append(playerJson);*/
 
-		Json::Value paj;
+		/*Json::Value paj;
 		paj["oId"] = Json::Value(std::to_string(i + 1));
 		paj["tp"] = Json::Value(std::to_string(-1));
 		paj["id"] = Json::Value(std::to_string(-1));
@@ -111,7 +111,7 @@ bool Map::readMap(ifstream& inMap, bool enableOutput, std::vector<std::string> p
 		paj["dT"] = Json::Value(std::to_string(-1));
 		paj["pT"] = Json::Value(std::to_string(-1));
 		paj["aid"] = Json::Value(std::to_string(-1));
-		data->currentRoundCommandJson["command"].append(paj);
+		data->currentRoundCommandJson["command"].append(paj);*/
 	}
 
 	//初始化兵团的表
@@ -119,6 +119,9 @@ bool Map::readMap(ifstream& inMap, bool enableOutput, std::vector<std::string> p
 	for (int i = 0; i < m_height; i++) {
 		data->corps[i] = new CorpsUnit[m_width];
 	}
+	char bufferCorps[64];
+	sprintf(bufferCorps, "#corps\n");
+	infoF << bufferCorps;
 
 	return true;
 }
@@ -131,7 +134,7 @@ bool Map::readMap(ifstream& inMap, bool enableOutput, std::vector<std::string> p
 *函数返回值 : false--随机地图初始化失败，true--随机地图初始化成功
 *作者 : 姜永鹏
 ***********************************************************************************************/
-bool Map::randomInitMap() {
+bool Map::randomInitMap(ofstream& cmdFile,ofstream& infoFile) {
 	//【FC18】利用柏林噪声方法产生随机地图
 	Perlin perlinNoiseGen;
 	int terrainArea[TERRAIN_TYPE_NUM] = { 0 };      //【FC18】统计每种地形生成了多少格
@@ -260,6 +263,11 @@ bool Map::randomInitMap() {
 		return false;
 	}
 
+
+	//初始化塔及指令信息存档
+	char bufferCmd[64];
+	sprintf(bufferCmd, "#command\n");
+	cmdFile << bufferCmd;
 	vector<pair<TPoint, TPoint>> towerRegion;         //各玩家生成随机防御塔的位置范围
 	towerRegion.push_back({ {1,1},{(m_width - Xinterval) / 2 - 2,(m_height - Yinterval) / 2 - 2} });
 	towerRegion.push_back({ {(m_width + Xinterval) / 2 + 1,1},{m_width - 2,(m_height - Yinterval) / 2 - 2} });
@@ -285,6 +293,22 @@ bool Map::randomInitMap() {
 			//重复 tower构造 map[p.m_y][p.m_x].occupyPoint[i] = TowerOccupyPoint[0];
 			map[p.m_y][p.m_x].type = TRRoad;
 		}
+		//写入txt存档
+		char bufferCmd[128];
+		sprintf(bufferCmd, "%d %d %d %d %d %d %d %d %d\n", i + 1, JBuild, -1, towerPoint.m_x, towerPoint.m_y, -1, -1, -1, -1);
+		cmdFile << bufferCmd;
+	}
+
+	//塔信息存档
+	char bufferTowerHead[64];
+	sprintf(bufferTowerHead, "#tower\n");
+	infoFile << bufferTowerHead;
+	for (int i = 0; i < data->myTowers.size(); i++) {
+		Tower newTower = data->myTowers[i];
+		TPoint towerPoint = newTower.getPosition();
+		char bufferTower[128];
+		sprintf(bufferTower, "%d %d %d %d %d %d %d %d %d %d %d %d\n", i, towerPoint.m_x, towerPoint.m_y, i + 1, newTower.getProductPoint(), NOTASK, -1, newTower.getHealthPoint(), newTower.getBattlePoint(), newTower.getExperPoint(), newTower.getLevel(), 1);
+		infoFile << bufferTower;
 	}
 
 	////////////////////////////////////////////////////////
@@ -313,23 +337,28 @@ bool Map::randomInitMap() {
 		}
 	}*/
 	
-	int countRound = 0, countPlayer = 0;
+	//int countRound = 0, countPlayer = 0;
+	char bufferMap[64];
+	sprintf(bufferMap, "#map\n");
+	infoFile << bufferMap;
 	for (int i = 0; i < m_height; i++) {
 		for (int j = 0; j < m_width; j++) {
+			char bufferBlock[64];
+			sprintf(bufferBlock, "%d %d %d %d\n", j, i, map[i][j].type, map[i][j].owner);
+			infoFile << bufferBlock;
 			Json::Value blockJson;
-			//Json::Value position;
-			blockJson["x"] = Json::Value(std::to_string(j));
-			blockJson["z"] = Json::Value(std::to_string(i));
-			//blockJson["pos"] = position;
-			blockJson["tp"] = Json::Value(std::to_string(int(map[i][j].type)));
-			blockJson["oId"] = Json::Value(std::to_string(map[i][j].owner));
-			/*Json::Value occupyPoint;  暂不提供给Json
-			for (int k = 0; k < 4; k++) {
-				Json::Value occupyPointUnit;
-				occupyPointUnit["id"] = Json::Value(k + 1);
-				occupyPointUnit["point"] = Json::Value(map[i][j].occupyPoint[k]);
-				occupyPoint.append(occupyPointUnit);
-			}*/
+			blockJson["x"] = Json::Value(j);
+			blockJson["z"] = Json::Value(i);
+			blockJson["tp"] = Json::Value(map[i][j].type);
+			blockJson["oId"] = Json::Value(map[i][j].owner);
+			data->currentRoundMapJson.append(blockJson);
+			/*//Json::Value occupyPoint;  //暂不提供给Json
+			//for (int k = 0; k < 4; k++) {
+			//	Json::Value occupyPointUnit;
+			//	occupyPointUnit["id"] = Json::Value(k + 1);
+			//	occupyPointUnit["point"] = Json::Value(map[i][j].occupyPoint[k]);
+			//	occupyPoint.append(occupyPointUnit);
+			//}
 			if (map[i][j].type == TRTower) {
 				Json::Value towerJson;
 				towerJson["id"] = Json::Value(std::to_string(map[i][j].TowerIndex));
@@ -349,17 +378,28 @@ bool Map::randomInitMap() {
 				towerJson["sL"] = Json::Value(std::to_string(1));
 				towerJson["nT"] = Json::Value(std::to_string(1));
 				data->currentRoundTowerJson.append(towerJson);
-				/*Json::Value playerJson;
+				Json::Value playerJson;
 				playerJson["rk"] = playerJson["tm"] = playerJson["id"] = Json::Value(std::to_string(map[i][j].owner));
 				playerJson["scr"] = Json::Value(std::to_string(1 * TOWER_SCORE));
 				playerJson["cpN"] = Json::Value(std::to_string(0));
 				playerJson["twN"] = Json::Value(std::to_string(1));
 				playerJson["tw"].append(towerJson["id"]);
-				data->currentRoundPlayerJson["player"].append(playerJson);*/
-			}
-			data->currentRoundMapJson["map"].append(blockJson);
+				data->currentRoundPlayerJson["player"].append(playerJson);
+			}*/
 		}
 	}
+
+	//玩家信息TXT存档
+	char bufferInfo[64];
+	sprintf(bufferInfo, "#players\n");
+	infoFile << bufferInfo;
+	for (int i = 0; i < data->totalPlayers; i++)
+	{
+		char bufferPlayer[128];
+		sprintf(bufferPlayer, "%d %s %d %d %d %d\n", i + 1, data->players[i].getName().c_str(), 0, 1, 1 * TOWER_SCORE, i + 1);
+		infoFile << bufferPlayer;
+	}
+
 
 	return true;
 }
@@ -372,9 +412,9 @@ bool Map::randomInitMap() {
 *作者 : 姜永鹏
 ***********************************************************************************************/
 void Map::saveMapJson() {
-	TRound round = data->getRound();      //更新地图Json前记录当前回合数
-	data->currentRoundMapJson["round"] = Json::Value(std::to_string(round));
-	data->mapInfoJsonRoot["map_logList"].append(data->currentRoundMapJson);
+	//TRound round = data->getRound();      //更新地图Json前记录当前回合数
+	//data->currentRoundMapJson["round"] = Json::Value(std::to_string(round));
+	//data->mapInfoJsonRoot["map_logList"].append(data->currentRoundMapJson);
 	data->lastRoundMapJson.clear();
 	data->lastRoundMapJson = data->currentRoundMapJson;
 	data->currentRoundMapJson.clear();

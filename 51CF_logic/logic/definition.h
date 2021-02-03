@@ -54,7 +54,7 @@ const int TOWER_EXPER_GAIN_SCALE = 3;     //【FC18】塔的每回合经验值增加等级数
 const int OCCUPY_POINT_DIST_SCALE = 5;    //【FC18】塔对周围方格施加占有属性值的距离等级有几个
 const int CORPS_ACTION_TYPE_NUM = 10;    //【FC18】兵团能进行的操作种类数
 const int TOWER_ACTION_TYPE_NUM = 3;     //【FC18】防御塔进行的操作种类数
-const int MAX_ROUND = 500;               //【FC18】游戏全程的最大回合数，确定的，不像FC15从外部文件读入
+const int MAX_ROUND = 300;               //【FC18】游戏全程的最大回合数，确定的，不像FC15从外部文件读入
 const int TOWER_SCORE = 10;              //【FC18】计算玩家得分时每个防御塔每个等级得分
 const int BATTLE_CORP_SCORE = 2;         //【FC18】战斗兵团每个星级得分
 const int CONSTRUCT_CORP_SCORE = 4;      //【FC18】工程兵团每个得分
@@ -219,7 +219,7 @@ enum productType
 {//                                                 生产回报
 	PWarrior       = 0,       //生产战士         1star-战士兵团
 	PArcher        = 1,       //生产弓箭手      1star-弓箭手兵团
-	PCavalry       = 2,       //生产骑兵         1star-骑兵兵团
+	PCavalry       = 2,       //生产法师         1star-骑兵法师
 	PBuilder       = 3,       //生产建造者        1-建造者兵团
 	PExtender      = 4,       //生产开拓者        1-开拓者兵团
 	PUpgrade       = 5,       //塔升级任务      塔等级+1（max=8)
@@ -337,7 +337,7 @@ const TOperaNum CorpsOperaNumNeed[CORPS_ACTION_TYPE_NUM] =
 	2,    //驻扎塔
 	3,    //攻击兵团
 	3,    //攻击塔
-	3,    //兵团整编
+	INF,  //兵团整编（去掉）
 	INF,  //兵团解散（去掉）
 	2,    //修建塔
 	2,    //维护塔
@@ -526,12 +526,11 @@ struct TowerInfo {
 	TPlayerID     ownerID;  //所属玩家ID
 	TPoint        position;    //位置
 	TProductPoint productPoint;  //生产力
-	TProductPoint productConsume;  //当前生产任务对应得生产力消耗值	*补充定义
+	productType   pdtType;     //当前生产任务类型
+	TProductPoint productConsume;  //当前生产任务还需多少生产力才能生产结束（
 	TBattlePoint  battlePoint;   //战斗力
 	THealthPoint  healthPoint;   //生命值
-	TExperPoint   experPoint;    //经验值
 	TLevel        level;       //等级
-	productType   pdtType;    //生产任务类型
 };
 
 

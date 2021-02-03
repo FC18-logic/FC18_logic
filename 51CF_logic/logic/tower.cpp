@@ -56,7 +56,7 @@ Tower::Tower(DATA::Data* _data, TPlayerID m_playid, TPoint pos) :m_data(_data)
 	m_data->players[m_PlayerID - 1].getTower().insert(m_id);
 	m_data->gameMap.map[m_position.m_y][m_position.m_x].TowerIndex = m_id;
 	//by jyp:塔被建立之后，修改方格地形为塔
-	m_data->gameMap.map[m_position.m_y][m_position.m_x].type = TRTower;
+	//m_data->gameMap.map[m_position.m_y][m_position.m_x].type = TRTower;
 	//by jyp : 记录新建的塔ID
 	m_data->newTower.insert(m_id);
 	//更新occupypoint/owner
@@ -111,7 +111,7 @@ bool Tower::set_level()
 	upgrade = false;
 	//回合开始累加上一回合所得经验值
 	int bonus = 0;
-	int m_round = m_data->getRound() - 1;
+	int m_round = floor(m_data->getRound() - 1 / 4.0F);
 	if (m_round >= 0 && m_round < 100)
 		bonus = 5;
 	if (m_round >= 100 && m_round < 200)
@@ -211,6 +211,7 @@ bool Tower::set_producttype(productType m_protype)
 		m_productconsume = task_cache[int(m_producttype)];
 		m_productconsume -= m_productpoint;
 	}
+	m_data->changeTowers.insert(m_id);  //by jyp:记录塔的生产任务改变
 	return true;
 }
 
@@ -243,6 +244,7 @@ by lxj
 bool Tower::Be_Attacked(TPlayerID enemy_id,THealthPoint hp_decrease)
 {
 	m_healthpoint -= hp_decrease;
+	m_data->changeTowers.insert(m_id);  //by jyp:记录塔的生命值等改变
 	if (m_healthpoint <= 0)
 	{
 		m_level -= 4;//塔的等级下降4级
@@ -254,8 +256,7 @@ bool Tower::Be_Attacked(TPlayerID enemy_id,THealthPoint hp_decrease)
 			m_data->totalTowers--;
 			m_data->players[m_PlayerID - 1].getTower().erase(m_id);
 			m_data->gameMap.map[m_position.m_y][m_position.m_x].TowerIndex = NOTOWER;
-			//by jyp: 塔被摧毁之后统一修改方格地形为平原
-			m_data->gameMap.map[m_position.m_y][m_position.m_x].type = TRPlain;  
+			//m_data->gameMap.map[m_position.m_y][m_position.m_x].type = TRPlain;  //by jyp: 塔被摧毁之后统一修改方格地形为平原
 			//by jyp : 记录被摧毁的塔的ID
 			m_data->dieTower.insert(m_id);
 			//更新occupypoint/owner
@@ -270,6 +271,7 @@ bool Tower::Be_Attacked(TPlayerID enemy_id,THealthPoint hp_decrease)
 			//更新occupypoint/owner
 			m_data->gameMap.modifyOccupyPoint(m_PlayerID, enemy_id, m_position);
 			m_PlayerID = enemy_id;
+			//塔被攻占后所有驻扎兵团
 		}
 		//【规则修改】
 		//塔被摧毁或攻占后驻扎兵团消灭
@@ -347,7 +349,8 @@ by lmx
 void Tower::Recover()
 {
 	struct TowerConfig levelInfo = TowerInitConfig[m_level-1];
-	m_healthpoint += floor(levelInfo.initHealthPoint/3);
+	if (m_healthpoint != levelInfo.initHealthPoint) m_data->changeTowers.insert(m_id);   //by jyp:记录塔的生命值改变
+	m_healthpoint += floor(float(levelInfo.initHealthPoint)/3.0F);
 	if(m_healthpoint >= levelInfo.initHealthPoint)
 	{
 		m_healthpoint = levelInfo.initHealthPoint;

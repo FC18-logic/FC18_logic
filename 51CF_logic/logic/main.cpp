@@ -30,10 +30,10 @@ int main(int argc, char** argv)
 #ifdef FC15_DEBUG
 	//freopen(buffer, "w", stdout);  //Debug模式，写入新的txt空文件
 #endif // FC15_DEBUG
-	char json_filename[1024];
+	char log_filename[1024];
 	//旧代码//strftime(json_filename, sizeof(json_filename), "../log_json/log_%Y%m%d_%H%M%S.json", localtime(&t));
-	strftime(json_filename, sizeof(json_filename), "../log_json/%Y%m%d_%H%M%S", localtime(&t));
-	if (0 != _access(json_filename, 0)) _mkdir(json_filename);
+	strftime(log_filename, sizeof(log_filename), "../log_json/%Y%m%d_%H%M%S", localtime(&t));
+	if (0 != _access(log_filename, 0)) _mkdir(log_filename);
 	string  config_filename =
 #ifdef _MSC_VER
 		//旧代码//"../config_msvc.ini";
@@ -51,6 +51,16 @@ int main(int argc, char** argv)
 		cout << "usage:												" << endl
 			<< "DAGAN						Load config file	" << endl;
 	}
+
+	//打开txt存档文件
+	string cmd_txt_name = string(log_filename) + ("/log_info.txt");
+	string info_txt_name = string(log_filename) + ("/everyround_info.txt");
+	ofstream cmdWriter(cmd_txt_name, ios::app);
+	ofstream infoWriter(info_txt_name, ios::app);
+	char bufferTXT[64];
+	sprintf(bufferTXT, "round %d\n", 0);
+	cmdWriter << bufferTXT;
+	infoWriter << bufferTXT;
 
 
 	vector<Player_Code>  players;                       //【FC18】玩家AI代码类
@@ -130,7 +140,7 @@ int main(int argc, char** argv)
 	// load map
 	//初始化地图、玩家的势力区域、防御塔、兵团的作战关系表等等
 	Game G;
-	if (!G.init(map_filename, json_filename, players_name)) {
+	if (!G.init(map_filename, log_filename, players_name,cmdWriter,infoWriter)) {
 		cout << "[Error] failed to load " << map_filename << endl;
 		return 4;
 	}
@@ -152,7 +162,7 @@ int main(int argc, char** argv)
 	{
 		for (int i = 1; i <= 4; i++)
 		{
-			controller.run(i);   //每个玩家依次运行，传入玩家ID，运行该玩家指令
+			controller.run(i,cmdWriter,infoWriter);   //每个玩家依次运行，传入玩家ID，运行该玩家指令
 			if (G.goNext() == false ) {
 				break;
 			}
@@ -162,7 +172,10 @@ int main(int argc, char** argv)
 
 
 	// output the result
+	cmdWriter.close();
+	infoWriter.close();
 	outputResult(G, players);
+	//G.printJson();
 
 	return 0;
 
