@@ -44,7 +44,6 @@ public:
 	bool BeAttacked(int attack, TPlayerID ID, bool bAlive);	//作战兵团受到攻击 返回是否存活 如果死亡
 	bool Move(int dir);							//作战兵团移动 返回是否成功移动
 	bool Attack(int type, TCorpsID ID);			//兵团攻击
-	bool MergeCrops(TCorpsID ID);				//整编兵团 返回是否整编成功
 	bool GoRest();								//兵团进入驻扎休整状态
 	bool StationInTower();						//玩家驻扎所在位置的己方塔
 	bool BuildTower();							//开拓者建塔

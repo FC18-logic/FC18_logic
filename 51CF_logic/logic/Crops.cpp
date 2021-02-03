@@ -590,6 +590,7 @@ void Crops::UpdatePos(TPoint targetpos)
 			break;
 		}
 	}
+	//在data中更新
 	m_data->corps[targetpos.m_y][targetpos.m_x].push_back(this);
 	m_position = targetpos;
 	//如果驻守在塔中 则删除

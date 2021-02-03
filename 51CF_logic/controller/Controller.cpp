@@ -537,7 +537,6 @@ namespace DAGAN
 		//需要return返回命令执行是否成功<bool>
 		bool bCmdSucs = false;
 		TCorpsID id = c.parameters[1];
-
 		//如果兵团id越界
 		if(id < 0 || id >= data->myCorps.size())
 			return false;
@@ -584,14 +583,6 @@ namespace DAGAN
 				if (type == CAttackCorps && (enemyid < 0 || enemyid >= data->myCorps.size())) return false;   //越界：操作数非法
 				if (type == CAttackTower && (enemyid < 0 || enemyid >= data->myTowers.size())) return false;   //越界：操作数非法
 				bCmdSucs = data->myCorps[id].Attack(type,enemyid);
-			}
-			break;
-		case(CRegroup)://这个操作就不要了
-			//兵团整编的操作
-			{
-				TCorpsID target = c.parameters[2];
-				if (target < 0 || target >= data->myCorps.size()) return false;     //越界：操作数非法
-				bCmdSucs = data->myCorps[id].MergeCrops(target);
 			}
 			break;
 		case(CBuild):
