@@ -199,7 +199,7 @@ namespace DAGAN
 				if (towerBanned.find(c.parameters[1]) != towerBanned.end()) continue; //这个塔当前回合不能再操作，请求驳回
 				if (handleTowerCommand(id, c) == true) {   //记录不能再进行其他操作的塔序号
 					jsonChange(id, c,cmdFile);   //更新有效的指令Json
-				    //outPutCommand(id, c);  //复读被执行的命令，未执行的不复读
+				    outPutCommand(id, c);  //复读被执行的命令，未执行的不复读
 					switch (c.parameters[0]) {
 					case(TProduct):
 					case(TAttackCorps):
@@ -219,6 +219,7 @@ namespace DAGAN
 			}
 			if (moreCommand(id, towerBanned, corpsBanned) == false) break;  //接收不了更多命令了，直接跳出
 		}
+
 		getGameRank();   //获取游戏中玩家排名
 
 		isValid_ = game_.isValid();
@@ -231,6 +232,7 @@ namespace DAGAN
 				int rank = 0;
 				for (TPlayerID r : game_.getRank())
 				{
+					//
 					cout << "Rank " << ++rank << " : player " << players_[r - 1].getName() << endl;
 				}
 			}
@@ -705,7 +707,7 @@ namespace DAGAN
 				}
 			}
 			data->players[i - 1].setRank(Rank);
-			game_.getRank()[i - 1] = Rank;
+			game_.getRank()[Rank-1] = Ranker[Rank-1].ID;
 		}
 	}
 
@@ -726,10 +728,8 @@ namespace DAGAN
 					break;
 				}
 			}
-			if(info.totalRounds >= 6 && info.totalRounds < 9 && (m_ID == 1 || m_ID == 2)) info.myCommandList.addCommand(towerCommand, { TProduct,t,PBuilder});   //让玩家的所有塔生产建造者
-			if (info.totalRounds >= 6 && info.totalRounds < 9 && (m_ID == 3 || m_ID == 4)) info.myCommandList.addCommand(towerCommand, { TProduct,t,PExtender });   //让玩家的所有塔生产开拓者
-			if(info.totalRounds < 6) info.myCommandList.addCommand(towerCommand, { TProduct,t,PArcher });
-			if (info.totalRounds > 11) info.myCommandList.addCommand(towerCommand, { TProduct,t,PCavalry });
+			if(info.totalRounds >= 6 && (m_ID == 1 || m_ID == 2)) info.myCommandList.addCommand(towerCommand, { TProduct,t,PBuilder});   //让玩家的所有塔生产建造者
+			if (info.totalRounds >= 6 && (m_ID == 3 || m_ID == 4)) info.myCommandList.addCommand(towerCommand, { TProduct,t,PExtender });   //让玩家的所有塔生产开拓者
 		}
 		if (info.totalRounds < 11) {
 			for (TCorpsID c : info.playerInfo[m_ID - 1].corps)
@@ -737,9 +737,9 @@ namespace DAGAN
 				info.myCommandList.addCommand(corpsCommand, { CMove,c,CUp });
 				info.myCommandList.addCommand(corpsCommand, { CMove,c,CUp });         //让玩家的所有兵团向上移动
 				info.myCommandList.addCommand(corpsCommand, { CMove,c,CRight });
-				info.myCommandList.addCommand(corpsCommand, { CStation,c });          //让玩家的所有兵团
 			}
 		}
+		
 		if (info.totalRounds >= 11)
 		{	
 			if (m_ID == 3) {
