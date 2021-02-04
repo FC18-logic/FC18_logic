@@ -180,9 +180,9 @@ namespace DAGAN
 				if (corpsBanned.find(c.parameters[1]) != corpsBanned.end()) continue;     //这个兵团本回合不能再接受操作，请求驳回
 				if (handleCorpsCommand(id, c) == true) {   //记录不能再进行其他操作的兵团序号
 					jsonChange(id, c,cmdFile);   //更新有效的指令Json
-					//outPutCommand(id, c);  //复读被执行的命令，未执行的不复读
+					outPutCommand(id, c);  //复读被执行的命令，未执行的不复读
 					switch (c.parameters[0]) {
-					case(CStation):
+					//case(CStation):
 					case(CStationTower):
 					case(CBuild):
 					case(CRepair):
@@ -553,7 +553,7 @@ namespace DAGAN
 			return false;
 		}
 
-		data->myCorps[id].haveCmd();
+		//data->myCorps[id].haveCmd();
 		switch (c.parameters[0]) {
 		case(CMove):
 			//兵团移动的操作
@@ -562,12 +562,14 @@ namespace DAGAN
 				bCmdSucs = data->myCorps[id].Move(dir);
 			}
 			break;
+			/*
 		case(CStation)://兵团没有属性值改变
 			//兵团原地驻扎的操作
 			{
 				bCmdSucs = data->myCorps[id].GoRest();
 			}
 			break;
+			*/
 		case(CStationTower)://兵团没有属性值改变
 			//兵团驻扎当前格防御塔的操作
 			{

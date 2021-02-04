@@ -114,11 +114,6 @@ bool Map::readMap(ifstream& inMap, ofstream& cmdF,ofstream& infoF, bool enableOu
 		data->currentRoundCommandJson["command"].append(paj);*/
 	}
 
-	//初始化兵团的表
-	data->corps = new CorpsUnit*[m_height];
-	for (int i = 0; i < m_height; i++) {
-		data->corps[i] = new CorpsUnit[m_width];
-	}
 	char bufferCorps[64];
 	sprintf(bufferCorps, "#corps\n");
 	infoF << bufferCorps;
@@ -533,9 +528,4 @@ TPlayerID Map::showOwner(TPoint p) {
 void Map::clearAll(){
 	delete[] data->players;
 	data->players = nullptr;
-	for (int i = 0; i < m_height; i++) {
-		delete[] data->corps[i];
-	}
-	delete[] data->corps;
-	data->corps = nullptr;
 }

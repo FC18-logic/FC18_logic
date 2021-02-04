@@ -62,8 +62,6 @@ const int MAX_CMD_NUM = 10;              //【FC18】限制每个玩家每次最大命令数
 
 class Crops;
 struct CorpsInfo;
-typedef vector<Crops*>		CorpsUnit;	//【FC18】一个单元格上所有兵团
-typedef CorpsUnit**			Army;		//【FC18】整个地图上的所有兵团 [i][j]表示x=i,y=j位置的所有兵团
 typedef vector<CorpsInfo>	CorpsInfoUnit; //【FC18】一个单元格上所有兵团信息
 
 //以下来自FC15，我们应该用不到了
@@ -574,6 +572,7 @@ struct mapBlock                                 //【FC18】地图方格类
 	vector<int> occupyPoint;                    //【FC18】各玩家的占有属性值，秩为玩家序号-1
 	int owner;                                  //【FC18】所属玩家序号，-1为过渡TRANSITION，-2为公共PUBLIC
 	int TowerIndex;								//@@@【FC18】位于该单元格的塔的下标，对应data里的myTowers，没有塔的时候为-1
+	vector<TCorpsID> corps;						//该位置兵团
 };
 
 //【FC18】地图单元格信息结构体
