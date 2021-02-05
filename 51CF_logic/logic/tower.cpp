@@ -147,30 +147,38 @@ void Tower::product_crops(productType protype)
 	{
 		Crops temp(m_data, Battle, Warrior, Builder, m_PlayerID, m_position);
 		m_data->myCorps.push_back(temp);
+		m_data->changeCorps.insert(temp.getID());
 	}
 	if (protype == PArcher) 
 	{
 		Crops temp(m_data, Battle, Archer, Builder, m_PlayerID, m_position);
 		m_data->myCorps.push_back(temp);
+		m_data->changeCorps.insert(temp.getID());
 	}
 	if (protype == PCavalry) 
 	{
 		Crops temp(m_data, Battle, Cavalry, Builder, m_PlayerID, m_position);
 		m_data->myCorps.push_back(temp);
+		m_data->changeCorps.insert(temp.getID());
 	}
 	if (protype == PBuilder) 
 	{
 		Crops temp(m_data, Construct, Warrior, Builder, m_PlayerID, m_position);
 		m_data->myCorps.push_back(temp);
+		m_data->changeCorps.insert(temp.getID());
 	}
 	if (protype == PExtender) 
 	{
 		Crops temp(m_data, Construct, Warrior, Extender, m_PlayerID, m_position);
 		m_data->myCorps.push_back(temp);
-		//by jyp：开拓者生产出后所在方格等级减小1
-		if (m_level > 1) 
+		m_data->changeCorps.insert(temp.getID());
+		//by jyp：开拓者生产出后所在方格塔减小1
+		if (m_level > 1)
+		{
 			m_level--;
-		set_all(m_level);
+			set_all(m_level);//暂时把等级减小后的塔等级设为满级
+		}
+		//对于已经是一级（最低级）的塔，既不
 	}	
 }
 
@@ -249,7 +257,7 @@ bool Tower::Be_Attacked(TPlayerID enemy_id,THealthPoint hp_decrease)
 	{
 		m_level -= 4;//塔的等级下降4级
 		//塔被摧毁
-		if (m_level < 1)
+		if (m_level < 1 || m_data->players[enemy_id - 1].towerNumControl() == true)  //攻击者防御塔数目超过限制，那么即使塔等级不低于1，也直接摧毁
 		{
 			m_exsit = false;
 			//更新data
@@ -309,7 +317,7 @@ bool Tower::Be_Attacked(TPlayerID enemy_id,THealthPoint hp_decrease)
 		return true;
 		*/
 	}
-	return false;
+	return m_exsit;
 }
 
 

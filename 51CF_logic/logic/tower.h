@@ -99,6 +99,7 @@ public:
 	/*提供防御塔信息*/
 	TowerInfo ShowInfo() {
 		TowerInfo info;
+		info.exist = m_exsit;
 		info.ID = m_id;
 		info.ownerID = m_PlayerID;
 		info.position = m_position;

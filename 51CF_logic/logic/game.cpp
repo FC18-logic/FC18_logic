@@ -18,7 +18,6 @@ struct configCorpsTool
 	int movePoint = -1;
 	int battlePoint = -1;
 	int healthPoint = -1;
-	int starLevel = -1;
 	int newC = -1;
 };
 
@@ -210,7 +209,7 @@ void Game::DebugPhase()
 		if (!data.myTowers[i].getexsit()) continue;
 		cout << "塔 " << i << " ： " << "主人：" << data.myTowers[i].getPlayerID() << " 位于：(" << data.myTowers[i].getPosition().m_x << "," << data.myTowers[i].getPosition().m_y
 			<< ") 等级：" << data.myTowers[i].getLevel() << " 生产力：" << data.myTowers[i].getProductPoint() << " 战斗力：" << data.myTowers[i].getBattlePoint() << " 生命值：" << data.myTowers[i].getHealthPoint()
-			<< " 经验值：" << data.myTowers[i].getExperPoint() << " 生产：" << ((data.myTowers[i].ShowInfo().pdtType >= 0 && data.myTowers[i].ShowInfo().pdtType <= 5) ? ProductCmd[data.myTowers[i].ShowInfo().pdtType] : "N/A")
+			<< " 生产：" << ((data.myTowers[i].ShowInfo().pdtType >= 0 && data.myTowers[i].ShowInfo().pdtType <= 5) ? ProductCmd[data.myTowers[i].ShowInfo().pdtType] : "N/A")
 			<< " 任务消耗：" << ((data.myTowers[i].ShowInfo().pdtType >= 0 && data.myTowers[i].ShowInfo().pdtType <= 5) ? data.myTowers[i].ShowInfo().productConsume:0) << endl;
 		for (Crops* u : data.myTowers[i].getCrops()) {
 			if (!u->bAlive()) continue;
@@ -222,8 +221,7 @@ void Game::DebugPhase()
 	for (int i = 0; i < data.myCorps.size(); i++) {
 		if (!data.myCorps[i].bAlive()) continue;
 		CorpsInfo currentCrops = data.myCorps[i].ShowInfo();
-		cout << "兵团 " << i << " ： " << "主人：" << currentCrops.owner << " 位于：(" << currentCrops.pos.m_x << "," << currentCrops.pos.m_y << " ) 移动力：" << currentCrops.movePoint
-			<< " 等级：" << currentCrops.level;
+		cout << "兵团 " << i << " ： " << "主人：" << currentCrops.owner << " 位于：(" << currentCrops.pos.m_x << "," << currentCrops.pos.m_y << " ) 移动力：" << currentCrops.movePoint;
 		if (currentCrops.type == Battle) {
 			cout << " 类型：作战兵团 + " << BattleName[currentCrops.m_BattleType] << " 生命值：" << currentCrops.HealthPoint;
 		}
@@ -243,7 +241,7 @@ void Game::DebugPhase()
 				cout << " 过渡";
 			else
 				cout << " 玩家" << currentBlock.owner;
-			if (currentBlock.type == TRTower)
+			if (currentBlock.towerIndex != NOTOWER)
 				cout << " 地形：塔";
 			else
 				cout << " 地形：" << Terrain[currentBlock.type - 1];
@@ -1154,7 +1152,7 @@ Info Game::generatePlayerInfo(TPlayerID id) {
 	info.myID = id;
 	info.totalPlayers = getTotalPlayerNum();
 	info.playerAlive = getTotalPlayerAlive();
-	info.totalRounds = ceil(data.getRound() / 4.0);     //比game的round计数要提前1回合，把小回合数除以每轮4个小回合，得到大回合数传给选手
+	info.totalRounds = ceil(data.getRound() / 4.0F);     //比game的round计数要提前1回合，把小回合数除以每轮4个小回合，得到大回合数传给选手
 	info.totalTowers = data.getTotalTower();
 	info.totalCorps = data.getTotalCorp();
 
@@ -1259,20 +1257,19 @@ void Game::saveJson(ofstream& infoFile) {
 				corps.battlePoint = -1;
 				corps.healthPoint = -1;
 			}
-			corps.starLevel = currentCorpsInfo.level;
+			//corps.starLevel = currentCorpsInfo.level;
 			if (data.newCorps.find(currentCorpsInfo.ID) != data.newCorps.end()) {
 				corps.newC = 1;
 			}
 			else
 				corps.newC = 0;
 			//data.currentRoundCorpsJson.append(corpsJson);
-			sprintf(bufferCorps," %d %d %d %d %d %d %d %d\n", corps.player
+			sprintf(bufferCorps," %d %d %d %d %d %d %d \n"  , corps.player
 															, corps.type
 															, corps.builder_point
 															, corps.movePoint
 															, corps.battlePoint
 															, corps.healthPoint
-															, corps.starLevel
 															, corps.newC);
 			infoFile << bufferCorps;
 		}
@@ -1345,7 +1342,10 @@ void Game::saveJson(ofstream& infoFile) {
 			blockJson["x"] = Json::Value(j);
 			blockJson["z"] = Json::Value(i);
 			//blockJson["pos"] = blockPos;
-			blockJson["tp"] = Json::Value(currentBlockInfo.type);
+			if (currentBlockInfo.towerIndex != NOTOWER)
+				blockJson["tp"] = Json::Value(TRTower);
+			else
+				blockJson["tp"] = Json::Value(currentBlockInfo.type);
 			blockJson["oId"] = Json::Value(currentBlockInfo.owner);
 			data.currentRoundMapJson.append(blockJson);
 		}
@@ -1357,10 +1357,10 @@ void Game::saveJson(ofstream& infoFile) {
 	sprintf(bufferMapHead, "#map\n");
 	infoFile << bufferMapHead;
 	for (int i = 0; i < data.currentRoundMapJson.size(); i++) {
-		Json::Value mapChange;
+		//Json::Value mapChange;
 		if (data.currentRoundMapJson[i]["tp"] != data.lastRoundMapJson[i]["tp"] || data.currentRoundMapJson[i]["oId"] != data.lastRoundMapJson[i]["oId"]) {
 			char bufferBlock[64];
-			sprintf(bufferBlock, "%d %d %d %d\n", data.currentRoundMapJson[i]["x"], data.currentRoundMapJson[i]["z"], data.currentRoundMapJson[i]["tp"], data.currentRoundMapJson[i]["oId"]);
+			sprintf(bufferBlock, "%d %d %d %d\n", data.currentRoundMapJson[i]["x"].asInt(), data.currentRoundMapJson[i]["z"].asInt(), data.currentRoundMapJson[i]["tp"].asInt(), data.currentRoundMapJson[i]["oId"].asInt());
 			infoFile << bufferBlock;
 			/*mapChange["x"] = data.currentRoundMapJson["map"][i]["x"];
 			mapChange["z"] = data.currentRoundMapJson["map"][i]["z"];
@@ -1380,13 +1380,13 @@ void Game::saveJson(ofstream& infoFile) {
 	infoFile << bufferInfo;
 	for (int i = 0; i < data.totalPlayers; i++)
 	{
-		char bufferPlayer[128];
-		sprintf(bufferPlayer, "%d %s %d %d %d %d\n", data.players[i].getId()
-			                                       , data.players[i].getName().c_str()
-			                                       , data.players[i].getCrops().size()
-			                                       , data.players[i].getTower().size()
-			                                       , data.players[i].getScore()
-			                                       , data.players[i].getRank());
+		char bufferPlayer[256];
+		sprintf(bufferPlayer, "%d %s %lld %lld %d %d\n", data.players[i].getId()
+													   , data.players[i].getName().c_str()
+													   , data.players[i].getCrops().size()
+													   , data.players[i].getTower().size()
+													   , data.players[i].getScore()
+													   , data.players[i].getRank());
 		infoFile << bufferPlayer;
 	}
 

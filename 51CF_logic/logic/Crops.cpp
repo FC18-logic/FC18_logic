@@ -230,7 +230,7 @@ bool Crops::BeAttacked(int attack, TPlayerID ID, bool bAlive)
 	//俘虏工程兵
 	if(m_type == Construct)
 	{
-		if(bAlive){
+		if(bAlive && m_data->players[ID - 1].constructNumControl() == false){   //如果攻击方的工程兵团数目超了，那么就不俘虏
 			ChangeOwner(ID);
 			int num = m_data->players[ID - 1].getCqCorpsNum() + 1;
 			m_data->players[ID - 1].setCqCorpsNum(num);
@@ -446,8 +446,9 @@ ShowInfo
 struct CorpsInfo Crops::ShowInfo()
 {
 	struct CorpsInfo info;
+	info.exist = m_bAlive;
 	info.ID = m_myID;
-	info.level = m_level;
+	//info.level = m_level + 1;//兵团的等级m_level从0开始，展示的兵团信息等级从1开始
 	info.owner = m_PlayerID;
 	info.pos = m_position;
 	info.type = m_type;

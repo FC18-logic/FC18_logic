@@ -8,6 +8,7 @@
 #define TRANSITION -1   //过渡地形区域
 #define PUBLIC 0      //公共地形区域
 #define NOTOWER -1    //当前方格没有防御塔
+//#define NOTASK  -1    //当前防御塔无生产任务
 #define OUTOFRANGE -2  //当前方格在地图之外
 
 
@@ -41,9 +42,8 @@ typedef int    TRound;         //【FC18】回合数
 typedef int    TScore;         //【FC18】玩家得分
 typedef int    TDist;          //【FC18】游戏中距离的定义
 typedef int    TOperaNum;      //【FC18】操作数的个数
-typedef int    TPosition;      //【FC18】坐标
-typedef int    TLevel;         //【FC18】等级
-typedef int    TLength;        //【FC18】距离
+typedef int    TPosition;
+typedef int    TLevel;
 
 
 const int MAX_CORPS_LEVEL = 3;    //【FC18】最大的兵团等级
@@ -56,16 +56,19 @@ const int TOWER_EXPER_GAIN_SCALE = 3;     //【FC18】塔的每回合经验值增加等级数
 const int OCCUPY_POINT_DIST_SCALE = 5;    //【FC18】塔对周围方格施加占有属性值的距离等级有几个
 const int CORPS_ACTION_TYPE_NUM = 10;    //【FC18】兵团能进行的操作种类数
 const int TOWER_ACTION_TYPE_NUM = 3;     //【FC18】防御塔进行的操作种类数
-const int MAX_ROUND = 500;               //【FC18】游戏全程的最大回合数，确定的，不像FC15从外部文件读入
+const int MAX_ROUND = 300;               //【FC18】游戏全程的最大回合数，确定的，不像FC15从外部文件读入
 const int TOWER_SCORE = 10;              //【FC18】计算玩家得分时每个防御塔每个等级得分
 const int BATTLE_CORP_SCORE = 2;         //【FC18】战斗兵团每个星级得分
 const int CONSTRUCT_CORP_SCORE = 4;      //【FC18】工程兵团每个得分
-const int MAX_CMD_NUM = 10;              //【FC18】限制每个玩家每次最大命令数
+const int KILL_SCORE = 5;                //【FC18】击杀分：占领塔/俘虏兵团/击杀兵团得分
+const int CORP_SCORE = 4;                //【FC18】单个兵团得分
+const int MAX_CMD_NUM = 50;              //【FC18】限制每个玩家每次最大命令数
+const int MAX_TOWER_NUM = 10;            //【FC18】玩家最大防御塔数
+const int MAX_BATTLE_NUM = 10;           //【FC18】玩家最大作战兵团数目
+const int MAX_CONSTRUCT_NUM = 10;        //【FC18】玩家最大工程兵团数目
 
 class Crops;
 struct CorpsInfo;
-typedef vector<Crops*>		CorpsUnit;	//【FC18】一个单元格上所有兵团
-typedef CorpsUnit** Army;		//【FC18】整个地图上的所有兵团 [i][j]表示x=i,y=j位置的所有兵团
 typedef vector<CorpsInfo>	CorpsInfoUnit; //【FC18】一个单元格上所有兵团信息
 
 
@@ -75,16 +78,6 @@ struct TPoint
 	TPosition  m_x;
 	TPosition  m_y;
 };
-
-//【FC18】塔的配置数据结构体
-struct TowerConfig {
-	int initBuildPoint;       //起始生产力
-	int initProductPoint;      //起始战斗力
-	int initHealthPoint;      //起始生命值
-	int upgradeExper;         //升到下一级所需经验值
-	int battleRegion;         //攻击距离
-};
-
 
 //【FC18】兵团种类
 enum corpsType
@@ -110,7 +103,14 @@ enum constructCorpsType
 	Extender = 1           //开拓者
 };
 
-
+//【FC18】塔的配置数据结构体
+struct TowerConfig {
+	int initBuildPoint;       //起始生产力
+	int initProductPoint;      //起始战斗力
+	int initHealthPoint;      //起始生命值
+	int upgradeExper;         //升到下一级所需经验值
+	int battleRegion;         //攻击距离
+};
 
 
 //【FC18】命令类型
@@ -176,7 +176,7 @@ enum productType
 {//                                                 生产回报
 	PWarrior = 0,       //生产战士         1star-战士兵团
 	PArcher = 1,       //生产弓箭手      1star-弓箭手兵团
-	PCavalry = 2,       //生产骑兵         1star-骑兵兵团
+	PCavalry = 2,       //生产法师         1star-骑兵法师
 	PBuilder = 3,       //生产建造者        1-建造者兵团
 	PExtender = 4,       //生产开拓者        1-开拓者兵团
 	PUpgrade = 5,       //塔升级任务      塔等级+1（max=8)
@@ -195,47 +195,6 @@ enum terrainType
 	TRRoad = 5,       //道路
 };
 
-//【FC18】兵团操作名
-const string CorpsCmd[CORPS_ACTION_TYPE_NUM] =
-{
-	"move","station","station at tower","attack corps","attack tower","regroup","dissolve","build tower","repair tower","change terrain"
-};
-
-//【FC18】塔操作名
-const string TowerCmd[TOWER_ACTION_TYPE_NUM] =
-{
-	"produce","attack corps","attack tower"
-};
-
-//【FC18】塔生产任务名
-const string ProductCmd[TOWER_PRODUCT_TASK_NUM] =
-{
-	"warrior","archer","caster","builder","extender","upgrade"
-};
-
-//【FC18】移动方向名
-const string Direction[4] =
-{
-	"up","down","left","right"
-};
-
-//【FC18】改变的地形名
-const string Terrain[TERRAIN_TYPE_NUM] =
-{
-	"plain","mountain","forest","swamp","road"
-};
-
-//【FC18】作战兵团名字
-const string BattleName[3] =
-{
-	"warrior","archer","caster"
-};
-
-//【FC18】工程兵团名字
-const string ConstructName[2] =
-{
-	"Builder","Explorer"
-};
 
 //【FC18】作战兵团行动力（与作战兵团的枚举类在序号上对应，且考虑了等级）
 const TMovePoint battleMovePoint[BATTLE_CORPS_TYPE_NUM][MAX_CORPS_LEVEL] =
@@ -286,43 +245,7 @@ const THealthPoint battleHealthPoint[BATTLE_CORPS_TYPE_NUM][MAX_CORPS_LEVEL] =
 //【FC18】战斗兵团射程距离 战士1 弓箭手2 骑兵1
 const int TBattleRange[BATTLE_CORPS_TYPE_NUM] = { 1, 2, 1 };
 
-//【FC18】兵团操作所需操作数个数，判断指令合法性（与兵团操作的枚举类在序号上对应)
-const TOperaNum CorpsOperaNumNeed[CORPS_ACTION_TYPE_NUM] =
-{
-	3,    //移动
-	2,    //驻扎
-	2,    //驻扎塔
-	3,    //攻击兵团
-	3,    //攻击塔
-	3,    //兵团整编
-	INF,  //兵团解散（去掉）
-	2,    //修建塔
-	2,    //维护塔
-	3     //改地形
-};
 
-
-//【FC18】工程建设兵团操作的劳动力消耗（与兵团操作的枚举类在序号上对应)
-const TBuildPoint constructBuildCost[CORPS_ACTION_TYPE_NUM] =
-{
-	0,       //在地图上移动
-	0,       //驻扎在地图方格（无自己塔）
-	0,       //驻扎在塔（自己势力的塔）
-	0,       //攻击对方势力的兵团
-	0,       //攻击对方势力的塔
-	0,       //兵团整编
-	0,       //兵团解散
-	0,       //修建新防御塔
-	1,       //修理原防御塔
-	1,       //改变方格地形
-};
-
-const TOperaNum towerOperaNumNeed[TOWER_ACTION_TYPE_NUM] =
-{
-	3,       //生产任务
-	3,       //攻击防御塔
-	3        //攻击兵团
-};
 
 //【FC18】塔的生产任务生产力消耗值
 const TProductPoint TowerProductCost[TOWER_PRODUCT_TASK_NUM] =
@@ -398,6 +321,9 @@ const TBattlePoint CorpsBattleGain[TERRAIN_TYPE_NUM + 1] =
 };
 
 
+
+
+
 //@@@【FC18】防御塔结构体，有需要的信息再加
 
 struct TowerInfo {
@@ -406,21 +332,20 @@ struct TowerInfo {
 	TPlayerID     ownerID;  //所属玩家ID
 	TPoint        position;    //位置
 	TProductPoint productPoint;  //生产力
-	TProductPoint productConsume;  //当前生产任务对应得生产力消耗值	*补充定义
+	productType   pdtType;     //塔上一次生产任务指令后尚未完成的任务种类（若上一次任务指令完成，则为-1）
+	TProductPoint productConsume;  //塔上一次生产任务指令后未完成任务的剩余的工作余量
 	TBattlePoint  battlePoint;   //战斗力
 	THealthPoint  healthPoint;   //生命值
-	TExperPoint   experPoint;    //经验值
 	TLevel        level;       //等级
-	productType   pdtType;    //生产任务类型
 };
 
 
 //@@@【FC18】兵团结构体，有需要的信息再加
 struct CorpsInfo
 {
-	//不需要，如果不存在就不录入信息了bool	exist;		//是否存在
+	bool	exist;		//是否存在
 	TPoint	pos;		//兵团坐标
-	int		level;		//兵团等级
+	//int		level;		//兵团等级
 	TCorpsID		ID;	//兵团ID
 	THealthPoint	HealthPoint;	//生命值
 	TBuildPoint		BuildPoint;		//劳动力
@@ -435,7 +360,7 @@ struct CorpsInfo
 //@@@【FC18】玩家结构体
 struct PlayerInfo
 {
-	TPlayerID id;                        //【FC18】玩家的序号（从？[0 or 1]开始）
+	TPlayerID id;                        //【FC18】玩家的序号，请注意玩家序号从1开始，访问玩家数组请用[ID-1]
 	int rank;                            //【FC18】该选手排名（出局者直接由出局回合数给位次）|（存活者按防御塔得分和兵团得分来排名）|（同名次按防御塔攻占数、消灭敌方军团数、俘虏敌方军团数依次检索排名）|（仍有同名次者随机分配排名）
 	bool alive;                          //【FC18】玩家是否还活着
 
@@ -445,7 +370,6 @@ struct PlayerInfo
 
 	//【FC18】玩家所有兵团的序号，建议也用set这种数据结构，内部按兵团序号升序来排序
 	set<TCorpsID> corps; //所有兵团
-	//@@@【FC18】其他需要添加的属性或接口
 };
 
 
@@ -455,15 +379,8 @@ struct mapBlock                                 //【FC18】地图方格类
 	terrainType type;                           //【FC18】地块类型，对应terrainType枚举类
 	vector<int> occupyPoint;                    //【FC18】各玩家的占有属性值，秩为玩家序号-1
 	int owner;                                  //【FC18】所属玩家序号，-1为过渡TRANSITION，-2为公共PUBLIC
-	int TowerIndex;								//@@@【FC18】位于该单元格的塔的下标，对应data里的myTowers
-};
-
-//【FC18】地图单元格信息结构体
-struct mapBlockInfo
-{
-	terrainType type;                           //【FC18】地块类型，对应terrainType枚举类
-	int owner;                                  //【FC18】所属玩家序号，-1为过渡TRANSITION，-2为公共PUBLIC
-	vector<int> occupyPoint;                    //【FC18】各玩家的占有属性值，秩为玩家序号-1
+	int TowerIndex;								//@@@【FC18】位于该单元格的塔的下标，对应data里的myTowers，没有塔的时候为-1
+	vector<TCorpsID> corps;						//该位置兵团
 };
 
 
@@ -472,8 +389,7 @@ class CommandList;
 //常用数学运算
 //二维坐标减运算
 TPoint operator-(const TPoint& p1, const TPoint& p2);
-//计算欧式距离
-TLength getDistance(const TPoint& p1, const TPoint& p2);
+
 //计算FC18中塔攻击范围的距离（FC18距离）
 TDist getDist(const TPoint& p1, const TPoint& p2);
 TDist getDist(const int p1_x, const int p1_y, const int p2_x, const int p2_y);
@@ -482,11 +398,6 @@ int generateRanInt(int start, int end);
 //输出玩家下达的指令集
 std::ostream& operator << (std::ostream& os, const CommandList& cl);
 
-struct TBarrier
-{
-	TPoint m_beginPoint;
-	TPoint m_endPoint;
-};
 
 
 //@@@【FC18】地图基类
@@ -514,9 +425,15 @@ public:
 	//【FC18】获取地图上的所有兵团信息函数，可以参照const  vector<TPoint>& getStudentPos() const
 	//【FC18】返回一个兵团信息结构体的vector引用，方便外部访问修改
 	const  vector<CorpsInfoUnit>& getCropsInfo() const { return m_corpsinfo; }
+
+
 	bool   isPosValid(TPoint p) { return isPosValid(p.m_x, p.m_y); }             //判断点是否越界
 	bool   isPosValid(int x, int y) { return x >= 0 && x < m_width && y >= 0 && y < m_height; }
 	//protected:
+private:
+	int cross(const TPoint& p1, const TPoint& p2) { return p1.m_x * p2.m_y - p1.m_y * p2.m_x; }//叉乘
+	int min(int a, int b) { return a < b ? a : b; }
+	int max(int a, int b) { return a < b ? b : a; }
 };
 
 //命令种类
@@ -605,7 +522,9 @@ struct Info
 
 	//【FC18】地图信息
 	//vector<vector<mapBlockInfo>> mapInfo;
+	//索引地图时 ，第一维为y坐标，第二维为x坐标，即gameMapInfo[y][x]表示（x,y）点的地图信息
 	const vector<vector<mapBlock>>* gameMapInfo;
+
 };
 
 #endif // DEFINITION_H

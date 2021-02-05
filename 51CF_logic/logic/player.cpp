@@ -179,20 +179,24 @@ int Player::getPlayerScore() {
 
 	if (isAlive() == false)   //玩家已经出局，根据出局的回合数记录进行分值
 		return deadRound - MAX_ROUND;
-	TScore corpsScore, towerScore;
-	corpsScore = towerScore = 0;
-	for (TCorpsID i : m_crops)
+	TScore corpsScore, towerScore, killScore;
+	corpsScore = towerScore = killScore = 0;
+	/*for (TCorpsID i : m_crops)
 	{
 		if (data->myCorps[i].getType() == Battle)  //兵团星级从0开始[!!!反复确认]
 			corpsScore += BATTLE_CORP_SCORE * (data->myCorps[i].getLevel() + 1);
 		else if (data->myCorps[i].getType() == Construct)
 			corpsScore += CONSTRUCT_CORP_SCORE * 1;
-	}
+	}*/
+	corpsScore += CORP_SCORE * m_crops.size();
 	for (TTowerID i : m_tower)
 	{
-		towerScore += TOWER_SCORE * (data->myTowers[i].getLevel());             //防御塔等级从0开始[!!!反复确认]
+		towerScore += TOWER_SCORE * (data->myTowers[i].getLevel());             //防御塔等级从1开始[!!!反复确认]
 	}
-	return corpsScore + towerScore;
+	killScore += (conqueTowerNum + eliminateCorpsNum + captureCorpsNum) * KILL_SCORE;
+	TScore totalScore = corpsScore + towerScore + killScore;
+	//setScore(totalScore);
+	return totalScore;
 }
 
 /***********************************************************************************************
@@ -217,4 +221,53 @@ void Player::addCrops(TCorpsID ID)
 void Player::deleteCrops(TCorpsID ID)
 {
 	m_crops.erase(ID);
+}
+/***********************************************************************************************
+*函数名 :【FC18】towerNumControl判断玩家防御塔数是否超限
+*函数功能描述 : 判断玩家防御塔数目是否超过最大防御塔数限制
+*函数参数 : 空
+*函数返回值 : <bool>---是否超过限制（true---是，false---否）
+*作者 : 姜永鹏
+***********************************************************************************************/
+bool Player::towerNumControl() {
+	if (getTower().size() >= MAX_TOWER_NUM) return true;
+	else return false;
+}
+/***********************************************************************************************
+*函数名 :【FC18】corpsNumControl判断玩家兵团数是否超限
+*函数功能描述 : 判断玩家兵团数目是否超过最大兵团数限制
+*函数参数 : 空
+*函数返回值 : <bool>---是否超过限制（true---是，false---否）
+*作者 : 姜永鹏
+***********************************************************************************************/
+bool Player::battleNumControl() {
+	int battleNum = 0;
+	for (TCorpsID c : getCrops())
+	{
+		if (data->myCorps[c].getType() == Battle) battleNum++;
+		if (battleNum >= MAX_BATTLE_NUM)
+		{
+			return true;
+		}
+	}
+	return false;
+}
+/***********************************************************************************************
+*函数名 :【FC18】corpsNumControl判断玩家兵团数是否超限
+*函数功能描述 : 判断玩家兵团数目是否超过最大兵团数限制
+*函数参数 : 空
+*函数返回值 : <bool>---是否超过限制（true---是，false---否）
+*作者 : 姜永鹏
+***********************************************************************************************/
+bool Player::constructNumControl() {
+	int constructNum = 0;
+	for (TCorpsID c : getCrops())
+	{
+		if (data->myCorps[c].getType() == Construct) constructNum++;
+		if (constructNum >= MAX_CONSTRUCT_NUM)
+		{
+			return true;
+		}
+	}
+	return false;
 }

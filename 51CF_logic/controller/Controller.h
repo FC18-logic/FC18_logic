@@ -48,6 +48,7 @@ namespace DAGAN
 
 		void testPlayerCommand(Info& info);                                      //【FC18】用于调试，模拟AI给出玩家命令，放到游戏中执行
 
+
 		inline void setSilentMode(bool flag) { silent_mode_ = flag; }                         //【FC18】重设silent_mode
 		inline void setFileOutputEnabled(bool flag) { file_output_enabled_ = flag; }          //【FC18】文件输出开关，重设file_output_enabled_
 		inline bool isValid() const { return isValid_; }                                      //【FC18】设置是够game_over

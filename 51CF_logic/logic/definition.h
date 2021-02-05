@@ -58,7 +58,12 @@ const int MAX_ROUND = 300;               //¡¾FC18¡¿ÓÎÏ·È«³ÌµÄ×î´ó»ØºÏÊı£¬È·¶¨µÄ£
 const int TOWER_SCORE = 10;              //¡¾FC18¡¿¼ÆËãÍæ¼ÒµÃ·ÖÊ±Ã¿¸ö·ÀÓùËşÃ¿¸öµÈ¼¶µÃ·Ö
 const int BATTLE_CORP_SCORE = 2;         //¡¾FC18¡¿Õ½¶·±øÍÅÃ¿¸öĞÇ¼¶µÃ·Ö
 const int CONSTRUCT_CORP_SCORE = 4;      //¡¾FC18¡¿¹¤³Ì±øÍÅÃ¿¸öµÃ·Ö
-const int MAX_CMD_NUM = 10;              //¡¾FC18¡¿ÏŞÖÆÃ¿¸öÍæ¼ÒÃ¿´Î×î´óÃüÁîÊı
+const int KILL_SCORE = 5;                //¡¾FC18¡¿»÷É±·Ö£ºÕ¼ÁìËş/·ıÂ²±øÍÅ/»÷É±±øÍÅµÃ·Ö
+const int CORP_SCORE = 4;                //¡¾FC18¡¿µ¥¸ö±øÍÅµÃ·Ö
+const int MAX_CMD_NUM = 50;              //¡¾FC18¡¿ÏŞÖÆÃ¿¸öÍæ¼ÒÃ¿´Î×î´óÃüÁîÊı
+const int MAX_TOWER_NUM = 10;            //¡¾FC18¡¿Íæ¼Ò×î´ó·ÀÓùËşÊı
+const int MAX_BATTLE_NUM = 10;           //¡¾FC18¡¿Íæ¼Ò×î´ó×÷Õ½±øÍÅÊıÄ¿
+const int MAX_CONSTRUCT_NUM = 10;        //¡¾FC18¡¿Íæ¼Ò×î´ó¹¤³Ì±øÍÅÊıÄ¿
 
 class Crops;
 struct CorpsInfo;
@@ -524,8 +529,8 @@ struct TowerInfo {
 	TPlayerID     ownerID;  //ËùÊôÍæ¼ÒID
 	TPoint        position;    //Î»ÖÃ
 	TProductPoint productPoint;  //Éú²úÁ¦
-	productType   pdtType;     //µ±Ç°Éú²úÈÎÎñÀàĞÍ
-	TProductPoint productConsume;  //µ±Ç°Éú²úÈÎÎñ»¹Ğè¶àÉÙÉú²úÁ¦²ÅÄÜÉú²ú½áÊø£¨
+	productType   pdtType;     //ËşÉÏÒ»´ÎÉú²úÈÎÎñÖ¸ÁîºóÉĞÎ´Íê³ÉµÄÈÎÎñÖÖÀà£¨ÈôÉÏÒ»´ÎÈÎÎñÖ¸ÁîÍê³É£¬ÔòÎª-1£©
+	TProductPoint productConsume;  //ËşÉÏÒ»´ÎÉú²úÈÎÎñÖ¸ÁîºóÎ´Íê³ÉÈÎÎñµÄÊ£ÓàµÄ¹¤×÷ÓàÁ¿
 	TBattlePoint  battlePoint;   //Õ½¶·Á¦
 	THealthPoint  healthPoint;   //ÉúÃüÖµ
 	TLevel        level;       //µÈ¼¶
@@ -535,9 +540,9 @@ struct TowerInfo {
 //@@@¡¾FC18¡¿±øÍÅ½á¹¹Ìå£¬ÓĞĞèÒªµÄĞÅÏ¢ÔÙ¼Ó
 struct CorpsInfo
 {
-	//²»ĞèÒª£¬Èç¹û²»´æÔÚ¾Í²»Â¼ÈëĞÅÏ¢ÁËbool	exist;		//ÊÇ·ñ´æÔÚ
+	bool	exist;		//ÊÇ·ñ´æÔÚ
 	TPoint	pos;		//±øÍÅ×ø±ê
-	int		level;		//±øÍÅµÈ¼¶
+	//int		level;		//±øÍÅµÈ¼¶
 	TCorpsID		ID;	//±øÍÅID
 	THealthPoint	HealthPoint;	//ÉúÃüÖµ
 	TBuildPoint		BuildPoint;		//ÀÍ¶¯Á¦
@@ -581,6 +586,7 @@ struct mapBlockInfo
 	terrainType type;                           //¡¾FC18¡¿µØ¿éÀàĞÍ£¬¶ÔÓ¦terrainTypeÃ¶¾ÙÀà
 	int owner;                                  //¡¾FC18¡¿ËùÊôÍæ¼ÒĞòºÅ£¬-1Îª¹ı¶ÉTRANSITION£¬-2Îª¹«¹²PUBLIC
 	vector<int> occupyPoint;                    //¡¾FC18¡¿¸÷Íæ¼ÒµÄÕ¼ÓĞÊôĞÔÖµ£¬ÖÈÎªÍæ¼ÒĞòºÅ-1
+	TTowerID towerIndex;                        //¡¾FC18¡¿µØÍ¼·½¸ñĞÅÏ¢£¬NOTOWER±íÊ¾Ã»ÓĞËş
 };
 
 struct CellInfo
@@ -779,6 +785,7 @@ struct Info
 
 	//¡¾FC18¡¿µØÍ¼ĞÅÏ¢
 	//vector<vector<mapBlockInfo>> mapInfo;
+	//Ë÷ÒıµØÍ¼Ê± £¬µÚÒ»Î¬Îªy×ø±ê£¬µÚ¶şÎ¬Îªx×ø±ê£¬¼´gameMapInfo[y][x]±íÊ¾£¨x,y£©µãµÄµØÍ¼ĞÅÏ¢
 	const vector<vector<mapBlock>>* gameMapInfo;
 
 };

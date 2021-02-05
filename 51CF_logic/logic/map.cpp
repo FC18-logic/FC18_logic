@@ -114,6 +114,12 @@ bool Map::readMap(ifstream& inMap, ofstream& cmdF,ofstream& infoF, bool enableOu
 		data->currentRoundCommandJson["command"].append(paj);*/
 	}
 
+
+	//初始化兵团的表
+	/*data->corps = new CorpsUnit*[m_height];
+	for (int i = 0; i < m_height; i++) {
+		data->corps[i] = new CorpsUnit[m_width];
+	}*/
 	char bufferCorps[64];
 	sprintf(bufferCorps, "#corps\n");
 	infoF << bufferCorps;
@@ -302,7 +308,17 @@ bool Map::randomInitMap(ofstream& cmdFile,ofstream& infoFile) {
 		Tower newTower = data->myTowers[i];
 		TPoint towerPoint = newTower.getPosition();
 		char bufferTower[128];
-		sprintf(bufferTower, "%d %d %d %d %d %d %d %d %d %d %d %d\n", i, towerPoint.m_x, towerPoint.m_y, i + 1, newTower.getProductPoint(), NOTASK, -1, newTower.getHealthPoint(), newTower.getBattlePoint(), newTower.getExperPoint(), newTower.getLevel(), 1);
+		sprintf(bufferTower, "%d %d %d %d %d %d %d %d %d %d %d\n", i
+			                                                     , towerPoint.m_x
+			                                                     , towerPoint.m_y
+			                                                     , newTower.getPlayerID()
+			                                                     , newTower.getProductPoint()
+			                                                     , NOTASK
+			                                                     , -1
+			                                                     , newTower.getHealthPoint()
+			                                                     , newTower.getBattlePoint()
+			                                                     , newTower.getLevel()
+			                                                     , 1);
 		infoFile << bufferTower;
 	}
 
@@ -339,12 +355,17 @@ bool Map::randomInitMap(ofstream& cmdFile,ofstream& infoFile) {
 	for (int i = 0; i < m_height; i++) {
 		for (int j = 0; j < m_width; j++) {
 			char bufferBlock[64];
-			sprintf(bufferBlock, "%d %d %d %d\n", j, i, map[i][j].type, map[i][j].owner);
+			int terrain = map[i][j].type;
+			if (map[i][j].TowerIndex != NOTOWER) terrain = TRTower;
+			sprintf(bufferBlock, "%d %d %d %d\n", j, i, terrain, map[i][j].owner);
 			infoFile << bufferBlock;
 			Json::Value blockJson;
 			blockJson["x"] = Json::Value(j);
 			blockJson["z"] = Json::Value(i);
-			blockJson["tp"] = Json::Value(map[i][j].type);
+			if (map[i][j].TowerIndex != NOTOWER)
+				blockJson["tp"] = Json::Value(TRTower);
+			else
+				blockJson["tp"] = Json::Value(map[i][j].type);
 			blockJson["oId"] = Json::Value(map[i][j].owner);
 			data->currentRoundMapJson.append(blockJson);
 			/*//Json::Value occupyPoint;  //暂不提供给Json
@@ -428,6 +449,7 @@ mapBlockInfo Map::ShowInfo(int x, int y) {
 	info.type = map[y][x].type;
 	info.owner = map[y][x].owner;
 	info.occupyPoint = map[y][x].occupyPoint;
+	info.towerIndex = map[y][x].TowerIndex;
 	return info;
 }
 

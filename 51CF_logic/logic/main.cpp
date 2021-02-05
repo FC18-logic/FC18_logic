@@ -13,12 +13,12 @@ using namespace DAGAN;
 
 //【FC18】输出结果排名文件
 void outputResult(Game& game, vector<Player_Code>& players) {
-	ofstream ofs("../log_txt/result.txt");//打开txt文件
+	ofstream ofs("../log_txt/result.txt",ios::trunc);//打开txt文件
 
 	vector<TPlayerID> rank = game.getRank();   //游戏结果排名(vector)
 	for (size_t i = 0; i < rank.size(); ++i) {
 		if (rank[i] > players.size() || rank[i] <= 0) continue;
-		ofs << "rank：" << rank[i] << " --> " << players[rank[i] - 1].getName() << endl;   //按排名输出每个名次的玩家name
+		ofs << " rank：" << i + 1 << " --> " << players[rank[i] - 1].getName() << endl;   //按排名输出每个名次的玩家name
 	}
 }
 

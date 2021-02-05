@@ -97,7 +97,7 @@ namespace DAGAN
 
 		//data->currentRoundMapJson["round"] = Json::Value(std::to_string(dataRound));
 		char buffer[64];
-		sprintf(buffer, "round %d\n", dataRound);
+		sprintf(buffer, "\nround %d\n", dataRound);
 		cmdFile << buffer;
 		infoFile << buffer;
 		char bufferCmd[64];
@@ -171,7 +171,8 @@ namespace DAGAN
 
 		}
 		Corpslastcmd[id].clear();
-
+		//回合数增加1
+		game_.addRound();
 		//执行本回合命令
 		for (Command c : commands.getCommand()) {
 			commandRead++;  //更新读取指令数，有效、无效指令都要读取
@@ -180,7 +181,7 @@ namespace DAGAN
 				if (corpsBanned.find(c.parameters[1]) != corpsBanned.end()) continue;     //这个兵团本回合不能再接受操作，请求驳回
 				if (handleCorpsCommand(id, c) == true) {   //记录不能再进行其他操作的兵团序号
 					jsonChange(id, c,cmdFile);   //更新有效的指令Json
-					outPutCommand(id, c);  //复读被执行的命令，未执行的不复读
+					//outPutCommand(id, c);  //复读被执行的命令，未执行的不复读
 					switch (c.parameters[0]) {
 					//case(CStation):
 					case(CStationTower):
@@ -238,8 +239,6 @@ namespace DAGAN
 			}
 		}
 
-		//回合数增加1
-		game_.addRound();
 
 		//#json save，保存Json存档数据
 		{
@@ -287,14 +286,15 @@ namespace DAGAN
 				//newCmd["mv"] = Json::Value(std::to_string(int(c.parameters[2])));
 				//newCmd["dir"] = Json::Value(std::to_string(std::atan2(DAGAN::moveDir[c.parameters[2]].m_y, DAGAN::moveDir[c.parameters[2]].m_x)));
 				break;
-			case(CStation):
+			/*case(CStation):
 				newCmd.cm_type = JStation;
-				break;
+				break;*/
 			case(CStationTower):
 				newCmd.cm_type = JStationTower;
 				break;
 			case(CAttackCorps):
 				newCmd.cm_type = JAttackCorps;
+				//point = data->myCorps[c.parameters[1]].getPos();
 				point2 = data->myCorps[c.parameters[2]].getPos();
 				newCmd.aim_x = point2.m_x;
 				newCmd.aim_z = point2.m_y;
@@ -327,7 +327,7 @@ namespace DAGAN
 				else if (data->dieCorps.find(c.parameters[1]) != data->dieCorps.end() && data->dieTower.find(c.parameters[2]) == data->dieTower.end()) newCmd.result = 2;     //自己没了，对方还在
 				else  newCmd.result = 3;    //都没了
 				break;
-			case(CRegroup):
+			/*case(CRegroup):
 				newCmd.cm_type = JRegroup;
 				//TPoint point2 = data->myCorps[c.parameters[2]].getPos();
 				newCmd.another_id = c.parameters[2];
@@ -336,7 +336,7 @@ namespace DAGAN
 				//newCmd["pos"] = pos;
 				//newCmd["dFC"] = Json::Value(std::to_string(int(c.parameters[2])));
 				//if (data->dieCorps.find(c.parameters[2]) != data->dieCorps.end()) newCmd.result = -1;
-				break;
+				break;*/
 			case(CBuild):
 				newCmd.cm_type = JBuild;
 				newCmd.another_id = data->myTowers.size() - 1;
@@ -354,7 +354,7 @@ namespace DAGAN
 			//data->currentRoundCommandJson["command"].append(newCmd);
 		}
 		else if (c.cmdType == towerCommand) {
-			TPoint point2;
+			TPoint point3;
 			//Json::Value newCmd;
 			//Json::Value pos;
 			//newCmd["oId"] = Json::Value(std::to_string(id));
@@ -370,9 +370,10 @@ namespace DAGAN
 				break;
 			case(TAttackCorps):
 				newCmd.cm_type = JTowerAttackCorps;
-				point2 = data->myCorps[c.parameters[2]].getPos();
-				newCmd.aim_x = point2.m_x;
-				newCmd.aim_z = point2.m_y;
+				point3 = data->myCorps[c.parameters[2]].getPos();
+				newCmd.aim_x = point3.m_x;
+				newCmd.aim_z = point3.m_y;
+				newCmd.another_id = c.parameters[2];
 				if (data->dieCorps.find(c.parameters[2]) != data->dieCorps.end()) newCmd.result = 1;   //对方没了
 				//pos["x"] = Json::Value(std::to_string(point.m_x));
 				//pos["z"] = Json::Value(std::to_string(point.m_y));
@@ -441,13 +442,13 @@ namespace DAGAN
 		}
 		if (!towerFree)   //若塔不能操作了
 		{
-		for (TCorpsID i : data->players[id - 1].getCrops()) {
-			if (cBanned.find(i) == cBanned.end())//用户现存的兵团还有能进行操作的
-			{
-				corpsFree = true;
-				break;
+			for (TCorpsID i : data->players[id - 1].getCrops()) {
+				if (cBanned.find(i) == cBanned.end())//用户现存的兵团还有能进行操作的
+				{
+					corpsFree = true;
+					break;
+				}
 			}
-		}
 		}
 		if (commandRead >= MAX_CMD_NUM || (!towerFree && !corpsFree))//超过最大命令条数，或者没有可操作性的塔或兵团了
 			return false;
@@ -564,8 +565,8 @@ namespace DAGAN
 				bCmdSucs = data->myCorps[id].Move(dir);
 			}
 			break;
-			/*
-		case(CStation)://兵团没有属性值改变
+			
+		/*case(CStation)://兵团没有属性值改变
 			//兵团原地驻扎的操作
 			{
 				bCmdSucs = data->myCorps[id].GoRest();
@@ -589,9 +590,19 @@ namespace DAGAN
 				bCmdSucs = data->myCorps[id].Attack(type,enemyid);
 			}
 			break;
+		/*case(CRegroup)://这个操作就不要了
+			//兵团整编的操作
+			{
+				TCorpsID target = c.parameters[2];
+				if (target < 0 || target >= data->myCorps.size()) return false;     //越界：操作数非法
+				bCmdSucs = data->myCorps[id].MergeCrops(target);
+			}
+			break;*/
 		case(CBuild):
 			//兵团修建新塔的操作
 			{
+				if (data->players[ID - 1].towerNumControl() == true) 
+					return false;
 				bCmdSucs = data->myCorps[id].BuildTower();
 			}
 			break;
@@ -638,6 +649,7 @@ namespace DAGAN
 		//需要return返回命令执行是否成功<bool>
 		bool bCmdSucs = false;
 		TCorpsID id = c.parameters[1];
+		int pdtType = c.parameters[2];
 		//塔id越界
 		if (id < 0 || id >= data->myTowers.size())
 			return false;  
@@ -645,8 +657,10 @@ namespace DAGAN
 			return false;
 		switch (c.parameters[0]) {
 		case(TProduct):
+			if ((pdtType == PWarrior || pdtType == PArcher || pdtType == PCavalry) && data->players[ID - 1].battleNumControl() == true) return false;
+			else if ((pdtType == PBuilder || pdtType == PExtender) && data->players[ID - 1].constructNumControl() == true) return false;
 			//设置生产任务，任务种类不越界就判定成功
-			bCmdSucs = data->myTowers[id].set_producttype(enum productType(c.parameters[2]));
+			bCmdSucs = data->myTowers[id].set_producttype(enum productType(pdtType));
 			return bCmdSucs;
 			break;
 		case(TAttackCorps):
@@ -707,10 +721,9 @@ namespace DAGAN
 				}
 			}
 			data->players[i - 1].setRank(Rank);
-			game_.getRank()[Rank-1] = Ranker[Rank-1].ID;
+			game_.getRank()[Rank - 1] = Ranker[Rank - 1].ID;
 		}
 	}
-
 	/***********************************************************************************************
 	*函数名 :【FC18】testPlayerCommand模拟AI给出玩家命令函数
 	*函数功能描述 : 模拟玩家AI，给出游戏指令，方便调试

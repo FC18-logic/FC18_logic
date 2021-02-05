@@ -9,11 +9,6 @@ TPoint operator-(const TPoint& p1, const TPoint& p2)
 	return ret;
 }
 
-TLength getDistance(const TPoint& p1, const TPoint& p2)
-{
-	TPoint distance = p1 - p2;
-	return sqrt(distance.m_x * distance.m_x + distance.m_y * distance.m_y);
-}
 
 int generateRanInt(int start, int end) {
 	return rand() % (end - start + 1) + start;
