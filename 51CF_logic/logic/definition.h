@@ -5,11 +5,11 @@
 #define NO_SILENT_MODE
 #define NO_JSON
 #define INF 100000000
-#define TRANSITION -1   //¹ı¶ÉµØĞÎÇøÓò
-#define PUBLIC 0      //¹«¹²µØĞÎÇøÓò
-#define NOTOWER -1    //µ±Ç°·½¸ñÃ»ÓĞ·ÀÓùËş
-//#define NOTASK  -1    //µ±Ç°·ÀÓùËşÎŞÉú²úÈÎÎñ
-#define OUTOFRANGE -2  //µ±Ç°·½¸ñÔÚµØÍ¼Ö®Íâ
+#define TRANSITION -1   //è¿‡æ¸¡åœ°å½¢åŒºåŸŸ
+#define PUBLIC 0      //å…¬å…±åœ°å½¢åŒºåŸŸ
+#define NOTOWER -1    //å½“å‰æ–¹æ ¼æ²¡æœ‰é˜²å¾¡å¡”
+//#define NOTASK  -1    //å½“å‰é˜²å¾¡å¡”æ— ç”Ÿäº§ä»»åŠ¡
+#define OUTOFRANGE -2  //å½“å‰æ–¹æ ¼åœ¨åœ°å›¾ä¹‹å¤–
 
 
 #include <vector>
@@ -21,69 +21,69 @@
 #include <iostream>
 
 using namespace std;
-typedef int    TMovePoint;     //¡¾FC18¡¿ĞĞ¶¯Á¦
-typedef int    TBattlePoint;   //¡¾FC18¡¿Õ½¶·Á¦
-typedef int    THealthPoint;   //¡¾FC18¡¿ÉúÃüÖµ
-typedef int    TBuildPoint;    //¡¾FC18¡¿ÀÍ¶¯Á¦£º¹¤³Ì½¨Éè±øÍÅÊôĞÔ
-typedef int    TProductPoint;  //¡¾FC18¡¿ËşµÄÉú²úÁ¦
-typedef int	   TExperPoint;    //¡¾FC18¡¿ËşµÄ¾­ÑéÖµ
-typedef int    TOccupyPoint;   //¡¾FC18¡¿Ëş¶ÔÖÜÎ§·½¸ñÊ©¼ÓµÄÕ¼ÓĞÊôĞÔÖµ
-typedef int    TIntPara;       //¡¾FC18¡¿ÕûĞÍÏµÊıÖµ
-typedef double TDoublePara;    //¡¾FC18¡¿Ë«¾«¶È¸¡µãĞÍÏµÊıÖµ
-typedef int    TPlayer;        //¡¾FC18¡¿Íæ¼Ò¸öÊı
-typedef int    TTower;         //¡¾FC18¡¿ËşµÄ¸öÊı
-typedef int    TCorps;         //¡¾FC18¡¿±øÍÅ¸öÊı
-typedef int    TPlayerID;      //¡¾FC18¡¿Íæ¼ÒIDºÅ
-typedef int    TTowerID;       //¡¾FC18¡¿·ÀÓùËşIDºÅ
-typedef int    TCorpsID;       //¡¾FC18¡¿±øÍÅIDºÅ
-typedef string TMapID;         //¡¾FC18¡¿µØÍ¼IDºÅ
-typedef int    TMap;           //¡¾FC18¡¿µØÍ¼²ÎÊı£¨¸ß¶È/¿í¶È£©
-typedef int    TRound;         //¡¾FC18¡¿»ØºÏÊı
-typedef int    TScore;         //¡¾FC18¡¿Íæ¼ÒµÃ·Ö
-typedef int    TDist;          //¡¾FC18¡¿ÓÎÏ·ÖĞ¾àÀëµÄ¶¨Òå
-typedef int    TOperaNum;      //¡¾FC18¡¿²Ù×÷ÊıµÄ¸öÊı
+typedef int    TMovePoint;     //ã€FC18ã€‘è¡ŒåŠ¨åŠ›
+typedef int    TBattlePoint;   //ã€FC18ã€‘æˆ˜æ–—åŠ›
+typedef int    THealthPoint;   //ã€FC18ã€‘ç”Ÿå‘½å€¼
+typedef int    TBuildPoint;    //ã€FC18ã€‘åŠ³åŠ¨åŠ›ï¼šå·¥ç¨‹å»ºè®¾å…µå›¢å±æ€§
+typedef int    TProductPoint;  //ã€FC18ã€‘å¡”çš„ç”Ÿäº§åŠ›
+typedef int	   TExperPoint;    //ã€FC18ã€‘å¡”çš„ç»éªŒå€¼
+typedef int    TOccupyPoint;   //ã€FC18ã€‘å¡”å¯¹å‘¨å›´æ–¹æ ¼æ–½åŠ çš„å æœ‰å±æ€§å€¼
+typedef int    TIntPara;       //ã€FC18ã€‘æ•´å‹ç³»æ•°å€¼
+typedef double TDoublePara;    //ã€FC18ã€‘åŒç²¾åº¦æµ®ç‚¹å‹ç³»æ•°å€¼
+typedef int    TPlayer;        //ã€FC18ã€‘ç©å®¶ä¸ªæ•°
+typedef int    TTower;         //ã€FC18ã€‘å¡”çš„ä¸ªæ•°
+typedef int    TCorps;         //ã€FC18ã€‘å…µå›¢ä¸ªæ•°
+typedef int    TPlayerID;      //ã€FC18ã€‘ç©å®¶IDå·
+typedef int    TTowerID;       //ã€FC18ã€‘é˜²å¾¡å¡”IDå·
+typedef int    TCorpsID;       //ã€FC18ã€‘å…µå›¢IDå·
+typedef string TMapID;         //ã€FC18ã€‘åœ°å›¾IDå·
+typedef int    TMap;           //ã€FC18ã€‘åœ°å›¾å‚æ•°ï¼ˆé«˜åº¦/å®½åº¦ï¼‰
+typedef int    TRound;         //ã€FC18ã€‘å›åˆæ•°
+typedef int    TScore;         //ã€FC18ã€‘ç©å®¶å¾—åˆ†
+typedef int    TDist;          //ã€FC18ã€‘æ¸¸æˆä¸­è·ç¦»çš„å®šä¹‰
+typedef int    TOperaNum;      //ã€FC18ã€‘æ“ä½œæ•°çš„ä¸ªæ•°
 
 
-const int MAX_CORPS_LEVEL = 3;    //¡¾FC18¡¿×î´óµÄ±øÍÅµÈ¼¶
-const int MAX_TOWER_LEVEL = 8;    //¡¾FC18¡¿×î´óµÄ·ÀÓùËşµÈ¼¶
-const int TERRAIN_TYPE_NUM = 5;    //¡¾FC18¡¿µØĞÎµÄÖÖÀàÊı
-const int BATTLE_CORPS_TYPE_NUM = 3;    //¡¾FC18¡¿×÷Õ½±øÍÅµÄÖÖÀàÊı
-const int CONSTRUCT_CORPS_TYPE_NUM = 2;    //¡¾FC18¡¿¹¤³Ì±øÍÅµÄÖÖÀàÊı
-const int TOWER_PRODUCT_TASK_NUM = 6;     //¡¾FC18¡¿ËşµÄÉú²úÈÎÎñÖÖÀàÊı
-const int TOWER_EXPER_GAIN_SCALE = 3;     //¡¾FC18¡¿ËşµÄÃ¿»ØºÏ¾­ÑéÖµÔö¼ÓµÈ¼¶Êı
-const int OCCUPY_POINT_DIST_SCALE = 5;    //¡¾FC18¡¿Ëş¶ÔÖÜÎ§·½¸ñÊ©¼ÓÕ¼ÓĞÊôĞÔÖµµÄ¾àÀëµÈ¼¶ÓĞ¼¸¸ö
-const int CORPS_ACTION_TYPE_NUM = 10;    //¡¾FC18¡¿±øÍÅÄÜ½øĞĞµÄ²Ù×÷ÖÖÀàÊı
-const int TOWER_ACTION_TYPE_NUM = 3;     //¡¾FC18¡¿·ÀÓùËş½øĞĞµÄ²Ù×÷ÖÖÀàÊı
-const int MAX_ROUND = 300;               //¡¾FC18¡¿ÓÎÏ·È«³ÌµÄ×î´ó»ØºÏÊı£¬È·¶¨µÄ£¬²»ÏñFC15´ÓÍâ²¿ÎÄ¼ş¶ÁÈë
-const int TOWER_SCORE = 10;              //¡¾FC18¡¿¼ÆËãÍæ¼ÒµÃ·ÖÊ±Ã¿¸ö·ÀÓùËşÃ¿¸öµÈ¼¶µÃ·Ö
-const int BATTLE_CORP_SCORE = 2;         //¡¾FC18¡¿Õ½¶·±øÍÅÃ¿¸öĞÇ¼¶µÃ·Ö
-const int CONSTRUCT_CORP_SCORE = 4;      //¡¾FC18¡¿¹¤³Ì±øÍÅÃ¿¸öµÃ·Ö
-const int KILL_SCORE = 5;                //¡¾FC18¡¿»÷É±·Ö£ºÕ¼ÁìËş/·ıÂ²±øÍÅ/»÷É±±øÍÅµÃ·Ö
-const int CORP_SCORE = 4;                //¡¾FC18¡¿µ¥¸ö±øÍÅµÃ·Ö
-const int MAX_CMD_NUM = 50;              //¡¾FC18¡¿ÏŞÖÆÃ¿¸öÍæ¼ÒÃ¿´Î×î´óÃüÁîÊı
-const int MAX_TOWER_NUM = 10;            //¡¾FC18¡¿Íæ¼Ò×î´ó·ÀÓùËşÊı
-const int MAX_BATTLE_NUM = 10;           //¡¾FC18¡¿Íæ¼Ò×î´ó×÷Õ½±øÍÅÊıÄ¿
-const int MAX_CONSTRUCT_NUM = 10;        //¡¾FC18¡¿Íæ¼Ò×î´ó¹¤³Ì±øÍÅÊıÄ¿
+const int MAX_CORPS_LEVEL = 3;    //ã€FC18ã€‘æœ€å¤§çš„å…µå›¢ç­‰çº§
+const int MAX_TOWER_LEVEL = 8;    //ã€FC18ã€‘æœ€å¤§çš„é˜²å¾¡å¡”ç­‰çº§
+const int TERRAIN_TYPE_NUM = 5;    //ã€FC18ã€‘åœ°å½¢çš„ç§ç±»æ•°
+const int BATTLE_CORPS_TYPE_NUM = 3;    //ã€FC18ã€‘ä½œæˆ˜å…µå›¢çš„ç§ç±»æ•°
+const int CONSTRUCT_CORPS_TYPE_NUM = 2;    //ã€FC18ã€‘å·¥ç¨‹å…µå›¢çš„ç§ç±»æ•°
+const int TOWER_PRODUCT_TASK_NUM = 6;     //ã€FC18ã€‘å¡”çš„ç”Ÿäº§ä»»åŠ¡ç§ç±»æ•°
+const int TOWER_EXPER_GAIN_SCALE = 3;     //ã€FC18ã€‘å¡”çš„æ¯å›åˆç»éªŒå€¼å¢åŠ ç­‰çº§æ•°
+const int OCCUPY_POINT_DIST_SCALE = 5;    //ã€FC18ã€‘å¡”å¯¹å‘¨å›´æ–¹æ ¼æ–½åŠ å æœ‰å±æ€§å€¼çš„è·ç¦»ç­‰çº§æœ‰å‡ ä¸ª
+const int CORPS_ACTION_TYPE_NUM = 10;    //ã€FC18ã€‘å…µå›¢èƒ½è¿›è¡Œçš„æ“ä½œç§ç±»æ•°
+const int TOWER_ACTION_TYPE_NUM = 3;     //ã€FC18ã€‘é˜²å¾¡å¡”è¿›è¡Œçš„æ“ä½œç§ç±»æ•°
+const int MAX_ROUND = 300;               //ã€FC18ã€‘æ¸¸æˆå…¨ç¨‹çš„æœ€å¤§å›åˆæ•°ï¼Œç¡®å®šçš„ï¼Œä¸åƒFC15ä»å¤–éƒ¨æ–‡ä»¶è¯»å…¥
+const int TOWER_SCORE = 10;              //ã€FC18ã€‘è®¡ç®—ç©å®¶å¾—åˆ†æ—¶æ¯ä¸ªé˜²å¾¡å¡”æ¯ä¸ªç­‰çº§å¾—åˆ†
+const int BATTLE_CORP_SCORE = 2;         //ã€FC18ã€‘æˆ˜æ–—å…µå›¢æ¯ä¸ªæ˜Ÿçº§å¾—åˆ†
+const int CONSTRUCT_CORP_SCORE = 4;      //ã€FC18ã€‘å·¥ç¨‹å…µå›¢æ¯ä¸ªå¾—åˆ†
+const int KILL_SCORE = 5;                //ã€FC18ã€‘å‡»æ€åˆ†ï¼šå é¢†å¡”/ä¿˜è™å…µå›¢/å‡»æ€å…µå›¢å¾—åˆ†
+const int CORP_SCORE = 4;                //ã€FC18ã€‘å•ä¸ªå…µå›¢å¾—åˆ†
+const int MAX_CMD_NUM = 50;              //ã€FC18ã€‘é™åˆ¶æ¯ä¸ªç©å®¶æ¯æ¬¡æœ€å¤§å‘½ä»¤æ•°
+const int MAX_TOWER_NUM = 10;            //ã€FC18ã€‘ç©å®¶æœ€å¤§é˜²å¾¡å¡”æ•°
+const int MAX_BATTLE_NUM = 10;           //ã€FC18ã€‘ç©å®¶æœ€å¤§ä½œæˆ˜å…µå›¢æ•°ç›®
+const int MAX_CONSTRUCT_NUM = 10;        //ã€FC18ã€‘ç©å®¶æœ€å¤§å·¥ç¨‹å…µå›¢æ•°ç›®
 
 class Crops;
 struct CorpsInfo;
-typedef vector<CorpsInfo>	CorpsInfoUnit; //¡¾FC18¡¿Ò»¸öµ¥Ôª¸ñÉÏËùÓĞ±øÍÅĞÅÏ¢
+typedef vector<CorpsInfo>	CorpsInfoUnit; //ã€FC18ã€‘ä¸€ä¸ªå•å…ƒæ ¼ä¸Šæ‰€æœ‰å…µå›¢ä¿¡æ¯
 
-//ÒÔÏÂÀ´×ÔFC15£¬ÎÒÃÇÓ¦¸ÃÓÃ²»µ½ÁË
+//ä»¥ä¸‹æ¥è‡ªFC15ï¼Œæˆ‘ä»¬åº”è¯¥ç”¨ä¸åˆ°äº†
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 typedef double TSpeed;
-typedef double TResourceD;  //double µÄ×ÊÔ´Êı£¬ÓÃÓÚÄÚ²¿²Ù×÷
-typedef int    TResourceI;  //int    µÄ×ÊÔ´Êı£¬ÓÃÓÚÏÔÊ¾
-typedef double TTechPoint;  //¿Æ¼¼µãÊı
+typedef double TResourceD;  //double çš„èµ„æºæ•°ï¼Œç”¨äºå†…éƒ¨æ“ä½œ
+typedef int    TResourceI;  //int    çš„èµ„æºæ•°ï¼Œç”¨äºæ˜¾ç¤º
+typedef double TTechPoint;  //ç§‘æŠ€ç‚¹æ•°
 typedef double TLength;
 typedef int    TCellID;
 typedef int    TTentacleID;
 typedef int    TPosition;
-typedef int    TLevel;  //¸÷ÏîÊôĞÔµÈ¼¶
-typedef double TPower;  //±¶ÂÊ
+typedef int    TLevel;  //å„é¡¹å±æ€§ç­‰çº§
+typedef double TPower;  //å€ç‡
 typedef int    TTentacleNum;
 
-//±øÁ¦ÃÜ¶È
+//å…µåŠ›å¯†åº¦
 const double       Density = 0.1;
 const TSpeed       BaseExtendSpeed = 3;
 const TSpeed       BaseFrontSpeed = 20;
@@ -91,97 +91,97 @@ const TSpeed       BaseBackSpeed = 12;
 const TLevel       STUDENT_LEVEL_COUNT = 5;
 const TResourceI   MAX_RESOURCE = 200;
 const TSpeed       BASE_REGENERETION_SPEED[STUDENT_LEVEL_COUNT]{ 1,1.5,2,2.5,3 };
-const TTentacleNum MAX_TENTACLE_NUMBER[STUDENT_LEVEL_COUNT]{ 1,2,2,3,3 };  //¿ÉÉì´¥ÊÖÊıÁ¿
+const TTentacleNum MAX_TENTACLE_NUMBER[STUDENT_LEVEL_COUNT]{ 1,2,2,3,3 };  //å¯ä¼¸è§¦æ‰‹æ•°é‡
 const TResourceI   STUDENT_STAGE[STUDENT_LEVEL_COUNT + 1]{ 0 ,10,40,80,150,MAX_RESOURCE };
 const int          NO_DATA = -1;
 const TPlayerID        Neutral = NO_DATA;
 
-//×î´ó¼¼ÄÜµÈ¼¶
+//æœ€å¤§æŠ€èƒ½ç­‰çº§
 const TLevel MAX_REGENERATION_SPEED_LEVEL = 5;
 const TLevel MAX_EXTENDING_SPEED_LEVEL = 5;
 const TLevel MAX_EXTRA_CONTROL_LEVEL = 3;
 const TLevel MAX_DEFENCE_LEVEL = 3;
 
-//¸÷¼¼ÄÜµÈ¼¶¶ÔÓ¦ÊıÖµ
+//å„æŠ€èƒ½ç­‰çº§å¯¹åº”æ•°å€¼
 const TPower RegenerationSpeedStage[MAX_REGENERATION_SPEED_LEVEL + 1] = { 1,1.05,1.1,1.15,1.2,1.25 };
 const TPower SpeedStage[MAX_EXTENDING_SPEED_LEVEL + 1] = { 1,1.1,1.2,1.3,1.4,1.5 };
 const TPower ExtraControlStage[MAX_EXTRA_CONTROL_LEVEL + 1] = { 0,0.5,1,1.5 };
 const TPower DefenceStage[MAX_DEFENCE_LEVEL + 1] = { 1.5,1.4,1.3,1.2 };
 
-//¸÷¸ö¼¼ÄÜÉı¼¶ËùĞè¿Æ´´µãÊı
+//å„ä¸ªæŠ€èƒ½å‡çº§æ‰€éœ€ç§‘åˆ›ç‚¹æ•°
 const TResourceD RegenerationSpeedUpdateCost[MAX_REGENERATION_SPEED_LEVEL] = { 2,4,6,8,10 };
 const TResourceD ExtendingSpeedUpdateCost[MAX_EXTENDING_SPEED_LEVEL] = { 2,4,6,8,10 };
 const TResourceD ExtraControlStageUpdateCost[MAX_EXTRA_CONTROL_LEVEL] = { 3,5,7 };
 const TResourceD DefenceStageUpdateCost[MAX_DEFENCE_LEVEL] = { 3,5,7 };
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-//¡¾FC18¡¿¶şÎ¬×ø±êµã½á¹¹Ìå
+//ã€FC18ã€‘äºŒç»´åæ ‡ç‚¹ç»“æ„ä½“
 struct TPoint
 {
 	TPosition  m_x;
 	TPosition  m_y;
 };
 
-//¡¾FC18¡¿ËşµÄÅäÖÃÊı¾İ½á¹¹Ìå
+//ã€FC18ã€‘å¡”çš„é…ç½®æ•°æ®ç»“æ„ä½“
 struct TowerConfig {
-	int initBuildPoint;       //ÆğÊ¼Éú²úÁ¦
-	int initProductPoint;      //ÆğÊ¼Õ½¶·Á¦
-	int initHealthPoint;      //ÆğÊ¼ÉúÃüÖµ
-	int upgradeExper;         //Éıµ½ÏÂÒ»¼¶ËùĞè¾­ÑéÖµ
-	int battleRegion;         //¹¥»÷¾àÀë
+	int initBuildPoint;       //èµ·å§‹ç”Ÿäº§åŠ›
+	int initProductPoint;      //èµ·å§‹æˆ˜æ–—åŠ›
+	int initHealthPoint;      //èµ·å§‹ç”Ÿå‘½å€¼
+	int upgradeExper;         //å‡åˆ°ä¸‹ä¸€çº§æ‰€éœ€ç»éªŒå€¼
+	int battleRegion;         //æ”»å‡»è·ç¦»
 };
 
 
-//¡¾FC18¡¿±øÍÅÖÖÀà
+//ã€FC18ã€‘å…µå›¢ç§ç±»
 enum corpsType
 {
-	Battle = 0,          //×÷Õ½±øÍÅ
-	Construct = 1        //¹¤³Ì½¨Éè±øÍÅ
+	Battle = 0,          //ä½œæˆ˜å…µå›¢
+	Construct = 1        //å·¥ç¨‹å»ºè®¾å…µå›¢
 };
 
 
-//¡¾FC18¡¿×÷Õ½±øÍÅÖÖÀàµÄÃ¶¾ÙÀà
+//ã€FC18ã€‘ä½œæˆ˜å…µå›¢ç§ç±»çš„æšä¸¾ç±»
 enum battleCorpsType
 {
-	Warrior = 0,         //Õ½Ê¿
-	Archer  = 1,         //¹­¼ıÊÖ
-	Cavalry = 2,         //Æï±ø
+	Warrior = 0,         //æˆ˜å£«
+	Archer  = 1,         //å¼“ç®­æ‰‹
+	Cavalry = 2,         //éª‘å…µ
 };
 
 
-//¡¾FC18¡¿¹¤³Ì½¨Éè±øÍÅµÄÃ¶¾ÙÀà
+//ã€FC18ã€‘å·¥ç¨‹å»ºè®¾å…µå›¢çš„æšä¸¾ç±»
 enum constructCorpsType
 {
-	Builder = 0,           //½¨ÔìÕß
-	Extender = 1           //¿ªÍØÕß
+	Builder = 0,           //å»ºé€ è€…
+	Extender = 1           //å¼€æ‹“è€…
 };
 
 
 
 
-//¡¾FC18¡¿ÃüÁîÀàĞÍ
+//ã€FC18ã€‘å‘½ä»¤ç±»å‹
 enum commandType {
-	corpsCommand = 0,         //±øÍÅÃüÁî
-	towerCommand = 1,         //·ÀÓùËşÃüÁî
+	corpsCommand = 0,         //å…µå›¢å‘½ä»¤
+	towerCommand = 1,         //é˜²å¾¡å¡”å‘½ä»¤
 };
 
 
-//¡¾FC18¡¿±øÍÅ²Ù×÷ÀàĞÍ£¨CÇ°×º±íÊ¾Corps£©
+//ã€FC18ã€‘å…µå›¢æ“ä½œç±»å‹ï¼ˆCå‰ç¼€è¡¨ç¤ºCorpsï¼‰
 enum CorpsCommandEnum
-{//                                                          ×÷Õ½±øÍÅ        ¹¤³Ì±øÍÅ
-	CMove          = 0,       //ÔÚµØÍ¼ÉÏÒÆ¶¯                     ¡Ì              ¡Ì
-	CStation       = 1,       //×¤ÔúÔÚµØÍ¼·½¸ñ£¨ÎŞ×Ô¼ºËş£©       ¡Ì              ¡Ì
-	CStationTower  = 2,       //×¤ÔúÔÚËş£¨×Ô¼ºÊÆÁ¦µÄËş£©         ¡Ì              ¡Ì
-	CAttackCorps   = 3,       //¹¥»÷¶Ô·½ÊÆÁ¦µÄ±øÍÅ               ¡Ì
-	CAttackTower   = 4,       //¹¥»÷¶Ô·½ÊÆÁ¦µÄËş                 ¡Ì
-	CRegroup       = 5,       //±øÍÅÕû±à                         ¡Ì
-	CDissolve      = 6,       //±øÍÅ½âÉ¢                         ¡Á              ¡Á
-	CBuild         = 7,       //ĞŞ½¨ĞÂ·ÀÓùËş                                     ¡Ì
-	CRepair        = 8,       //ĞŞÀíÔ­·ÀÓùËş                                     ¡Ì
-	CChangeTerrain = 9,       //¸Ä±ä·½¸ñµØĞÎ                                     ¡Ì
+{//                                                          ä½œæˆ˜å…µå›¢        å·¥ç¨‹å…µå›¢
+	CMove          = 0,       //åœ¨åœ°å›¾ä¸Šç§»åŠ¨                     âˆš              âˆš
+	CStation       = 1,       //é©»æ‰åœ¨åœ°å›¾æ–¹æ ¼ï¼ˆæ— è‡ªå·±å¡”ï¼‰       âˆš              âˆš
+	CStationTower  = 2,       //é©»æ‰åœ¨å¡”ï¼ˆè‡ªå·±åŠ¿åŠ›çš„å¡”ï¼‰         âˆš              âˆš
+	CAttackCorps   = 3,       //æ”»å‡»å¯¹æ–¹åŠ¿åŠ›çš„å…µå›¢               âˆš
+	CAttackTower   = 4,       //æ”»å‡»å¯¹æ–¹åŠ¿åŠ›çš„å¡”                 âˆš
+	CRegroup       = 5,       //å…µå›¢æ•´ç¼–                         âˆš
+	CDissolve      = 6,       //å…µå›¢è§£æ•£                         Ã—              Ã—
+	CBuild         = 7,       //ä¿®å»ºæ–°é˜²å¾¡å¡”                                     âˆš
+	CRepair        = 8,       //ä¿®ç†åŸé˜²å¾¡å¡”                                     âˆš
+	CChangeTerrain = 9,       //æ”¹å˜æ–¹æ ¼åœ°å½¢                                     âˆš
 };
 
-//¡¾FC18¡¿ÃüÁîÔÚJsonÖĞµÄ´úºÅ(J±íÊ¾Json´úºÅ)
+//ã€FC18ã€‘å‘½ä»¤åœ¨Jsonä¸­çš„ä»£å·(Jè¡¨ç¤ºJsonä»£å·)
 enum CmdJsonNumber
 {
 	JMove = 0,
@@ -199,214 +199,214 @@ enum CmdJsonNumber
 	JTowerSttackTower = 12
 };
 
-//¡¾FC18¡¿±øÍÅÒÆ¶¯µÄ·½Ïò
+//ã€FC18ã€‘å…µå›¢ç§»åŠ¨çš„æ–¹å‘
 enum corpsMoveDir
 {
-	CUp            = 0,         //ÏòÉÏÒÆ¶¯1¸ñ
-	CDown          = 1,         //ÏòÏÂÒÆ¶¯1¸ñ
-	CLeft          = 2,         //Ïò×óÒÆ¶¯1¸ñ
-	CRight         = 3          //ÏòÓÒÒÆ¶¯1¸ñ
+	CUp            = 0,         //å‘ä¸Šç§»åŠ¨1æ ¼
+	CDown          = 1,         //å‘ä¸‹ç§»åŠ¨1æ ¼
+	CLeft          = 2,         //å‘å·¦ç§»åŠ¨1æ ¼
+	CRight         = 3          //å‘å³ç§»åŠ¨1æ ¼
 };
 
-//¡¾FC18¡¿ËşµÄ²Ù×÷ÀàĞÍ£¨TÇ°×º±íÊ¾tower£©
+//ã€FC18ã€‘å¡”çš„æ“ä½œç±»å‹ï¼ˆTå‰ç¼€è¡¨ç¤ºtowerï¼‰
 enum towerCommand
 {
-	TProduct       = 0,       //Éú²úÈÎÎñ
-	TAttackCorps   = 1,       //¹¥»÷±øÍÅÈÎÎñ
-	TAttackTower   = 2        //¹¥»÷ËşÈÎÎñ
+	TProduct       = 0,       //ç”Ÿäº§ä»»åŠ¡
+	TAttackCorps   = 1,       //æ”»å‡»å…µå›¢ä»»åŠ¡
+	TAttackTower   = 2        //æ”»å‡»å¡”ä»»åŠ¡
 };
 
 
-//¡¾FC18¡¿ËşµÄÉú²úÈÎÎñÀàĞÍ£¨P±íÊ¾product£©
+//ã€FC18ã€‘å¡”çš„ç”Ÿäº§ä»»åŠ¡ç±»å‹ï¼ˆPè¡¨ç¤ºproductï¼‰
 enum productType
-{//                                                 Éú²ú»Ø±¨
-	PWarrior       = 0,       //Éú²úÕ½Ê¿         1star-Õ½Ê¿±øÍÅ
-	PArcher        = 1,       //Éú²ú¹­¼ıÊÖ      1star-¹­¼ıÊÖ±øÍÅ
-	PCavalry       = 2,       //Éú²ú·¨Ê¦         1star-Æï±ø·¨Ê¦
-	PBuilder       = 3,       //Éú²ú½¨ÔìÕß        1-½¨ÔìÕß±øÍÅ
-	PExtender      = 4,       //Éú²ú¿ªÍØÕß        1-¿ªÍØÕß±øÍÅ
-	PUpgrade       = 5,       //ËşÉı¼¶ÈÎÎñ      ËşµÈ¼¶+1£¨max=8)
+{//                                                 ç”Ÿäº§å›æŠ¥
+	PWarrior       = 0,       //ç”Ÿäº§æˆ˜å£«         1star-æˆ˜å£«å…µå›¢
+	PArcher        = 1,       //ç”Ÿäº§å¼“ç®­æ‰‹      1star-å¼“ç®­æ‰‹å…µå›¢
+	PCavalry       = 2,       //ç”Ÿäº§æ³•å¸ˆ         1star-éª‘å…µæ³•å¸ˆ
+	PBuilder       = 3,       //ç”Ÿäº§å»ºé€ è€…        1-å»ºé€ è€…å…µå›¢
+	PExtender      = 4,       //ç”Ÿäº§å¼€æ‹“è€…        1-å¼€æ‹“è€…å…µå›¢
+	PUpgrade       = 5,       //å¡”å‡çº§ä»»åŠ¡      å¡”ç­‰çº§+1ï¼ˆmax=8)
 	NOTASK         = -1
 };
 
 
-//¡¾FC18¡¿µØĞÎµÄÃ¶¾ÙÀà£¨TRÇ°×º±íÊ¾µØĞÎ£©
+//ã€FC18ã€‘åœ°å½¢çš„æšä¸¾ç±»ï¼ˆTRå‰ç¼€è¡¨ç¤ºåœ°å½¢ï¼‰
 enum terrainType
 {
-	TRTower     = 0,       //Ëş
-	TRPlain     = 1,       //Æ½Ô­
-	TRMountain  = 2,       //É½µØ
-	TRForest    = 3,       //É­ÁÖ
-	TRSwamp     = 4,       //ÕÓÔó
-	TRRoad      = 5,       //µÀÂ·
+	TRTower     = 0,       //å¡”
+	TRPlain     = 1,       //å¹³åŸ
+	TRMountain  = 2,       //å±±åœ°
+	TRForest    = 3,       //æ£®æ—
+	TRSwamp     = 4,       //æ²¼æ³½
+	TRRoad      = 5,       //é“è·¯
 };
 
-//¡¾FC18¡¿±øÍÅ²Ù×÷Ãû
+//ã€FC18ã€‘å…µå›¢æ“ä½œå
 const string CorpsCmd[CORPS_ACTION_TYPE_NUM] = 
 {
 	"move","station","station at tower","attack corps","attack tower","regroup","dissolve","build tower","repair tower","change terrain"
 };
 
-//¡¾FC18¡¿Ëş²Ù×÷Ãû
+//ã€FC18ã€‘å¡”æ“ä½œå
 const string TowerCmd[TOWER_ACTION_TYPE_NUM] = 
 {
 	"produce","attack corps","attack tower"
 };
 
-//¡¾FC18¡¿ËşÉú²úÈÎÎñÃû
+//ã€FC18ã€‘å¡”ç”Ÿäº§ä»»åŠ¡å
 const string ProductCmd[TOWER_PRODUCT_TASK_NUM] = 
 {
 	"warrior","archer","caster","builder","extender","upgrade"
 };
 
-//¡¾FC18¡¿ÒÆ¶¯·½ÏòÃû
+//ã€FC18ã€‘ç§»åŠ¨æ–¹å‘å
 const string Direction[4] = 
 {
 	"up","down","left","right"
 };
 
-//¡¾FC18¡¿¸Ä±äµÄµØĞÎÃû
+//ã€FC18ã€‘æ”¹å˜çš„åœ°å½¢å
 const string Terrain[TERRAIN_TYPE_NUM] = 
 {
 	"plain","mountain","forest","swamp","road"
 };
 
-//¡¾FC18¡¿×÷Õ½±øÍÅÃû×Ö
+//ã€FC18ã€‘ä½œæˆ˜å…µå›¢åå­—
 const string BattleName[3] =
 {
 	"warrior","archer","caster"
 };
 
-//¡¾FC18¡¿¹¤³Ì±øÍÅÃû×Ö
+//ã€FC18ã€‘å·¥ç¨‹å…µå›¢åå­—
 const string ConstructName[2] =
 {
 	"Builder","Explorer"
 };
 
-//¡¾FC18¡¿×÷Õ½±øÍÅĞĞ¶¯Á¦£¨Óë×÷Õ½±øÍÅµÄÃ¶¾ÙÀàÔÚĞòºÅÉÏ¶ÔÓ¦£¬ÇÒ¿¼ÂÇÁËµÈ¼¶£©
+//ã€FC18ã€‘ä½œæˆ˜å…µå›¢è¡ŒåŠ¨åŠ›ï¼ˆä¸ä½œæˆ˜å…µå›¢çš„æšä¸¾ç±»åœ¨åºå·ä¸Šå¯¹åº”ï¼Œä¸”è€ƒè™‘äº†ç­‰çº§ï¼‰
 const TMovePoint battleMovePoint[BATTLE_CORPS_TYPE_NUM][MAX_CORPS_LEVEL] = 
 {
-	{2,   2,   2},    //Õ½Ê¿
-	{2,   2,   2},    //¹­¼ıÊÖ
-	{4,   4,   4}     //Æï±ø
+	{2,   2,   2},    //æˆ˜å£«
+	{2,   2,   2},    //å¼“ç®­æ‰‹
+	{4,   4,   4}     //éª‘å…µ
 };
 
-//¡¾FC18¡¿¹¤³Ì±øĞĞ¶¯Á¦£¬¹æÔòÖĞÃ»ÓĞ£¬ÏÈ¼ÙÉèÕâÁ½¸öÊı
+//ã€FC18ã€‘å·¥ç¨‹å…µè¡ŒåŠ¨åŠ›ï¼Œè§„åˆ™ä¸­æ²¡æœ‰ï¼Œå…ˆå‡è®¾è¿™ä¸¤ä¸ªæ•°
 const TMovePoint constructMovePoint[CONSTRUCT_CORPS_TYPE_NUM] = {2,2};
 
-//¡¾FC18¡¿×÷Õ½±øÍÅ³õÊ¼Õ½¶·Á¦£¨Óë×÷Õ½±øÍÅµÄÃ¶¾ÙÀàÔÚĞòºÅÉÏ¶ÔÓ¦£¬ÇÒ¿¼ÂÇÁËµÈ¼¶£©
+//ã€FC18ã€‘ä½œæˆ˜å…µå›¢åˆå§‹æˆ˜æ–—åŠ›ï¼ˆä¸ä½œæˆ˜å…µå›¢çš„æšä¸¾ç±»åœ¨åºå·ä¸Šå¯¹åº”ï¼Œä¸”è€ƒè™‘äº†ç­‰çº§ï¼‰
 const TBattlePoint corpsBattlePoint[BATTLE_CORPS_TYPE_NUM][MAX_CORPS_LEVEL] = 
 {
-	{36,   44,   52},    //Õ½Ê¿
-	{30,   38,   46},    //¹­¼ıÊÖ
-	{44,   52,   60}     //Æï±ø
+	{36,   44,   52},    //æˆ˜å£«
+	{30,   38,   46},    //å¼“ç®­æ‰‹
+	{44,   52,   60}     //éª‘å…µ
 };
 
 
-//¡¾FC18¡¿×÷Õ½±øÍÅµÄÕ½¶·Á¦ÔöÒæÏµÊı£¨Óë×÷Õ½±øÍÅµÄÃ¶¾ÙÀàÔÚĞòºÅÉÏ¶ÔÓ¦£¬ÇÒ¿¼ÂÇÁËµÈ¼¶£©
+//ã€FC18ã€‘ä½œæˆ˜å…µå›¢çš„æˆ˜æ–—åŠ›å¢ç›Šç³»æ•°ï¼ˆä¸ä½œæˆ˜å…µå›¢çš„æšä¸¾ç±»åœ¨åºå·ä¸Šå¯¹åº”ï¼Œä¸”è€ƒè™‘äº†ç­‰çº§ï¼‰
 const TIntPara corpsBattleGain[BATTLE_CORPS_TYPE_NUM][MAX_CORPS_LEVEL] = 
 {
-	{2,   2,   2},    //Õ½Ê¿
-	{2,   2,   2},    //¹­¼ıÊÖ
-	{4,   4,   4}     //Æï±ø
+	{2,   2,   2},    //æˆ˜å£«
+	{2,   2,   2},    //å¼“ç®­æ‰‹
+	{4,   4,   4}     //éª‘å…µ
 };
 
 
-//¡¾FC18¡¿×÷Õ½±øÍÅµÄ¹¥³ÇÏµÊı£¨Óë×÷Õ½±øÍÅµÄÃ¶¾ÙÀàÔÚĞòºÅÉÏ¶ÔÓ¦£¬ÇÒ¿¼ÂÇÁËµÈ¼¶£©
+//ã€FC18ã€‘ä½œæˆ˜å…µå›¢çš„æ”»åŸç³»æ•°ï¼ˆä¸ä½œæˆ˜å…µå›¢çš„æšä¸¾ç±»åœ¨åºå·ä¸Šå¯¹åº”ï¼Œä¸”è€ƒè™‘äº†ç­‰çº§ï¼‰
 const TDoublePara corpsAttackTowerGain[BATTLE_CORPS_TYPE_NUM][MAX_CORPS_LEVEL] = 
 {
-	{0.4,   0.4,   0.4},    //Õ½Ê¿
-	{0.7,   0.7,   0.7},    //¹­¼ıÊÖ
-	{0.5,   0.5,   0.5}     //Æï±ø
+	{0.4,   0.4,   0.4},    //æˆ˜å£«
+	{0.7,   0.7,   0.7},    //å¼“ç®­æ‰‹
+	{0.5,   0.5,   0.5}     //éª‘å…µ
 };
 
 
-//¡¾FC18¡¿×÷Õ½±øÍÅ³õÊ¼ÉúÃüÖµ£¨Óë×÷Õ½±øÍÅµÄÃ¶¾ÙÀàÔÚĞòºÅÉÏ¶ÔÓ¦£¬ÇÒ¿¼ÂÇÁËµÈ¼¶£©
+//ã€FC18ã€‘ä½œæˆ˜å…µå›¢åˆå§‹ç”Ÿå‘½å€¼ï¼ˆä¸ä½œæˆ˜å…µå›¢çš„æšä¸¾ç±»åœ¨åºå·ä¸Šå¯¹åº”ï¼Œä¸”è€ƒè™‘äº†ç­‰çº§ï¼‰
 const THealthPoint battleHealthPoint[BATTLE_CORPS_TYPE_NUM][MAX_CORPS_LEVEL] = 
 {
-	{60,   80,   90},    //Õ½Ê¿
-	{50,   70,   90},    //¹­¼ıÊÖ
-	{70,   90,   110}    //Æï±ø
+	{60,   80,   90},    //æˆ˜å£«
+	{50,   70,   90},    //å¼“ç®­æ‰‹
+	{70,   90,   110}    //éª‘å…µ
 };
 
-//¡¾FC18¡¿Õ½¶·±øÍÅÉä³Ì¾àÀë Õ½Ê¿1 ¹­¼ıÊÖ2 Æï±ø1
+//ã€FC18ã€‘æˆ˜æ–—å…µå›¢å°„ç¨‹è·ç¦» æˆ˜å£«1 å¼“ç®­æ‰‹2 éª‘å…µ1
 const int TBattleRange[BATTLE_CORPS_TYPE_NUM] = { 1, 2, 1 };
 
-//¡¾FC18¡¿±øÍÅ²Ù×÷ËùĞè²Ù×÷Êı¸öÊı£¬ÅĞ¶ÏÖ¸ÁîºÏ·¨ĞÔ£¨Óë±øÍÅ²Ù×÷µÄÃ¶¾ÙÀàÔÚĞòºÅÉÏ¶ÔÓ¦)
+//ã€FC18ã€‘å…µå›¢æ“ä½œæ‰€éœ€æ“ä½œæ•°ä¸ªæ•°ï¼Œåˆ¤æ–­æŒ‡ä»¤åˆæ³•æ€§ï¼ˆä¸å…µå›¢æ“ä½œçš„æšä¸¾ç±»åœ¨åºå·ä¸Šå¯¹åº”)
 const TOperaNum CorpsOperaNumNeed[CORPS_ACTION_TYPE_NUM] =
 {
-	3,    //ÒÆ¶¯
-	2,    //×¤Ôú
-	2,    //×¤ÔúËş
-	3,    //¹¥»÷±øÍÅ
-	3,    //¹¥»÷Ëş
-	INF,  //±øÍÅÕû±à£¨È¥µô£©
-	INF,  //±øÍÅ½âÉ¢£¨È¥µô£©
-	2,    //ĞŞ½¨Ëş
-	2,    //Î¬»¤Ëş
-	3     //¸ÄµØĞÎ
+	3,    //ç§»åŠ¨
+	2,    //é©»æ‰
+	2,    //é©»æ‰å¡”
+	3,    //æ”»å‡»å…µå›¢
+	3,    //æ”»å‡»å¡”
+	INF,  //å…µå›¢æ•´ç¼–ï¼ˆå»æ‰ï¼‰
+	INF,  //å…µå›¢è§£æ•£ï¼ˆå»æ‰ï¼‰
+	2,    //ä¿®å»ºå¡”
+	2,    //ç»´æŠ¤å¡”
+	3     //æ”¹åœ°å½¢
 };
 
 
-//¡¾FC18¡¿¹¤³Ì½¨Éè±øÍÅ²Ù×÷µÄÀÍ¶¯Á¦ÏûºÄ£¨Óë±øÍÅ²Ù×÷µÄÃ¶¾ÙÀàÔÚĞòºÅÉÏ¶ÔÓ¦)
+//ã€FC18ã€‘å·¥ç¨‹å»ºè®¾å…µå›¢æ“ä½œçš„åŠ³åŠ¨åŠ›æ¶ˆè€—ï¼ˆä¸å…µå›¢æ“ä½œçš„æšä¸¾ç±»åœ¨åºå·ä¸Šå¯¹åº”)
 const TBuildPoint constructBuildCost[CORPS_ACTION_TYPE_NUM] = 
 {
-	0,       //ÔÚµØÍ¼ÉÏÒÆ¶¯
-	0,       //×¤ÔúÔÚµØÍ¼·½¸ñ£¨ÎŞ×Ô¼ºËş£©
-	0,       //×¤ÔúÔÚËş£¨×Ô¼ºÊÆÁ¦µÄËş£©
-	0,       //¹¥»÷¶Ô·½ÊÆÁ¦µÄ±øÍÅ
-	0,       //¹¥»÷¶Ô·½ÊÆÁ¦µÄËş
-	0,       //±øÍÅÕû±à
-	0,       //±øÍÅ½âÉ¢
-	0,       //ĞŞ½¨ĞÂ·ÀÓùËş
-	1,       //ĞŞÀíÔ­·ÀÓùËş
-	1,       //¸Ä±ä·½¸ñµØĞÎ
+	0,       //åœ¨åœ°å›¾ä¸Šç§»åŠ¨
+	0,       //é©»æ‰åœ¨åœ°å›¾æ–¹æ ¼ï¼ˆæ— è‡ªå·±å¡”ï¼‰
+	0,       //é©»æ‰åœ¨å¡”ï¼ˆè‡ªå·±åŠ¿åŠ›çš„å¡”ï¼‰
+	0,       //æ”»å‡»å¯¹æ–¹åŠ¿åŠ›çš„å…µå›¢
+	0,       //æ”»å‡»å¯¹æ–¹åŠ¿åŠ›çš„å¡”
+	0,       //å…µå›¢æ•´ç¼–
+	0,       //å…µå›¢è§£æ•£
+	0,       //ä¿®å»ºæ–°é˜²å¾¡å¡”
+	1,       //ä¿®ç†åŸé˜²å¾¡å¡”
+	1,       //æ”¹å˜æ–¹æ ¼åœ°å½¢
 };
 
 const TOperaNum towerOperaNumNeed[TOWER_ACTION_TYPE_NUM] =
 {
-	3,       //Éú²úÈÎÎñ
-	3,       //¹¥»÷·ÀÓùËş
-	3        //¹¥»÷±øÍÅ
+	3,       //ç”Ÿäº§ä»»åŠ¡
+	3,       //æ”»å‡»é˜²å¾¡å¡”
+	3        //æ”»å‡»å…µå›¢
 };
 
-//¡¾FC18¡¿ËşµÄÉú²úÈÎÎñÉú²úÁ¦ÏûºÄÖµ
+//ã€FC18ã€‘å¡”çš„ç”Ÿäº§ä»»åŠ¡ç”Ÿäº§åŠ›æ¶ˆè€—å€¼
 const TProductPoint TowerProductCost[TOWER_PRODUCT_TASK_NUM] = 
-{//                                 Éú²ú»Ø±¨                                           ÌØÊâËµÃ÷
-	40,       //Éú²úÕ½Ê¿         1star-Õ½Ê¿±øÍÅ
-	60,       //Éú²ú¹­¼ıÊÖ      1star-¹­¼ıÊÖ±øÍÅ
-	100,      //Éú²úÆï±ø         1star-Æï±ø±øÍÅ
-	40,       //Éú²ú½¨ÔìÕß        1-½¨ÔìÕß±øÍÅ
-	40,       //Éú²ú¿ªÍØÕß        1-¿ªÍØÕß±øÍÅ
-	40        //ËşÉı¼¶ÈÎÎñ      ËşµÈ¼¶+1£¨max=8)       ÕâÀï40ÊÇ×îĞ¡Öµ£¬Êµ¼ÊÖµÎªÖ´ĞĞ¸ÃÈÎÎñµÄµÚÒ»»ØºÏËşµÄµÈ¼¶*40£¬Òª¸ù¾İÊµ¼ÊÇé¿öËã  
+{//                                 ç”Ÿäº§å›æŠ¥                                           ç‰¹æ®Šè¯´æ˜
+	40,       //ç”Ÿäº§æˆ˜å£«         1star-æˆ˜å£«
+	60,       //ç”Ÿäº§å¼“ç®­æ‰‹      1star-å¼“ç®­æ‰‹
+	100,      //ç”Ÿäº§æ³•å¸ˆ         1star-æ³•å¸ˆ
+	40,       //ç”Ÿäº§å»ºé€ è€…        1-å»ºé€ è€…å…µå›¢
+	40,       //ç”Ÿäº§å¼€æ‹“è€…        1-å¼€æ‹“è€…å…µå›¢
+	40        //å¡”å‡çº§ä»»åŠ¡      å¡”ç­‰çº§+1ï¼ˆmax=8)       è¿™é‡Œ40æ˜¯æœ€å°å€¼ï¼Œå®é™…å€¼ä¸ºæ‰§è¡Œè¯¥ä»»åŠ¡çš„ç¬¬ä¸€å›åˆå¡”çš„ç­‰çº§*40ï¼Œè¦æ ¹æ®å®é™…æƒ…å†µç®—  
 };
 
 
-//¡¾FC18¡¿Ã¿»ØºÏËşµÄ¾­ÑéÖµÔö¼ÓÓë»ØºÏÊıµÄ¹ØÏµ
-//¡¾GC18¡¿×¢ÒâÊµ¼Ê·ÃÎÊµÄÊ±ºò£¬´«Èë»ØºÏÊı/100ÏÂÈ¡Õû£¬300»ØºÏ´«Èë2,301»ØºÏÆğ´«Èë3
-//¡¾FC18¡¿»òÖ±½Ó¹«Ê½¼ÆËã£º5 + 5 * floor(currentRound / 100)£¬×¢Òâ±ß½çÖµÒªÌØÊâ¶Ô´ı
+//ã€FC18ã€‘æ¯å›åˆå¡”çš„ç»éªŒå€¼å¢åŠ ä¸å›åˆæ•°çš„å…³ç³»
+//ã€GC18ã€‘æ³¨æ„å®é™…è®¿é—®çš„æ—¶å€™ï¼Œä¼ å…¥å›åˆæ•°/100ä¸‹å–æ•´ï¼Œ300å›åˆä¼ å…¥2,301å›åˆèµ·ä¼ å…¥3
+//ã€FC18ã€‘æˆ–ç›´æ¥å…¬å¼è®¡ç®—ï¼š5 + 5 * floor(currentRound / 100)ï¼Œæ³¨æ„è¾¹ç•Œå€¼è¦ç‰¹æ®Šå¯¹å¾…
 const TExperPoint TowerExperGain[TOWER_EXPER_GAIN_SCALE + 1] = 
-{//               »ØºÏÊı
+{//               å›åˆæ•°
 	5,//          [0,100)
 	10,//         [100,200)
 	15,//         [200,300]
-	0//           (300,+¡Ş)
+	0//           (300,+âˆ)
 };
 
 
-//¡¾FC18¡¿Ëş¶ÔÖÜÎ§·½¸ñÊ©¼ÓµÄÕ¼ÓĞÊôĞÔÖµ£¬Óë¾àÀëµÄ¹ØÏµ±í
+//ã€FC18ã€‘å¡”å¯¹å‘¨å›´æ–¹æ ¼æ–½åŠ çš„å æœ‰å±æ€§å€¼ï¼Œä¸è·ç¦»çš„å…³ç³»è¡¨
 const TOccupyPoint TowerOccupyPoint[OCCUPY_POINT_DIST_SCALE + 1] = 
-{//                ·½¸ñ¸úËşµÄ¾àÀë
-	100,//              1¸ñ
-	80,//               2¸ñ
-	50,//               3¸ñ
-	20,//               4¸ñ
-	10,//               5¸ñ
-	0//               6¸ñ»ò¸üÔ¶
+{//                æ–¹æ ¼è·Ÿå¡”çš„è·ç¦»
+	100,//              1æ ¼
+	80,//               2æ ¼
+	50,//               3æ ¼
+	20,//               4æ ¼
+	10,//               5æ ¼
+	0//               6æ ¼æˆ–æ›´è¿œ
 };
 
 
-//¡¾FC18¡¿ËşÃ¿¸öµÈ¼¶×î¿ªÊ¼µÄÊ±ºò¸÷ÏîÊôĞÔµÄÖµ£¬ÓÃÓÚ³õÊ¼»¯ÅäÖÃ
+//ã€FC18ã€‘å¡”æ¯ä¸ªç­‰çº§æœ€å¼€å§‹çš„æ—¶å€™å„é¡¹å±æ€§çš„å€¼ï¼Œç”¨äºåˆå§‹åŒ–é…ç½®
 const struct TowerConfig TowerInitConfig[MAX_TOWER_LEVEL] =
 {
 	{10,25,100,20, 2},
@@ -420,41 +420,41 @@ const struct TowerConfig TowerInitConfig[MAX_TOWER_LEVEL] =
 };
 
 
-//¡¾FC18¡¿ĞĞ¶¯Á¦ÏûºÄ£¨ÓëµØĞÎµÄÃ¶¾ÙÀàÔÚĞòºÅÉÏ¶ÔÓ¦£©
+//ã€FC18ã€‘è¡ŒåŠ¨åŠ›æ¶ˆè€—ï¼ˆä¸åœ°å½¢çš„æšä¸¾ç±»åœ¨åºå·ä¸Šå¯¹åº”ï¼‰
 const TMovePoint CorpsMoveCost[TERRAIN_TYPE_NUM + 1] = 
 {
-	0,    //Ëş
-	2,    //Æ½Ô­
-	4,    //É½µØ
-	3,    //É­ÁÖ
-	4,    //ÕÓÔó
-	1,    //µÀÂ·
+	0,    //å¡”
+	2,    //å¹³åŸ
+	4,    //å±±åœ°
+	3,    //æ£®æ—
+	4,    //æ²¼æ³½
+	1,    //é“è·¯
 };
 
 
-//¡¾FC18¡¿Õ½¶·Á¦ÔöÒæ£¨ÓëµØĞÎµÄÃ¶¾ÙÀàÔÚĞòºÅÉÏ¶ÔÓ¦£©
+//ã€FC18ã€‘æˆ˜æ–—åŠ›å¢ç›Šï¼ˆä¸åœ°å½¢çš„æšä¸¾ç±»åœ¨åºå·ä¸Šå¯¹åº”ï¼‰
 const TBattlePoint CorpsBattleGain[TERRAIN_TYPE_NUM + 1] = 
 {
-	0,    //Ëş
-	0,    //Æ½Ô­
-	5,    //É½µØ
-	3,    //É­ÁÖ
-	-3,   //ÕÓÔó
-	0,    //µÀÂ·
+	0,    //å¡”
+	0,    //å¹³åŸ
+	5,    //å±±åœ°
+	3,    //æ£®æ—
+	-3,   //æ²¼æ³½
+	0,    //é“è·¯
 };
 
 
-//ÒÔÏÂÀ´×ÔFC15£¬ÎÒÃÇÓ¦¸ÃÓÃ²»µ½ÁË
+//ä»¥ä¸‹æ¥è‡ªFC15ï¼Œæˆ‘ä»¬åº”è¯¥ç”¨ä¸åˆ°äº†
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 enum CellStrategy
 {
-	Normal    //³õÊ¼×´Ì¬
-	, Attack  //¹¥»÷  
-	, Defence //·ÀÓù
-	, Grow    //·¢Óı
+	Normal    //åˆå§‹çŠ¶æ€
+	, Attack  //æ”»å‡»  
+	, Defence //é˜²å¾¡
+	, Grow    //å‘è‚²
 };
 
-//Ï¸°û²ßÂÔ¸Ä±ä»¨·Ñ¿Æ¼¼µã
+//ç»†èƒç­–ç•¥æ”¹å˜èŠ±è´¹ç§‘æŠ€ç‚¹
 const TTechPoint CellChangeCost[4][4] ={
 	//TO        N    A    D    G
 	/*F  N */   0,   3,   3,   3,
@@ -463,7 +463,7 @@ const TTechPoint CellChangeCost[4][4] ={
 	/*M  G */   2,   5,   5,   0
 };
 
-//Ï¸°û¶ÔÖÅÏûºÄ±¶ÂÊ
+//ç»†èƒå¯¹å³™æ¶ˆè€—å€ç‡
 const TPower CellConfrontPower[4][4] ={
 	//TO        N    A    D    G
 	/*F  N */  1.0, 1.0, 1.0, 1.0,
@@ -472,7 +472,7 @@ const TPower CellConfrontPower[4][4] ={
 	/*M  G */  2.0, 1.0, 1.0, 1.0
 };
 
-//Ï¸°ûÑ¹ÖÆÏûºÄ±¶ÂÊ
+//ç»†èƒå‹åˆ¶æ¶ˆè€—å€ç‡
 const TPower CellSupressPower[4][4] ={
 	//TO        N    A    D    G
 	/*F  N */  1.5, 1.5, 1.0, 1.5,
@@ -481,36 +481,36 @@ const TPower CellSupressPower[4][4] ={
 	/*M  G */  3.0, 1.5, 1.0, 1.5
 };
 
-//Ï¸°û×ÊÔ´Éú³¤±¶ÂÊ
+//ç»†èƒèµ„æºç”Ÿé•¿å€ç‡
 const TPower CellStrategyRegenerate[4] ={
 	//    N    A    D    G
 		 1.0, 1.0, 0.5, 1.5
 };
 
 const TPower TentacleDecay[4] = {
-	//´¥ÊÖÊıÁ¿   0    1    2    3
+	//è§¦æ‰‹æ•°é‡   0    1    2    3
 	           1.0, 1.0, 0.8, 0.6
 };
 
 enum TPlayerProperty
 {
-	RegenerationSpeed    //ÔÙÉúËÙ¶È
-	, ExtendingSpeed //ÑÓÉìËÙ¶È
-	, ExtraControl   //¶îÍâ¿ØÖÆÊı
-	, CellWall        //·ÀÓùµÈ¼¶
+	RegenerationSpeed    //å†ç”Ÿé€Ÿåº¦
+	, ExtendingSpeed //å»¶ä¼¸é€Ÿåº¦
+	, ExtraControl   //é¢å¤–æ§åˆ¶æ•°
+	, CellWall        //é˜²å¾¡ç­‰çº§
 };
 
 enum TentacleState
 {
-	Extending           //ÑÓÉìÖĞ
-	, Attacking          //¹¥»÷ÖĞ£¨Ãæ¶Ô¶Ô·½´¥ÊÖ£©
-	, Backing            //ÍËºóÖĞ£¨±»´òÍË£©
-	, Confrontation      //¶ÔÖÅÖĞ
-	, Arrived            //ÒÑµ½´ïÄ¿µÄµØ
-	, AfterCut           //±»ÇĞ¶Ï
+	Extending           //å»¶ä¼¸ä¸­
+	, Attacking          //æ”»å‡»ä¸­ï¼ˆé¢å¯¹å¯¹æ–¹è§¦æ‰‹ï¼‰
+	, Backing            //é€€åä¸­ï¼ˆè¢«æ‰“é€€ï¼‰
+	, Confrontation      //å¯¹å³™ä¸­
+	, Arrived            //å·²åˆ°è¾¾ç›®çš„åœ°
+	, AfterCut           //è¢«åˆ‡æ–­
 };
 
-enum CellType  //Ï¸°ûÖÖÀàµÄÃ¶¾Ù
+enum CellType  //ç»†èƒç§ç±»çš„æšä¸¾
 {
 	Alpha = 0,
 	Beta_1,
@@ -521,72 +521,72 @@ enum CellType  //Ï¸°ûÖÖÀàµÄÃ¶¾Ù
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 
-//@@@¡¾FC18¡¿·ÀÓùËş½á¹¹Ìå£¬ÓĞĞèÒªµÄĞÅÏ¢ÔÙ¼Ó
+//@@@ã€FC18ã€‘é˜²å¾¡å¡”ç»“æ„ä½“ï¼Œæœ‰éœ€è¦çš„ä¿¡æ¯å†åŠ 
 
 struct TowerInfo {
-	bool    exist;      //·ÀÓùËşÊÇ·ñ´æÔÚ
-	TTowerID      ID;   //·ÀÓùËşID
-	TPlayerID     ownerID;  //ËùÊôÍæ¼ÒID
-	TPoint        position;    //Î»ÖÃ
-	TProductPoint productPoint;  //Éú²úÁ¦
-	productType   pdtType;     //ËşÉÏÒ»´ÎÉú²úÈÎÎñÖ¸ÁîºóÉĞÎ´Íê³ÉµÄÈÎÎñÖÖÀà£¨ÈôÉÏÒ»´ÎÈÎÎñÖ¸ÁîÍê³É£¬ÔòÎª-1£©
-	TProductPoint productConsume;  //ËşÉÏÒ»´ÎÉú²úÈÎÎñÖ¸ÁîºóÎ´Íê³ÉÈÎÎñµÄÊ£ÓàµÄ¹¤×÷ÓàÁ¿
-	TBattlePoint  battlePoint;   //Õ½¶·Á¦
-	THealthPoint  healthPoint;   //ÉúÃüÖµ
-	TLevel        level;       //µÈ¼¶
+	bool    exist;      //é˜²å¾¡å¡”æ˜¯å¦å­˜åœ¨
+	TTowerID      ID;   //é˜²å¾¡å¡”ID
+	TPlayerID     ownerID;  //æ‰€å±ç©å®¶ID
+	TPoint        position;    //ä½ç½®
+	TProductPoint productPoint;  //ç”Ÿäº§åŠ›
+	productType   pdtType;     //å¡”ä¸Šä¸€æ¬¡ç”Ÿäº§ä»»åŠ¡æŒ‡ä»¤åå°šæœªå®Œæˆçš„ä»»åŠ¡ç§ç±»ï¼ˆè‹¥ä¸Šä¸€æ¬¡ä»»åŠ¡æŒ‡ä»¤å®Œæˆï¼Œåˆ™ä¸º-1ï¼‰
+	TProductPoint productConsume;  //å¡”ä¸Šä¸€æ¬¡ç”Ÿäº§ä»»åŠ¡æŒ‡ä»¤åæœªå®Œæˆä»»åŠ¡çš„å‰©ä½™çš„å·¥ä½œä½™é‡
+	TBattlePoint  battlePoint;   //æˆ˜æ–—åŠ›
+	THealthPoint  healthPoint;   //ç”Ÿå‘½å€¼
+	TLevel        level;       //ç­‰çº§
 };
 
 
-//@@@¡¾FC18¡¿±øÍÅ½á¹¹Ìå£¬ÓĞĞèÒªµÄĞÅÏ¢ÔÙ¼Ó
+//@@@ã€FC18ã€‘å…µå›¢ç»“æ„ä½“ï¼Œæœ‰éœ€è¦çš„ä¿¡æ¯å†åŠ 
 struct CorpsInfo
 {
-	bool	exist;		//ÊÇ·ñ´æÔÚ
-	TPoint	pos;		//±øÍÅ×ø±ê
-	//int		level;		//±øÍÅµÈ¼¶
-	TCorpsID		ID;	//±øÍÅID
-	THealthPoint	HealthPoint;	//ÉúÃüÖµ
-	TBuildPoint		BuildPoint;		//ÀÍ¶¯Á¦
-	TPlayerID		owner;			//ËùÊôÍæ¼ÒID
-	corpsType       type;           //±øÍÅÖÖÀà
-	TMovePoint      movePoint;      //ĞĞ¶¯Á¦
-	battleCorpsType		m_BattleType;	//Õ½¶·±øÓÃ
-	constructCorpsType	m_BuildType;	//½¨Ôì±øÓÃ
+	bool	exist;		//æ˜¯å¦å­˜åœ¨
+	TPoint	pos;		//å…µå›¢åæ ‡
+	//int		level;		//å…µå›¢ç­‰çº§
+	TCorpsID		ID;	//å…µå›¢ID
+	THealthPoint	HealthPoint;	//ç”Ÿå‘½å€¼
+	TBuildPoint		BuildPoint;		//åŠ³åŠ¨åŠ›
+	TPlayerID		owner;			//æ‰€å±ç©å®¶ID
+	corpsType       type;           //å…µå›¢ç§ç±»
+	TMovePoint      movePoint;      //è¡ŒåŠ¨åŠ›
+	battleCorpsType		m_BattleType;	//æˆ˜æ–—å…µç”¨
+	constructCorpsType	m_BuildType;	//å»ºé€ å…µç”¨
 };
 
 
-//@@@¡¾FC18¡¿Íæ¼Ò½á¹¹Ìå
+//@@@ã€FC18ã€‘ç©å®¶ç»“æ„ä½“
 struct PlayerInfo
 {
-	TPlayerID id;                        //¡¾FC18¡¿Íæ¼ÒµÄĞòºÅ£¬Çë×¢ÒâÍæ¼ÒĞòºÅ´Ó1¿ªÊ¼£¬·ÃÎÊÍæ¼ÒÊı×éÇëÓÃ[ID-1]
-	int rank;                            //¡¾FC18¡¿¸ÃÑ¡ÊÖÅÅÃû£¨³ö¾ÖÕßÖ±½ÓÓÉ³ö¾Ö»ØºÏÊı¸øÎ»´Î£©|£¨´æ»îÕß°´·ÀÓùËşµÃ·ÖºÍ±øÍÅµÃ·ÖÀ´ÅÅÃû£©|£¨Í¬Ãû´Î°´·ÀÓùËş¹¥Õ¼Êı¡¢ÏûÃğµĞ·½¾üÍÅÊı¡¢·ıÂ²µĞ·½¾üÍÅÊıÒÀ´Î¼ìË÷ÅÅÃû£©|£¨ÈÔÓĞÍ¬Ãû´ÎÕßËæ»ú·ÖÅäÅÅÃû£©
-	bool alive;                          //¡¾FC18¡¿Íæ¼ÒÊÇ·ñ»¹»î×Å
+	TPlayerID id;                        //ã€FC18ã€‘ç©å®¶çš„åºå·ï¼Œè¯·æ³¨æ„ç©å®¶åºå·ä»1å¼€å§‹ï¼Œè®¿é—®ç©å®¶æ•°ç»„è¯·ç”¨[ID-1]
+	int rank;                            //ã€FC18ã€‘è¯¥é€‰æ‰‹æ’åï¼ˆå‡ºå±€è€…ç›´æ¥ç”±å‡ºå±€å›åˆæ•°ç»™ä½æ¬¡ï¼‰|ï¼ˆå­˜æ´»è€…æŒ‰é˜²å¾¡å¡”å¾—åˆ†å’Œå…µå›¢å¾—åˆ†æ¥æ’åï¼‰|ï¼ˆåŒåæ¬¡æŒ‰é˜²å¾¡å¡”æ”»å æ•°ã€æ¶ˆç­æ•Œæ–¹å†›å›¢æ•°ã€ä¿˜è™æ•Œæ–¹å†›å›¢æ•°ä¾æ¬¡æ£€ç´¢æ’åï¼‰|ï¼ˆä»æœ‰åŒåæ¬¡è€…éšæœºåˆ†é…æ’åï¼‰
+	bool alive;                          //ã€FC18ã€‘ç©å®¶æ˜¯å¦è¿˜æ´»ç€
 
-	//@@@¡¾FC18¡¿Íæ¼ÒËùÓĞËşµÄĞòºÅ£¬²ÎÕÕÔ­À´µÄset<TCellID> cells
+	//@@@ã€FC18ã€‘ç©å®¶æ‰€æœ‰å¡”çš„åºå·ï¼Œå‚ç…§åŸæ¥çš„set<TCellID> cells
 	set<TTowerID> tower;
 
 
-	//¡¾FC18¡¿Íæ¼ÒËùÓĞ±øÍÅµÄĞòºÅ£¬½¨ÒéÒ²ÓÃsetÕâÖÖÊı¾İ½á¹¹£¬ÄÚ²¿°´±øÍÅĞòºÅÉıĞòÀ´ÅÅĞò
-	set<TCorpsID> corps; //ËùÓĞ±øÍÅ
+	//ã€FC18ã€‘ç©å®¶æ‰€æœ‰å…µå›¢çš„åºå·ï¼Œå»ºè®®ä¹Ÿç”¨setè¿™ç§æ•°æ®ç»“æ„ï¼Œå†…éƒ¨æŒ‰å…µå›¢åºå·å‡åºæ¥æ’åº
+	set<TCorpsID> corps; //æ‰€æœ‰å…µå›¢
 };
 
 
-//Info¸Ä´«Õâ¸ö¶«Î÷vector<vector<>> ·½±ã¿ì½İ
-struct mapBlock                                 //¡¾FC18¡¿µØÍ¼·½¸ñÀà
+//Infoæ”¹ä¼ è¿™ä¸ªä¸œè¥¿vector<vector<>> æ–¹ä¾¿å¿«æ·
+struct mapBlock                                 //ã€FC18ã€‘åœ°å›¾æ–¹æ ¼ç±»
 {
-	terrainType type;                           //¡¾FC18¡¿µØ¿éÀàĞÍ£¬¶ÔÓ¦terrainTypeÃ¶¾ÙÀà
-	vector<int> occupyPoint;                    //¡¾FC18¡¿¸÷Íæ¼ÒµÄÕ¼ÓĞÊôĞÔÖµ£¬ÖÈÎªÍæ¼ÒĞòºÅ-1
-	int owner;                                  //¡¾FC18¡¿ËùÊôÍæ¼ÒĞòºÅ£¬-1Îª¹ı¶ÉTRANSITION£¬-2Îª¹«¹²PUBLIC
-	int TowerIndex;								//@@@¡¾FC18¡¿Î»ÓÚ¸Ãµ¥Ôª¸ñµÄËşµÄÏÂ±ê£¬¶ÔÓ¦dataÀïµÄmyTowers£¬Ã»ÓĞËşµÄÊ±ºòÎª-1
-	vector<TCorpsID> corps;						//¸ÃÎ»ÖÃ±øÍÅ
+	terrainType type;                           //ã€FC18ã€‘åœ°å—ç±»å‹ï¼Œå¯¹åº”terrainTypeæšä¸¾ç±»
+	vector<int> occupyPoint;                    //ã€FC18ã€‘å„ç©å®¶çš„å æœ‰å±æ€§å€¼ï¼Œç§©ä¸ºç©å®¶åºå·-1
+	int owner;                                  //ã€FC18ã€‘æ‰€å±ç©å®¶åºå·ï¼Œ-1ä¸ºè¿‡æ¸¡TRANSITIONï¼Œ-2ä¸ºå…¬å…±PUBLIC
+	int TowerIndex;								//@@@ã€FC18ã€‘ä½äºè¯¥å•å…ƒæ ¼çš„å¡”çš„ä¸‹æ ‡ï¼Œå¯¹åº”dataé‡Œçš„myTowersï¼Œæ²¡æœ‰å¡”çš„æ—¶å€™ä¸º-1
+	vector<TCorpsID> corps;						//è¯¥ä½ç½®å…µå›¢
 };
 
-//¡¾FC18¡¿µØÍ¼µ¥Ôª¸ñĞÅÏ¢½á¹¹Ìå
+//ã€FC18ã€‘åœ°å›¾å•å…ƒæ ¼ä¿¡æ¯ç»“æ„ä½“
 struct mapBlockInfo
 {
-	terrainType type;                           //¡¾FC18¡¿µØ¿éÀàĞÍ£¬¶ÔÓ¦terrainTypeÃ¶¾ÙÀà
-	int owner;                                  //¡¾FC18¡¿ËùÊôÍæ¼ÒĞòºÅ£¬-1Îª¹ı¶ÉTRANSITION£¬-2Îª¹«¹²PUBLIC
-	vector<int> occupyPoint;                    //¡¾FC18¡¿¸÷Íæ¼ÒµÄÕ¼ÓĞÊôĞÔÖµ£¬ÖÈÎªÍæ¼ÒĞòºÅ-1
-	TTowerID towerIndex;                        //¡¾FC18¡¿µØÍ¼·½¸ñĞÅÏ¢£¬NOTOWER±íÊ¾Ã»ÓĞËş
+	terrainType type;                           //ã€FC18ã€‘åœ°å—ç±»å‹ï¼Œå¯¹åº”terrainTypeæšä¸¾ç±»
+	int owner;                                  //ã€FC18ã€‘æ‰€å±ç©å®¶åºå·ï¼Œ-1ä¸ºè¿‡æ¸¡TRANSITIONï¼Œ-2ä¸ºå…¬å…±PUBLIC
+	vector<int> occupyPoint;                    //ã€FC18ã€‘å„ç©å®¶çš„å æœ‰å±æ€§å€¼ï¼Œç§©ä¸ºç©å®¶åºå·-1
+	TTowerID towerIndex;                        //ã€FC18ã€‘åœ°å›¾æ–¹æ ¼ä¿¡æ¯ï¼ŒNOTOWERè¡¨ç¤ºæ²¡æœ‰å¡”
 };
 
 struct CellInfo
@@ -597,43 +597,43 @@ struct CellInfo
 	CellStrategy strategy;
 
 	TResourceD resource;
-	TResourceD occupyPoint;  //Ö»ÓĞÖĞÁ¢Ê±²ÅÓĞÒâÒå
-	TPlayerID occupyOwner;//Ö»ÓĞÖĞÁ¢Ê±²ÅÓĞÒâÒå
+	TResourceD occupyPoint;  //åªæœ‰ä¸­ç«‹æ—¶æ‰æœ‰æ„ä¹‰
+	TPlayerID occupyOwner;//åªæœ‰ä¸­ç«‹æ—¶æ‰æœ‰æ„ä¹‰
 
 	TPoint position;
 
 	TResourceD maxResource;
-	int maxTentacleNum;  //×î´ó´¥ÊÖÊıÁ¿
+	int maxTentacleNum;  //æœ€å¤§è§¦æ‰‹æ•°é‡
 	int currTentacleNum;
-	TPower techSpeed;    //¿Æ´´µãÊıÊÇ×ÊÔ´ÔÙÉúËÙÂÊµÄ¼¸±¶
+	TPower techSpeed;    //ç§‘åˆ›ç‚¹æ•°æ˜¯èµ„æºå†ç”Ÿé€Ÿç‡çš„å‡ å€
 };
 
-//¡¾FC15¡¿
+//ã€FC15ã€‘
 struct TentacleInfo
 {
-	bool	exist;		//ÊÇ·ñ´æÔÚ
-	TCellID         sourceCell;              //Ô´Í¬Ñ§
-	TCellID         targetCell;              //Ä¿±êÍ¬Ñ§
-	TentacleState   state;                     //´¥ÊÖ×´Ì¬
-	TLength         maxlength;                     //´¥ÊÖ³¤¶È£¨ÓÉÔ´/Ä¿±ê¾ö¶¨£©
-	TResourceD      resource;                   //µ±Ç°×ÊÔ´      £¨ÇĞ¶ÏÇ°ÓĞĞ§£©
-	TResourceD      frontResource;              //ÇĞ¶ÏºóÇ°·½×ÊÔ´£¨ÇĞ¶ÏºóÓĞĞ§£©
-	TResourceD      backResource;               //ÇĞ¶Ïºóºó·½×ÊÔ´£¨ÇĞ¶ÏºóÓĞĞ§£©
+	bool	exist;		//æ˜¯å¦å­˜åœ¨
+	TCellID         sourceCell;              //æºåŒå­¦
+	TCellID         targetCell;              //ç›®æ ‡åŒå­¦
+	TentacleState   state;                     //è§¦æ‰‹çŠ¶æ€
+	TLength         maxlength;                     //è§¦æ‰‹é•¿åº¦ï¼ˆç”±æº/ç›®æ ‡å†³å®šï¼‰
+	TResourceD      resource;                   //å½“å‰èµ„æº      ï¼ˆåˆ‡æ–­å‰æœ‰æ•ˆï¼‰
+	TResourceD      frontResource;              //åˆ‡æ–­åå‰æ–¹èµ„æºï¼ˆåˆ‡æ–­åæœ‰æ•ˆï¼‰
+	TResourceD      backResource;               //åˆ‡æ–­ååæ–¹èµ„æºï¼ˆåˆ‡æ–­åæœ‰æ•ˆï¼‰
 };
 
-//ÀàÉùÃ÷
+//ç±»å£°æ˜
 class CommandList;
-//³£ÓÃÊıÑ§ÔËËã
-//¶şÎ¬×ø±ê¼õÔËËã
+//å¸¸ç”¨æ•°å­¦è¿ç®—
+//äºŒç»´åæ ‡å‡è¿ç®—
 TPoint operator-(const TPoint& p1, const TPoint& p2);
-//¼ÆËãÅ·Ê½¾àÀë
+//è®¡ç®—æ¬§å¼è·ç¦»
 TLength getDistance(const TPoint& p1, const TPoint& p2);
-//¼ÆËãFC18ÖĞËş¹¥»÷·¶Î§µÄ¾àÀë£¨FC18¾àÀë£©
+//è®¡ç®—FC18ä¸­å¡”æ”»å‡»èŒƒå›´çš„è·ç¦»ï¼ˆFC18è·ç¦»ï¼‰
 TDist getDist(const TPoint& p1, const TPoint& p2);
 TDist getDist(const int p1_x, const int p1_y, const int p2_x, const int p2_y);
-//Éú³ÉÖ¸¶¨±ÕÇø¼äµÄËæ»úÕûÊı
+//ç”ŸæˆæŒ‡å®šé—­åŒºé—´çš„éšæœºæ•´æ•°
 int generateRanInt(int start, int end);
-//Êä³öÍæ¼ÒÏÂ´ïµÄÖ¸Áî¼¯
+//è¾“å‡ºç©å®¶ä¸‹è¾¾çš„æŒ‡ä»¤é›†
 std::ostream& operator << (std::ostream& os, const CommandList& cl);
 
 struct TBarrier
@@ -643,93 +643,93 @@ struct TBarrier
 };
 
 
-//@@@¡¾FC18¡¿µØÍ¼»ùÀà
+//@@@ã€FC18ã€‘åœ°å›¾åŸºç±»
 class BaseMap
 {
 	public:
-		void   setID(TMapID _id) { id = _id; }         //¡¾FC18¡¿ÉèÖÃµØÍ¼µÄĞòºÅ
-		TMap   getWidth()  const { return m_width; }   //¡¾FC18¡¿»ñÈ¡µØÍ¼¿í¶È
-		TMap   getHeigth() const { return m_height; }  //¡¾FC18¡¿»ñÈ¡µØÍ¼¸ß¶È
+		void   setID(TMapID _id) { id = _id; }         //ã€FC18ã€‘è®¾ç½®åœ°å›¾çš„åºå·
+		TMap   getWidth()  const { return m_width; }   //ã€FC18ã€‘è·å–åœ°å›¾å®½åº¦
+		TMap   getHeigth() const { return m_height; }  //ã€FC18ã€‘è·å–åœ°å›¾é«˜åº¦
 
-		string             id;                         //¡¾FC18¡¿¼ÇÂ¼µØÍ¼µÄid£¬ÓÉgame¸³Öµ£¬±»initº¯ÊıÊ¹ÓÃ£¬Ñ¡Ôñ¶ÔÓ¦µÄÎÄ¼ş
-		TMap               m_width;                    //¡¾FC18¡¿µØÍ¼¿í¶È
-		TMap               m_height;                   //¡¾FC18¡¿µØÍ¼¸ß¶È
+		string             id;                         //ã€FC18ã€‘è®°å½•åœ°å›¾çš„idï¼Œç”±gameèµ‹å€¼ï¼Œè¢«initå‡½æ•°ä½¿ç”¨ï¼Œé€‰æ‹©å¯¹åº”çš„æ–‡ä»¶
+		TMap               m_width;                    //ã€FC18ã€‘åœ°å›¾å®½åº¦
+		TMap               m_height;                   //ã€FC18ã€‘åœ°å›¾é«˜åº¦
 
-		//@@@¡¾FC18¡¿´æ´¢µØÍ¼ÉÏµÄËùÓĞ·ÀÓùËşĞÅÏ¢µÄÏòÁ¿£¨ÔªËØÎª·ÀÓùËşĞÅÏ¢½á¹¹Ìå£©£¬¿ÉÒÔ²ÎÕÕvector<TPoint> m_studentPos
-		vector<TPoint>     m_studentPos;               //Ö»Éè¶¨Ï¸°ûµÄ×ø±ê£¬Ö®ºóµÄÊÆÁ¦·ÖÅä½»¸øgame
+		//@@@ã€FC18ã€‘å­˜å‚¨åœ°å›¾ä¸Šçš„æ‰€æœ‰é˜²å¾¡å¡”ä¿¡æ¯çš„å‘é‡ï¼ˆå…ƒç´ ä¸ºé˜²å¾¡å¡”ä¿¡æ¯ç»“æ„ä½“ï¼‰ï¼Œå¯ä»¥å‚ç…§vector<TPoint> m_studentPos
+		vector<TPoint>     m_studentPos;               //åªè®¾å®šç»†èƒçš„åæ ‡ï¼Œä¹‹åçš„åŠ¿åŠ›åˆ†é…äº¤ç»™game
 
-		//¡¾FC18¡¿´æ´¢µØÍ¼ÉÏµÄËùÓĞ±øÍÅĞÅÏ¢µÄÏòÁ¿£¨ÔªËØÎª±øÍÅĞÅÏ¢½á¹¹Ìå£©£¬¿ÉÒÔ²ÎÕÕvector<TPoint> m_studentPos
+		//ã€FC18ã€‘å­˜å‚¨åœ°å›¾ä¸Šçš„æ‰€æœ‰å…µå›¢ä¿¡æ¯çš„å‘é‡ï¼ˆå…ƒç´ ä¸ºå…µå›¢ä¿¡æ¯ç»“æ„ä½“ï¼‰ï¼Œå¯ä»¥å‚ç…§vector<TPoint> m_studentPos
 		vector<CorpsInfoUnit>     m_corpsinfo;
 
-		//@@@¡¾FC18¡¿»ñÈ¡µØÍ¼ÉÏµÄËùÓĞ·ÀÓùËşĞÅÏ¢º¯Êı£¬¿ÉÒÔ²ÎÕÕconst  vector<TPoint>& getStudentPos() const
-		//@@@¡¾FC18¡¿·µ»ØÒ»¸ö·ÀÓùËşĞÅÏ¢½á¹¹ÌåµÄvectorÒıÓÃ£¬·½±ãÍâ²¿·ÃÎÊĞŞ¸Ä
+		//@@@ã€FC18ã€‘è·å–åœ°å›¾ä¸Šçš„æ‰€æœ‰é˜²å¾¡å¡”ä¿¡æ¯å‡½æ•°ï¼Œå¯ä»¥å‚ç…§const  vector<TPoint>& getStudentPos() const
+		//@@@ã€FC18ã€‘è¿”å›ä¸€ä¸ªé˜²å¾¡å¡”ä¿¡æ¯ç»“æ„ä½“çš„vectorå¼•ç”¨ï¼Œæ–¹ä¾¿å¤–éƒ¨è®¿é—®ä¿®æ”¹
 		const  vector<TPoint>& getStudentPos() const { return m_studentPos; }
 
-		//¡¾FC18¡¿»ñÈ¡µØÍ¼ÉÏµÄËùÓĞ±øÍÅĞÅÏ¢º¯Êı£¬¿ÉÒÔ²ÎÕÕconst  vector<TPoint>& getStudentPos() const
-		//¡¾FC18¡¿·µ»ØÒ»¸ö±øÍÅĞÅÏ¢½á¹¹ÌåµÄvectorÒıÓÃ£¬·½±ãÍâ²¿·ÃÎÊĞŞ¸Ä
+		//ã€FC18ã€‘è·å–åœ°å›¾ä¸Šçš„æ‰€æœ‰å…µå›¢ä¿¡æ¯å‡½æ•°ï¼Œå¯ä»¥å‚ç…§const  vector<TPoint>& getStudentPos() const
+		//ã€FC18ã€‘è¿”å›ä¸€ä¸ªå…µå›¢ä¿¡æ¯ç»“æ„ä½“çš„vectorå¼•ç”¨ï¼Œæ–¹ä¾¿å¤–éƒ¨è®¿é—®ä¿®æ”¹
 		const  vector<CorpsInfoUnit>& getCropsInfo() const { return m_corpsinfo; }
 
-		//FC15µÄ
-		vector<TBarrier>   m_barrier;                  //¼ÇÂ¼ËùÓĞÕÏ°­µÄĞÅÏ¢
+		//FC15çš„
+		vector<TBarrier>   m_barrier;                  //è®°å½•æ‰€æœ‰éšœç¢çš„ä¿¡æ¯
 		const  vector<TBarrier>& getBarriar()    const { return m_barrier; }
-		bool   passable(TPoint p1, TPoint p2)          //ÅĞ¶Ï´¥ÊÖÄÜ·ñÁ¬½ÓÕâÁ½¸öµã
+		bool   passable(TPoint p1, TPoint p2)          //åˆ¤æ–­è§¦æ‰‹èƒ½å¦è¿æ¥è¿™ä¸¤ä¸ªç‚¹
 		{
 			for (auto b : m_barrier)
 			{
-				//¿ìËÙÅÅ³âÊµÑé
+				//å¿«é€Ÿæ’æ–¥å®éªŒ
 				int minFX = max(min(p1.m_x, p2.m_x), min(b.m_beginPoint.m_x, b.m_endPoint.m_x));
 				int maxFX = min(max(p1.m_x, p2.m_x), max(b.m_beginPoint.m_x, b.m_endPoint.m_x));
 				int minFY = max(min(p1.m_y, p2.m_y), min(b.m_beginPoint.m_y, b.m_endPoint.m_y));
 				int maxFY = min(max(p1.m_y, p2.m_y), max(b.m_beginPoint.m_y, b.m_endPoint.m_y));
 				if (minFX > maxFX || minFY > maxFY)
 					return false;
-				//¿çÔ½ÊµÑé
+				//è·¨è¶Šå®éªŒ
 				if (cross(p1 - b.m_beginPoint, b.m_endPoint - b.m_beginPoint)*cross(b.m_endPoint - b.m_beginPoint, p2 - b.m_beginPoint) >= 0
 					|| cross(b.m_beginPoint - p1, p2 - p1)*cross(p2 - p1, b.m_endPoint - p1) >= 0)
 					return false;
 			}
 			return true;
 		}
-		bool   isPosValid(TPoint p) { return isPosValid(p.m_x, p.m_y); }             //ÅĞ¶ÏµãÊÇ·ñÔ½½ç
+		bool   isPosValid(TPoint p) { return isPosValid(p.m_x, p.m_y); }             //åˆ¤æ–­ç‚¹æ˜¯å¦è¶Šç•Œ
 		bool   isPosValid(int x, int y) { return x >= 0 && x < m_width&&y >= 0 && y < m_height; }
   //protected:
 	private:
-		int cross(const TPoint& p1, const TPoint& p2) { return p1.m_x*p2.m_y - p1.m_y*p2.m_x; }//²æ³Ë
+		int cross(const TPoint& p1, const TPoint& p2) { return p1.m_x*p2.m_y - p1.m_y*p2.m_x; }//å‰ä¹˜
 		int min(int a, int b) { return a < b ? a : b; }
 		int max(int a, int b) { return a < b ? b : a; }
 };
 
-//ÃüÁîÖÖÀà
+//å‘½ä»¤ç§ç±»
 enum CommandType
 {
-	upgrade          //Éı¼¶ÊôĞÔ
-	, changeStrategy //¸Ä±äÏ¸°û²ßÂÔ
-	, addTentacle    //Ìí¼Ó´¥ÊÖ
-	, cutTentacle    //ÇĞ¶Ï´¥ÊÖ
+	upgrade          //å‡çº§å±æ€§
+	, changeStrategy //æ”¹å˜ç»†èƒç­–ç•¥
+	, addTentacle    //æ·»åŠ è§¦æ‰‹
+	, cutTentacle    //åˆ‡æ–­è§¦æ‰‹
 };
 
-//¡¾FC18¡¿±£´æÃüÁîÏà¹ØĞÅÏ¢
+//ã€FC18ã€‘ä¿å­˜å‘½ä»¤ç›¸å…³ä¿¡æ¯
 struct Command
 {
-	Command(commandType _FC18type, initializer_list<int> _FC18parameters) :  //¡¾FC18¡¿ÓÉ³õÊ¼»¯ÁĞ±í¹¹ÔìµÄ¹¹Ôìº¯Êı
+	Command(commandType _FC18type, initializer_list<int> _FC18parameters) :  //ã€FC18ã€‘ç”±åˆå§‹åŒ–åˆ—è¡¨æ„é€ çš„æ„é€ å‡½æ•°
 		cmdType(_FC18type), parameters(_FC18parameters){}
-	Command(commandType _FC18type, vector<int> _FC18parameters) :            //¡¾FC18¡¿ÓÉÄ¬ÈÏÏòÁ¿Êı×é¹¹ÔìµÄ¹¹Ôìº¯Êı
+	Command(commandType _FC18type, vector<int> _FC18parameters) :            //ã€FC18ã€‘ç”±é»˜è®¤å‘é‡æ•°ç»„æ„é€ çš„æ„é€ å‡½æ•°
 		cmdType(_FC18type), parameters(_FC18parameters){}
-	Command() {}                                                             //¡¾FC18¡¿Ö¸ÁîµÄÎö¹¹º¯Êı
-	commandType cmdType;                                                     //¡¾FC18¡¿ÃüÁîÖÖÀà
-	vector<int> parameters;                                                  //¡¾FC18¡¿²ÎÊı£º×¢ÒâËùÓĞ²ÎÊıÊÇÕûĞÍ£¡
+	Command() {}                                                             //ã€FC18ã€‘æŒ‡ä»¤çš„ææ„å‡½æ•°
+	commandType cmdType;                                                     //ã€FC18ã€‘å‘½ä»¤ç§ç±»
+	vector<int> parameters;                                                  //ã€FC18ã€‘å‚æ•°ï¼šæ³¨æ„æ‰€æœ‰å‚æ•°æ˜¯æ•´å‹ï¼
 };
 
-//¡¾FC18¡¿ÃüÁîÁĞ±í
+//ã€FC18ã€‘å‘½ä»¤åˆ—è¡¨
 class CommandList
 {
 	public:
-		void addCommand(commandType _FC18type, initializer_list<int> _FC18parameters)  //¡¾FC18¡¿ÓÉ³õÊ¼»¯ÁĞ±íÖ±½ÓÌí¼ÓÃüÁî
+		void addCommand(commandType _FC18type, initializer_list<int> _FC18parameters)  //ã€FC18ã€‘ç”±åˆå§‹åŒ–åˆ—è¡¨ç›´æ¥æ·»åŠ å‘½ä»¤
 		{
 			if (size() >= MAX_CMD_NUM) return;
 			m_commands.emplace_back( _FC18type, _FC18parameters );
 		}
-		void addCommand(commandType _FC18type, vector<int> _FC18parameters)            //¡¾FC18¡¿ÓÉÄ¬ÈÏÏòÁ¿Êı×éÌí¼ÓÃüÁî£¨ĞèÒª¿½±´¹¹Ôì£©
+		void addCommand(commandType _FC18type, vector<int> _FC18parameters)            //ã€FC18ã€‘ç”±é»˜è®¤å‘é‡æ•°ç»„æ·»åŠ å‘½ä»¤ï¼ˆéœ€è¦æ‹·è´æ„é€ ï¼‰
 		{
 			if (size() >= MAX_CMD_NUM) return;
 			Command newCmd;
@@ -737,55 +737,55 @@ class CommandList
 			newCmd.parameters = _FC18parameters;
 			m_commands.push_back(newCmd);
 		}
-		void removeCommand(int n)                                                      //¡¾FC18¡¿ÒÆ³ıµÚnÌõÃüÁî
+		void removeCommand(int n)                                                      //ã€FC18ã€‘ç§»é™¤ç¬¬næ¡å‘½ä»¤
 		{
 			if (n < 0 || n >= size())
-				throw std::out_of_range("ÒÆ³ıÃüÁîÊ±Ô½½ç");
+				throw std::out_of_range("ç§»é™¤å‘½ä»¤æ—¶è¶Šç•Œ");
 			m_commands.erase(m_commands.begin() + n);
 		}
-		vector<Command> getCommand() { return m_commands; }                            //¡¾FC18¡¿»ñÈ¡ËùÓĞÃüÁî
-		Command& operator[](int n)                                                     //¡¾FC18¡¿·ÃÎÊµÚnÌõÃüÁî£¬·µ»Ø¸ÃÃüÁîµÄÒıÓÃ
+		vector<Command> getCommand() { return m_commands; }                            //ã€FC18ã€‘è·å–æ‰€æœ‰å‘½ä»¤
+		Command& operator[](int n)                                                     //ã€FC18ã€‘è®¿é—®ç¬¬næ¡å‘½ä»¤ï¼Œè¿”å›è¯¥å‘½ä»¤çš„å¼•ç”¨
 		{
 			if (n < 0 || size() <= n)
-				throw std::out_of_range("·ÃÎÊÃüÁîÊ±Ô½½ç");
+				throw std::out_of_range("è®¿é—®å‘½ä»¤æ—¶è¶Šç•Œ");
 			return m_commands[n];
 		}
-		int size() const { return int(m_commands.size()); }                            //¡¾FC18¡¿»ñÈ¡×Ü¹²µÄÃüÁîÌõÊı
-		vector<Command>::iterator begin() { return m_commands.begin(); }               //¡¾FC18¡¿·µ»ØµÚÒ»ÌõÃüÁîµÄµü´úÆ÷
-		vector<Command>::iterator end() { return m_commands.end(); }                   //¡¾FC18¡¿·µ»Ø×îºóÒ»ÌõÃüÁîµÄµü´úÆ÷
-		vector<Command>::const_iterator  begin() const { return m_commands.cbegin(); } //¡¾FC18¡¿·µ»ØµÚÒ»ÌõÃüÁîµÄ³£Á¿µü´úÆ÷
-		vector<Command>::const_iterator end() const { return m_commands.cend(); }      //¡¾FC18¡¿·µ»Ø×îºóÒ»ÌõÃüÁîµÄ³£Á¿µü´úÆ÷
+		int size() const { return int(m_commands.size()); }                            //ã€FC18ã€‘è·å–æ€»å…±çš„å‘½ä»¤æ¡æ•°
+		vector<Command>::iterator begin() { return m_commands.begin(); }               //ã€FC18ã€‘è¿”å›ç¬¬ä¸€æ¡å‘½ä»¤çš„è¿­ä»£å™¨
+		vector<Command>::iterator end() { return m_commands.end(); }                   //ã€FC18ã€‘è¿”å›æœ€åä¸€æ¡å‘½ä»¤çš„è¿­ä»£å™¨
+		vector<Command>::const_iterator  begin() const { return m_commands.cbegin(); } //ã€FC18ã€‘è¿”å›ç¬¬ä¸€æ¡å‘½ä»¤çš„å¸¸é‡è¿­ä»£å™¨
+		vector<Command>::const_iterator end() const { return m_commands.cend(); }      //ã€FC18ã€‘è¿”å›æœ€åä¸€æ¡å‘½ä»¤çš„å¸¸é‡è¿­ä»£å™¨
 
 	private:
-		vector<Command> m_commands;                                                    //¡¾FC18¡¿Ö¸Áî¼¯vector´æ´¢
+		vector<Command> m_commands;                                                    //ã€FC18ã€‘æŒ‡ä»¤é›†vectorå­˜å‚¨
 };
 
 
-//@@@¡¾FC18¡¿ÓÃÓÚÓëÍæ¼Ò¹²Ïí³¡ÉÏµÄ¸÷ÏîĞÅÏ¢
+//@@@ã€FC18ã€‘ç”¨äºä¸ç©å®¶å…±äº«åœºä¸Šçš„å„é¡¹ä¿¡æ¯
 struct Info
 {
-	TPlayer totalPlayers;                                   //¡¾FC18¡¿×ÜÍæ¼ÒÊı                               
-	TPlayer playerAlive;                                    //¡¾FC18¡¿Ê£ÓàÍæ¼ÒÊı
-	TRound totalRounds;                                     //¡¾FC18¡¿µ±Ç°»ØºÏÊı
-	TTower totalTowers;                                     //¡¾FC18¡¿×ÜµÄ·ÀÓùËş¸öÊı
-	TCorps totalCorps;                                      //¡¾FC18¡¿×ÜµÄ±øÍÅ¸öÊı
-	TPlayerID myID;                                         //¡¾FC18¡¿Ñ¡ÊÖIDºÅ
+	TPlayer totalPlayers;                                   //ã€FC18ã€‘æ€»ç©å®¶æ•°                               
+	TPlayer playerAlive;                                    //ã€FC18ã€‘å‰©ä½™ç©å®¶æ•°
+	TRound totalRounds;                                     //ã€FC18ã€‘å½“å‰å›åˆæ•°
+	TTower totalTowers;                                     //ã€FC18ã€‘æ€»çš„é˜²å¾¡å¡”ä¸ªæ•°
+	TCorps totalCorps;                                      //ã€FC18ã€‘æ€»çš„å…µå›¢ä¸ªæ•°
+	TPlayerID myID;                                         //ã€FC18ã€‘é€‰æ‰‹IDå·
 
-	CommandList myCommandList;                              //¡¾FC18¡¿ÓÃÓÚ½ÓÊÕÍæ¼Ò·¢³öµÄÖ¸ÁîµÄÖ¸Áî¼¯
+	CommandList myCommandList;                              //ã€FC18ã€‘ç”¨äºæ¥æ”¶ç©å®¶å‘å‡ºçš„æŒ‡ä»¤çš„æŒ‡ä»¤é›†
 
-	//@@@¡¾FC18¡¿·µ»ØËùÓĞÊÆÁ¦ĞÅÏ¢µÄvector£¬¿ÉÒÔ²ÎÕÕÔ­À´µÄvector<PlayerInfo> playerInfo;
-	vector<PlayerInfo> playerInfo;   //ÊÆÁ¦ĞÅÏ¢
+	//@@@ã€FC18ã€‘è¿”å›æ‰€æœ‰åŠ¿åŠ›ä¿¡æ¯çš„vectorï¼Œå¯ä»¥å‚ç…§åŸæ¥çš„vector<PlayerInfo> playerInfo;
+	vector<PlayerInfo> playerInfo;   //åŠ¿åŠ›ä¿¡æ¯
 
-	//@@@¡¾FC18¡¿·µ»ØËùÓĞ·ÀÓùËşĞÅÏ¢µÄvector£¬¿ÉÒÔ²ÎÕÕÔ­À´µÄvector<CellInfo> cellInfo;
+	//@@@ã€FC18ã€‘è¿”å›æ‰€æœ‰é˜²å¾¡å¡”ä¿¡æ¯çš„vectorï¼Œå¯ä»¥å‚ç…§åŸæ¥çš„vector<CellInfo> cellInfo;
 	vector<TowerInfo> towerInfo;
 
-	//@@@¡¾FC18¡¿·µ»ØËùÓĞ±øÍÅĞÅÏ¢µÄvector£¬¿ÉÒÔ²ÎÕÕÔ­À´µÄvector<vector<TentacleInfo> > tentacleInfo;
-	//vector<vector<CorpsInfoUnit>> corpsInfo;//ÏÂ±êÎªijµÄÎ»ÖÃ±íÊ¾Î»ÖÃÎªx:i,y:jµÄ±øÍÅĞÅÏ¢
+	//@@@ã€FC18ã€‘è¿”å›æ‰€æœ‰å…µå›¢ä¿¡æ¯çš„vectorï¼Œå¯ä»¥å‚ç…§åŸæ¥çš„vector<vector<TentacleInfo> > tentacleInfo;
+	//vector<vector<CorpsInfoUnit>> corpsInfo;//ä¸‹æ ‡ä¸ºijçš„ä½ç½®è¡¨ç¤ºä½ç½®ä¸ºx:i,y:jçš„å…µå›¢ä¿¡æ¯
 	vector<CorpsInfo> corpsInfo;
 
-	//¡¾FC18¡¿µØÍ¼ĞÅÏ¢
+	//ã€FC18ã€‘åœ°å›¾ä¿¡æ¯
 	//vector<vector<mapBlockInfo>> mapInfo;
-	//Ë÷ÒıµØÍ¼Ê± £¬µÚÒ»Î¬Îªy×ø±ê£¬µÚ¶şÎ¬Îªx×ø±ê£¬¼´gameMapInfo[y][x]±íÊ¾£¨x,y£©µãµÄµØÍ¼ĞÅÏ¢
+	//ç´¢å¼•åœ°å›¾æ—¶ ï¼Œç¬¬ä¸€ç»´ä¸ºyåæ ‡ï¼Œç¬¬äºŒç»´ä¸ºxåæ ‡ï¼Œå³gameMapInfo[y][x]è¡¨ç¤ºï¼ˆx,yï¼‰ç‚¹çš„åœ°å›¾ä¿¡æ¯
 	const vector<vector<mapBlock>>* gameMapInfo;
 
 };
