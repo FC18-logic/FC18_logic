@@ -740,14 +740,14 @@ class CommandList
 		void removeCommand(int n)                                                      //【FC18】移除第n条命令
 		{
 			if (n < 0 || n >= size())
-				throw std::out_of_range("移除命令时越界");
+				throw std::out_of_range("移除命令时越界 ");
 			m_commands.erase(m_commands.begin() + n);
 		}
 		vector<Command> getCommand() { return m_commands; }                            //【FC18】获取所有命令
 		Command& operator[](int n)                                                     //【FC18】访问第n条命令，返回该命令的引用
 		{
 			if (n < 0 || size() <= n)
-				throw std::out_of_range("访问命令时越界");
+				throw std::out_of_range("访问命令时越界 ");
 			return m_commands[n];
 		}
 		int size() const { return int(m_commands.size()); }                            //【FC18】获取总共的命令条数

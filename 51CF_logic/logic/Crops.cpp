@@ -345,15 +345,8 @@ ChangeTerrain
 参数：target 目标地形
 返回是否改造成功
 */
-bool Crops::JudgeChangeTerrain(Command& c)
+bool Crops::ChangeTerrain(terrainType target)
 {
-	terrainType target = (terrainType)c.parameters[2];
-	c.parameters.clear();
-	c.parameters.push_back(CChangeTerrain);
-	c.parameters.push_back(m_myID);
-	c.parameters.push_back(target);
-	c.parameters.push_back(m_position.m_x);
-	c.parameters.push_back(m_position.m_y);
 	if(!m_bAlive)
 		return false;
 	if(m_type != Construct)
@@ -367,6 +360,14 @@ bool Crops::JudgeChangeTerrain(Command& c)
 	if (!((curType == TRPlain && target == TRForest) || (curType == TRForest && target == TRPlain))) return false;    //by jyp 只能平原改成森林，或者森林改成平原
 	if(m_data->gameMap.map[m_position.m_y][m_position.m_x].TowerIndex == NOTOWER)
 	{
+		m_data->gameMap.map[m_position.m_y][m_position.m_x].type = target;
+		m_BuildPoint--;
+		m_MovePoint = 0;
+		if (m_BuildPoint == 0)
+		{
+			KillCorps();
+		}
+		m_data->changeCorps.insert(m_myID);  //by jyp:记录工程兵团劳动力改变
 		return true;
 	}
 	return false;
@@ -648,7 +649,7 @@ void Crops::KillCorps()
 }
 
 
-bool Crops::JudgeMendTower(Command& c)
+bool Crops::MendTower()
 {
 	if(!m_bAlive)
 		return false;
@@ -668,10 +669,16 @@ bool Crops::JudgeMendTower(Command& c)
 	//塔已摧毁
 	if(!m_data->myTowers[index].getexsit())
 		return false;
-	c.parameters.clear();
-	c.parameters.push_back(CRepair);
-	c.parameters.push_back(m_myID);
-	c.parameters.push_back(index);
+
+	m_BuildPoint--;
+	m_MovePoint = 0;
+	if (m_BuildPoint <= 0)
+	{
+		KillCorps();
+	}
+
+	m_data->myTowers[index].Recover();
+	m_data->changeCorps.insert(m_myID);  //by jyp:记录工程兵团劳动力改变
 	return true;
 }
 
@@ -731,26 +738,4 @@ void Crops::haveCmd()
 }
 */
 
-void Crops::doChangingTerrain(terrainType target, int x, int y)
-{
-	m_data->gameMap.map[y][x].type = target;
-	m_BuildPoint--;
-	if (m_BuildPoint == 0)
-	{
-		KillCorps();
-	}
-	m_data->changeCorps.insert(m_myID);  //by jyp:记录工程兵团劳动力改变
-}
 
-
-void Crops::doMending(int index)
-{	
-	m_BuildPoint--;
-	if (m_BuildPoint <= 0)
-	{
-		KillCorps();
-	}
-
-	m_data->myTowers[index].Recover();
-	m_data->changeCorps.insert(m_myID);  //by jyp:记录工程兵团劳动力改变
-}

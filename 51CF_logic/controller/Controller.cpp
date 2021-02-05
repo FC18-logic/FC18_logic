@@ -146,31 +146,7 @@ namespace DAGAN
 			data->players[id - 1].Kill();
 			cout << "Player " << id << " break the rules! Out!" << endl;
 		}
-		//执行上一回合延迟操作
-		for(int i = 0; i<Corpslastcmd[id].size(); i++)
-		{
-			TCorpsID corpsid = Corpslastcmd[id][i].parameters[1];
-			switch(Corpslastcmd[id][i].parameters[0])
-			{//@@@读取坐标
-			case(CRepair)://0:兵团操作类型 1：兵团序号 2：原来塔的序号
-			{
-				data->myCorps[corpsid].doMending(Corpslastcmd[id][i].parameters[2]);
-				break;
-			}
-			case(CChangeTerrain)://0:兵团操作类型 1：兵团序号 2：目标地形 3：位置x 4:位置y
-			{
-				int x = Corpslastcmd[id][i].parameters[3];
-				int y = Corpslastcmd[id][i].parameters[4];
-				terrainType type = (terrainType)Corpslastcmd[id][i].parameters[2];
-				data->myCorps[corpsid].doChangingTerrain(type, x, y);
-				break;
-			}
-			default:
-				break;
-			}
-
-		}
-		Corpslastcmd[id].clear();
+	
 		//回合数增加1
 		game_.addRound();
 		//执行本回合命令
@@ -181,7 +157,7 @@ namespace DAGAN
 				if (corpsBanned.find(c.parameters[1]) != corpsBanned.end()) continue;     //这个兵团本回合不能再接受操作，请求驳回
 				if (handleCorpsCommand(id, c) == true) {   //记录不能再进行其他操作的兵团序号
 					jsonChange(id, c,cmdFile);   //更新有效的指令Json
-					//outPutCommand(id, c);  //复读被执行的命令，未执行的不复读
+//					outPutCommand(id, c);  //复读被执行的命令，未执行的不复读
 					switch (c.parameters[0]) {
 					//case(CStation):
 					case(CStationTower):
@@ -609,11 +585,7 @@ namespace DAGAN
 		case(CRepair):
 			//兵团修理防御塔的操作
 			{
-				bCmdSucs = data->myCorps[id].JudgeMendTower(c);
-				if (bCmdSucs)
-				{
-					Corpslastcmd[ID].push_back(c);
-				}
+				bCmdSucs = data->myCorps[id].MendTower();
 			}
 			break;
 		case(CChangeTerrain):
@@ -625,11 +597,7 @@ namespace DAGAN
 					return false;
 				}
 				terrainType type = (terrainType)(c.parameters[2]);
-				bCmdSucs = data->myCorps[id].JudgeChangeTerrain(c);
-				if(bCmdSucs)
-				{
-					Corpslastcmd[ID].push_back(c);
-				}
+				bCmdSucs = data->myCorps[id].ChangeTerrain(type);
 			}
 			break;
 		default:
@@ -752,7 +720,6 @@ namespace DAGAN
 				info.myCommandList.addCommand(corpsCommand, { CMove,c,CRight });
 			}
 		}
-		
 		if (info.totalRounds >= 11)
 		{	
 			if (m_ID == 3) {

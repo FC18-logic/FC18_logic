@@ -51,10 +51,8 @@ public:
 	void KillCorps();							//兵团死亡
 	void newRound();							//新回合开始
 
-	bool JudgeMendTower(Command& c);						//判断建造兵是否可以在此修塔
-	bool JudgeChangeTerrain(Command& c);//判断建造兵是否可以在此更改地形
-	void doChangingTerrain(terrainType target, int x, int y);	//更改地形
-	void doMending(int index);							//建造兵修塔
+	bool MendTower();						//判断建造兵是否可以在此修塔
+	bool ChangeTerrain(terrainType target);//判断建造兵是否可以在此更改地形
 
 	//获取兵团属性
 
