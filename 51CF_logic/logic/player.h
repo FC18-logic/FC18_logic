@@ -1,8 +1,6 @@
 #pragma once
 
 #include "definition.h"
-#include "cell.h"
-#include "tentacle.h"
 #include "Crops.h"
 #include "tower.h"
 #include <set>
@@ -57,22 +55,6 @@ public:
 	//【FC18】设置玩家积分
 	void setScore(TScore Score) { score = Score; }
 
-	//FC15的
-	TResourceD totalResource();//获取所有塔资源数的总和
-	TResourceD techPoint() { return m_techPoint; }//获取玩家的科技点数
-	std::set<TCellID>& cells() { return m_cells; }//获取玩家的所有细胞set
-	void addTechPoint(TResourceD _techPoint);//增加科技点数
-	void regenerateTechPoint();//科技点数恢复
-	bool upgrade(TPlayerProperty kind);//玩家升级
-	bool subTechPoint(TResourceD _techPoint);//扣除相应的科技点数，失败返回false
-	int getDefenceLevel() const { return m_DefenceLevel; }//获取玩家防御等级
-	bool upgradeDefence(); //升级防御，返回是否成功
-	int getRegenerationLevel() const { return m_RegenerationLevel; }//获取玩家再生等级
-	bool upgradeRegeneration();//更新玩家再生等级
-	int getExtraControlLevel() const { return m_ExtraControlLevel; }//获取玩家额外控制数等级
-	bool upgradeExtraControl();//更新玩家额外控制数等级
-	int getMoveLevel() const { return m_MoveLevel; }//获取玩家移动等级
-	bool upgradeMove();//更新玩家移动等级
 
 private:
 	bool alive = true;                                                      //【FC18】是不是还活着
@@ -92,12 +74,5 @@ private:
 	
 	int rank;   //【FC18】玩家排名
 	int score;  //【FC18】玩家积分
-	//FC15的
-	std::set<TCellID> m_cells;//当前细胞
-	TResourceD m_techPoint;//科技点数
-	int m_MoveLevel = 0;//移动技能等级
-	int m_RegenerationLevel = 0;//再生技能等级
-	int m_ExtraControlLevel = 0;//额外控制数技能等级
-	int m_DefenceLevel = 0;//防御技能等级
 };
 

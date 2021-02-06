@@ -38,7 +38,7 @@ Crops::Crops(DATA::Data* _data, corpsType type, battleCorpsType battletype, cons
 	else if (type == Construct)
 	{
 		m_MovePoint = constructMovePoint[buildtype];
-		m_BuildPoint = 3;
+		if(buildtype == Builder )m_BuildPoint = 3;
 	}
 	//m_bResting = true;//兵团生产出来后默认休整
 	m_data->gameMap.map[m_position.m_y][m_position.m_x].corps.push_back(m_myID);
@@ -201,7 +201,6 @@ void Crops::AttackCrops(Crops* enemy)
 	if (m_BattleType != Archer)
 	{
 		m_HealthPoint -= mylost;
-		m_data->changeCorps.insert(m_myID);//by jyp:记录非弓箭手兵团生命值等的改变
 	}
 	//如果已阵亡
 	if (m_HealthPoint <= 0)
@@ -230,7 +229,14 @@ bool Crops::BeAttacked(int attack, TPlayerID ID, bool bAlive)
 	//俘虏工程兵
 	if(m_type == Construct)
 	{
-		if(bAlive && m_data->players[ID - 1].constructNumControl() == false){   //如果攻击方的工程兵团数目超了，那么就不俘虏
+		if(bAlive){   
+			if (m_data->players[ID - 1].constructNumControl() == false)//如果攻击方的工程兵团数目满了，那么不俘虏，直接消灭
+			{
+				KillCorps();
+				int num = m_data->players[ID - 1].getElCorpsNum() + 1;
+				m_data->players[ID - 1].setElCorpsNum(num);
+				return true;
+			}
 			ChangeOwner(ID);
 			int num = m_data->players[ID - 1].getCqCorpsNum() + 1;
 			m_data->players[ID - 1].setCqCorpsNum(num);
@@ -345,7 +351,32 @@ ChangeTerrain
 参数：target 目标地形
 返回是否改造成功
 */
-bool Crops::ChangeTerrain(terrainType target)
+
+bool Crops::JudgeChangeTerrain(Command& c)
+{
+	terrainType target = (terrainType)c.parameters[2];
+	c.parameters.clear();
+	c.parameters.push_back(CChangeTerrain);
+	c.parameters.push_back(m_myID);
+	c.parameters.push_back(target);
+	c.parameters.push_back(m_position.m_x);
+	c.parameters.push_back(m_position.m_y);
+	if (!m_bAlive)
+		return false;
+	if (m_type != Construct)
+		return false;
+	if (m_BuildType != Builder)
+		return false;
+	int curID = m_data->gameMap.map[m_position.m_y][m_position.m_x].owner;
+	if (curID != m_PlayerID)
+		return false;
+	if (m_data->gameMap.map[m_position.m_y][m_position.m_x].TowerIndex == NOTOWER)
+	{
+		return true;
+	}
+	return false;
+}
+/*bool Crops::ChangeTerrain(terrainType target)
 {
 	if(!m_bAlive)
 		return false;
@@ -371,7 +402,7 @@ bool Crops::ChangeTerrain(terrainType target)
 		return true;
 	}
 	return false;
-}
+}*/
 
 /*
 newRound
@@ -422,6 +453,7 @@ StationInTower
 */
 bool Crops::StationInTower()
 {
+	if (m_StationTower == NULL) return false;
 	bool bStation = false;
 	int index = m_data->gameMap.map[m_position.m_y][m_position.m_x].TowerIndex;
 	//如果选择驻扎的位置有塔 则驻扎在塔中
@@ -486,7 +518,6 @@ void Crops::AttackTower(class Tower *enemy)
 	if (m_BattleType != Archer)
 	{
 		m_HealthPoint -= mylost;
-		m_data->changeCorps.insert(m_myID); //by jyp:记录非弓箭手兵团生命值等改变
 	}
 	//如果已阵亡
 	if (m_HealthPoint <= 0)
@@ -530,6 +561,7 @@ bool Crops::Attack(int type, TCorpsID ID)
 		return false;
 
 	m_MovePoint = 0;
+	m_data->changeCorps.insert(m_myID);//by jyp:记录兵团行动力等的改变
 
 	//我方HP减少值
 	int mylost = 0;
@@ -738,4 +770,13 @@ void Crops::haveCmd()
 }
 */
 
-
+void Crops::doChangingTerrain(terrainType target, int x, int y)
+{
+	m_data->gameMap.map[y][x].type = target;
+	m_BuildPoint--;
+	if (m_BuildPoint == 0)
+	{
+		KillCorps();
+	}
+	m_data->changeCorps.insert(m_myID);
+}

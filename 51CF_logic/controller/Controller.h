@@ -28,16 +28,17 @@ namespace DAGAN
 		false
 #endif
 			)
-			, players_(p) {}                              //【FC18】游戏主控的构造函数，传入参数为当前游戏进程对象，以及玩家ai的vector（代码及相关信息）
+			, players_(p) {
+			Corpslastcmd.resize(5);
+		}                              //【FC18】游戏主控的构造函数，传入参数为当前游戏进程对象，以及玩家ai的vector（代码及相关信息）
 											              //【FC18】默认输出文件，游戏下一回合可以运行
 		                                                  //【FC18】NO_SILENT_MODE和FC15_DEBUG两个宏定义决定是否输出debug信息
-		void run(char* json_filename);                    //@@@【FC18】游戏单回合运行的主要部分，同时向json_filename进行文件写入
 		void run(TPlayerID id,ofstream& cmdF, ofstream& infoF);      //@@@【FC18】运行每个玩家当前的游戏回合（小回合），然后记录玩家指令Json和变化后的信息Json
         //#Json有关Json更改函数
 		void jsonChange(TPlayerID id,Command& c,ofstream& cmdFile);                      //【FC18】在命令执行完毕（保证有效）后，传入命令进来，会对应修改命令Json的数据
 		bool moreCommand(TPlayerID id,set<TTowerID>& tBanned,set<TCorpsID>& cBanned);//【FC18】判断某位玩家是否能继续执行下一句指令
 		void killPlayers();                                  //【FC18】判断玩家阵亡情况
-		int commandRead;                                      //【FC18】已读取命令数量
+		int commandRead = 0;                                      //【FC18】已读取命令数量
 		void setValid(bool valid) { isValid_ = valid; }       //【FC18】设置游戏控制器不能继续运行了
 		bool handleCorpsCommand(TPlayerID ID, Command& c);                       //【FC18】执行当前兵团指令，并返回是否执行成功
 		bool handleTowerCommand(TPlayerID ID, Command& c);                       //【FC18】执行当前防御塔指令，并返回是否执行成功
@@ -61,5 +62,6 @@ namespace DAGAN
 		bool file_output_enabled_;             //【FC18】文件输出使能，是否允许输出相关文件
 		bool silent_mode_;                     //【FC18】silent_mode_为false会输出回合数信息和每个玩家的操作信息等，用于debug
 		bool isValid_;                         //【FC18】游戏是否还能继续进行，用于判断game_over
+		vector<vector<Command>> Corpslastcmd;	//【FC18】兵团上一回合命令，用于需要延迟一回合生效的命令
 	};
 }

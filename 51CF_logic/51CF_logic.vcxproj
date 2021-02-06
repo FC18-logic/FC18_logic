@@ -34,7 +34,6 @@
     <ClInclude Include="json\writer.h" />
     <ClInclude Include="lib_json\json_tool.h" />
     <ClInclude Include="logic\ai.h" />
-    <ClInclude Include="logic\cell.h" />
     <ClInclude Include="logic\Crops.h" />
     <ClInclude Include="logic\data.h" />
     <ClInclude Include="logic\definition.h" />
@@ -42,7 +41,6 @@
     <ClInclude Include="logic\map.h" />
     <ClInclude Include="logic\player.h" />
     <ClInclude Include="logic\player_code.h" />
-    <ClInclude Include="logic\tentacle.h" />
     <ClInclude Include="logic\tower.h" />
   </ItemGroup>
   <ItemGroup>
@@ -50,7 +48,6 @@
     <ClCompile Include="lib_json\json_reader.cpp" />
     <ClCompile Include="lib_json\json_value.cpp" />
     <ClCompile Include="lib_json\json_writer.cpp" />
-    <ClCompile Include="logic\cell.cpp" />
     <ClCompile Include="logic\Crops.cpp" />
     <ClCompile Include="logic\definition.cpp" />
     <ClCompile Include="logic\game.cpp" />
@@ -58,7 +55,6 @@
     <ClCompile Include="logic\map.cpp" />
     <ClCompile Include="logic\player.cpp" />
     <ClCompile Include="logic\player_code.cpp" />
-    <ClCompile Include="logic\tentacle.cpp" />
     <ClCompile Include="logic\tower.cpp" />
   </ItemGroup>
   <PropertyGroup Label="Globals">

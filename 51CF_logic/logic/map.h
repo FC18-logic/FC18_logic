@@ -59,9 +59,6 @@ public:
     TPlayerID showOwner(TPoint p);               //【FC18】判断当前方格拥有者的ID
     void clearAll();                        //【FC18】把new出来的所有corps都delete掉，也把所有player都delete掉
 
-    //FC15的
-    bool init(const TMapID& filename, TResourceI _MAX_RESOURCE_);             //通过文件初始化地图信息
-    bool init(ifstream& inMap, TResourceI _MAX_RESOURCE_, bool enableOutput); //通过文件流初始化信息;
 private:
 	DATA::Data* data;                            //【FC18】用于游戏中的数据传输
 };

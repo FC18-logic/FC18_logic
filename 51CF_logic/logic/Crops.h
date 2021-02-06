@@ -5,7 +5,6 @@
 
 #include "definition.h"
 #include "data.h"
-#include "cell.h"
 #include "player.h"
 
 
@@ -50,6 +49,8 @@ public:
 	void ChangeOwner(TPlayerID newowner);		//兵团改变所属
 	void KillCorps();							//兵团死亡
 	void newRound();							//新回合开始
+	void doChangingTerrain(terrainType target, int x, int y);   //本回合结束修改地形
+	bool JudgeChangeTerrain(Command& c);                        //本回合接到改地形命令，判断能否修改
 
 	bool MendTower();						//判断建造兵是否可以在此修塔
 	bool ChangeTerrain(terrainType target);//判断建造兵是否可以在此更改地形

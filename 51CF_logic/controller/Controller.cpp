@@ -58,9 +58,6 @@ namespace DAGAN
 		int another_id = -1;
 	};
 
-	void Controller::run(char* json_filename)
-	{
-	}
 	/***********************************************************************************************
 	*函数名 :【FC18】run单玩家回合运行函数
 	*函数功能描述 : 生成当前游戏信息，向玩家ai发出，接受命令表之后依次执行，执行每个有效命令后修改
@@ -154,7 +151,7 @@ namespace DAGAN
 			commandRead++;  //更新读取指令数，有效、无效指令都要读取
 			if (c.cmdType == corpsCommand) {
 				if (c.parameters.size() != CorpsOperaNumNeed[c.parameters[0]]) continue;   //判断操作数合法性
-				if (corpsBanned.find(c.parameters[1]) != corpsBanned.end()) continue;     //这个兵团本回合不能再接受操作，请求驳回
+				if (data->newCorps.find(c.parameters[1]) != data->newCorps.end() || corpsBanned.find(c.parameters[1]) != corpsBanned.end()) continue;     //这个兵团本回合不能(再)接受操作，请求驳回
 				if (handleCorpsCommand(id, c) == true) {   //记录不能再进行其他操作的兵团序号
 					jsonChange(id, c,cmdFile);   //更新有效的指令Json
 //					outPutCommand(id, c);  //复读被执行的命令，未执行的不复读
@@ -173,10 +170,10 @@ namespace DAGAN
 			}
 			else if (c.cmdType == towerCommand) {
 				if (c.parameters.size() != towerOperaNumNeed[c.parameters[0]]) continue;   //判断操作数的数量是否合法
-				if (towerBanned.find(c.parameters[1]) != towerBanned.end()) continue; //这个塔当前回合不能再操作，请求驳回
+				if (data->newTower.find(c.parameters[1]) != data->newTower.end() || towerBanned.find(c.parameters[1]) != towerBanned.end()) continue; //这个塔当前回合不能(再)操作，请求驳回
 				if (handleTowerCommand(id, c) == true) {   //记录不能再进行其他操作的塔序号
 					jsonChange(id, c,cmdFile);   //更新有效的指令Json
-				    outPutCommand(id, c);  //复读被执行的命令，未执行的不复读
+				    //outPutCommand(id, c);  //复读被执行的命令，未执行的不复读
 					switch (c.parameters[0]) {
 					case(TProduct):
 					case(TAttackCorps):
@@ -196,7 +193,7 @@ namespace DAGAN
 			}
 			if (moreCommand(id, towerBanned, corpsBanned) == false) break;  //接收不了更多命令了，直接跳出
 		}
-
+		game_.endPhase(Corpslastcmd,id);
 		getGameRank();   //获取游戏中玩家排名
 
 		isValid_ = game_.isValid();
@@ -467,7 +464,7 @@ namespace DAGAN
 				case(CMove):
 					cout << " " << Direction[c.parameters[2]];
 					break;
-				case(CStation):
+				//case(CStation):
 				case(CBuild):
 				case(CRepair):
 				case(CStationTower):
@@ -477,9 +474,9 @@ namespace DAGAN
 				case(CAttackTower):
 					cout << " " << c.parameters[2];
 					break;
-				case(CRegroup):
+				/*case(CRegroup):
 					cout << " with corps " << c.parameters[2];
-					break;
+					break;*/
 				case(CChangeTerrain):
 					cout << " of (" << data->myCorps[c.parameters[1]].getPos().m_x << "," << data->myCorps[c.parameters[1]].getPos().m_y << ")" << " to " << Terrain[c.parameters[2] - 1];
 					break;
@@ -596,8 +593,14 @@ namespace DAGAN
 				{
 					return false;
 				}
+				//terrainType type = (terrainType)(c.parameters[2]);
+				//bCmdSucs = data->myCorps[id].ChangeTerrain(type);
 				terrainType type = (terrainType)(c.parameters[2]);
-				bCmdSucs = data->myCorps[id].ChangeTerrain(type);
+				bCmdSucs = data->myCorps[id].JudgeChangeTerrain(c);
+				if (bCmdSucs)
+				{
+					Corpslastcmd[ID].push_back(c);
+				}
 			}
 			break;
 		default:
@@ -732,6 +735,7 @@ namespace DAGAN
 			if (m_ID == 1) {
 				for (TCorpsID t : info.playerInfo[m_ID - 1].corps)
 				{
+					info.myCommandList.addCommand(corpsCommand, { CMove,t,CUp });
 					if(info.totalRounds % 2 == 0)
 						info.myCommandList.addCommand(corpsCommand, { CChangeTerrain,t,TRForest });
 					else
@@ -739,6 +743,7 @@ namespace DAGAN
 				}
 			}
 		}
+		cout << (*info.gameMapInfo)[4][5].type << "\n";
 	}
 }
 

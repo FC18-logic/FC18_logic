@@ -4,11 +4,9 @@
 #include<fstream>
 #include<iostream>
 #include "data.h"
-#include "cell.h"
 #include "Crops.h"
 #include "tower.h"
 #include "player.h"
-#include "tentacle.h"
 #include <utility>
 #include <vector>
 #include <map>
@@ -17,17 +15,7 @@ using std::pair;
 using std::vector;
 
 
-bool Map::init(ifstream& inMap, TResourceI _MAX_RESOURCE_, bool enableOutput)  //通过文件流初始化信息
-{
-	return true;
-}
 
-//这个函数看起来没什么用
-bool Map::init(const TMapID& filename,TResourceI _MAX_RESOURCE_)
-{
-	bool ret = true;
-	return ret;
-}
 
 /***********************************************************************************************
 *函数名 :【FC18】readMap读入地图函数

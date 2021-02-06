@@ -32,9 +32,7 @@ public:
 	bool isValid();                                                   //【FC18】判定是否结束
 	//@@@【FC18】根据规则每回合分过程的执行与结算函数
 	void commandPhase(vector<CommandList>& command_list);             //@@@【FC18】处理玩家指令
-	void killPlayer(TPlayerID id);                                    //@@@【FC18】杀死玩家 
 	bool isAlive(TPlayerID id) { return data.players[id].isAlive(); } //【FC18】判断玩家是否活着
-	void saveJson(DATA::Data & dataLastRound, DataSupplement & dataSuppleMent);//？？？【FC18】写入这一轮的JSON文档
 	void saveJson(ofstream& infoFile);                                                  //【FC18】写入这一轮的Json数据
 	void printJson();                                                 //【FC18】将JSON写入文件
 	void addRound() { totalRounds++; }               //@@@【FC18】回合数递增
@@ -43,23 +41,17 @@ public:
 
 	void setPlayerID(TPlayerID id){ curPlayer = id; }				//【FC18】设置当前回合玩家ID
 	void printGameMap();                                             //【FC18】输出当前游戏地图
+	void regeneratePhase();                                          //【FC18】重生阶段，兵团生命力恢复
+	void beginPhase();                                               //【FC18】开始阶段，塔的生产任务结算
+	void endPhase(vector<vector<Command>>& cmd2operate, TPlayerID id);             //【FC18】每位玩家指令结算后的操作
 	//std::ofstream& cmdFile;                                           //【FC18】存放指令数据的文件
 	//std::ofstream& infoFile;                                          //【FC18】存放信息数据的文件
 
 
-	//FC15的
-	vector<Info> generateInfo();
-	TRound getRound() { return currentRound; }//获取回合数
-	int getPlayerSize() { return data.PlayerNum; }//获取玩家数量
-	void regeneratePhase();    //恢复阶段
-	void movePhase();          //触手移动
-	void transPhase();         //传输/攻击阶段
-	void beginPhase();      //减小各种回合数
-	void endPhase();  //删除无用触手
+
 
 protected:
 
-	std::ofstream LogFile;
 	DATA::Data data;                                                  //【FC18】所有的数据存放处
 	TRound totalRounds;                                               //【FC18】当前回合数
 	size_t totalPlayers;                                              //【FC18】玩家总数
@@ -72,16 +64,6 @@ protected:
 	string mapinfo_txt_filename;                                     //【FC18】地图信息TXT文件名
 
 	TPlayerID curPlayer;	//【FC18】本回合正在执行的玩家 吕梦欣
-
-	//FC15的
-	TRound currentRound;  //当前回合数
-	size_t playerSize;    //游戏规模
-	TResourceI _MAX_RESOURCE_;//每局特定的最大资源
-	vector<int> controlCount;//记录玩家已执行的操作数
-	TRound _MAX_ROUND_;//最大回合数
-	void takeEffect(TransEffect& te); //将te施用到目标上
-	void handleExtending(TransEffect& t);
-	void OwnerChange(TransEffect** TE);
 };
 
 #endif // !GAME_H

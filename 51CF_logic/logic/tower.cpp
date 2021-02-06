@@ -283,8 +283,11 @@ bool Tower::Be_Attacked(TPlayerID enemy_id,THealthPoint hp_decrease)
 		}
 		//【规则修改】
 		//塔被摧毁或攻占后驻扎兵团消灭
-		for (int i = 0; i < m_staycrops.size(); i++)
+		int num = m_staycrops.size();
+		for (int i = 0; i < num; i++)
 			m_staycrops[i]->KillCorps();
+		int currentElNum = m_data->players[enemy_id - 1].getElCorpsNum();
+		m_data->players[enemy_id - 1].setElCorpsNum(num + currentElNum);
 		/*
 		//俘虏驻扎工程兵并修改data
 		for(int i = 0; i<m_staycrops.size(); i++)
