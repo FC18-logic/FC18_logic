@@ -453,7 +453,7 @@ StationInTower
 */
 bool Crops::StationInTower()
 {
-	if (m_StationTower == NULL) return false;
+	if (m_StationTower != NULL) return false; //已经驻扎到塔里，就不重复下命令了
 	bool bStation = false;
 	int index = m_data->gameMap.map[m_position.m_y][m_position.m_x].TowerIndex;
 	//如果选择驻扎的位置有塔 则驻扎在塔中
