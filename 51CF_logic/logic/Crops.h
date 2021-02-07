@@ -53,7 +53,7 @@ public:
 	bool JudgeChangeTerrain(Command& c);                        //本回合接到改地形命令，判断能否修改
 
 	bool MendTower();						//判断建造兵是否可以在此修塔
-	bool ChangeTerrain(terrainType target);//判断建造兵是否可以在此更改地形
+	//bool ChangeTerrain(terrainType target);//判断建造兵是否可以在此更改地形
 
 	//获取兵团属性
 
@@ -66,6 +66,7 @@ public:
 	TPoint getPos() { return m_position; }	//获取当前兵团的位置
 	battleCorpsType getbattleType() { return m_BattleType; }	//获取当前战斗兵团的类型
 	TPlayerID getPlayerID() { return m_PlayerID; }				//获取兵团所属阵营
+	bool isStation() { return m_StationTower; }
 
 
 	//void haveCmd();								//接受命令 退出自动休整状态

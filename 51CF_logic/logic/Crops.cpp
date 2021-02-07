@@ -528,7 +528,7 @@ void Crops::AttackTower(class Tower *enemy)
 
 	bool IsTowerDestroy = false;
 	//判断塔是否被攻陷(占领、摧毁都算)
-	IsTowerDestroy = enemy->Be_Attacked(m_PlayerID, enemylost);
+	IsTowerDestroy = enemy->Be_Attacked(m_PlayerID, enemylost,m_bAlive);
 	if(IsTowerDestroy/*&&!(enemy->getexsit())*/)
 	{
 		int num = m_data->players[m_PlayerID - 1].getCqTowerNum() + 1;
@@ -581,13 +581,13 @@ bool Crops::Attack(int type, TCorpsID ID)
 		if (!IsInRange(enemy->m_position))
 			return false;
 
-		//如果敌人所在位置存在敌方势力塔 优先与塔结算
+		//如果敌人驻扎到了所在位置存在敌方势力塔 优先与塔结算
 		int x = enemy->m_position.m_x;
 		int y = enemy->m_position.m_y;
 		int index = m_data->gameMap.map[y][x].TowerIndex;
 		if(index == NOTOWER)
 			AttackCrops(enemy);
-		else if(m_data->myTowers[index].getPlayerID() == enemy->m_PlayerID)
+		else if(m_StationTower != NULL && m_data->myTowers[index].getPlayerID() == enemy->m_PlayerID)
 			AttackTower(&(m_data->myTowers[index]));
 		else
 			AttackCrops(enemy);
@@ -666,6 +666,7 @@ void Crops::KillCorps()
 	m_BuildPoint = 0;
 	m_data->players[m_PlayerID - 1].deleteCrops(m_myID);
 	m_data->totalCorps--;
+	m_StationTower = NULL;
 
 	vector<TCorpsID>::iterator it;
 	for (it = m_data->gameMap.map[m_position.m_y][m_position.m_x].corps.begin();
@@ -773,6 +774,7 @@ void Crops::haveCmd()
 
 void Crops::doChangingTerrain(terrainType target, int x, int y)
 {
+	if (m_bAlive == false) return;
 	m_data->gameMap.map[y][x].type = target;
 	m_BuildPoint--;
 	if (m_BuildPoint == 0)

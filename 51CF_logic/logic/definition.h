@@ -73,51 +73,6 @@ class Crops;
 struct CorpsInfo;
 typedef vector<CorpsInfo>	CorpsInfoUnit; //【FC18】一个单元格上所有兵团信息
 
-//以下来自FC15，我们应该用不到了
-///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-typedef double TSpeed;
-typedef double TResourceD;  //double 的资源数，用于内部操作
-typedef int    TResourceI;  //int    的资源数，用于显示
-typedef double TTechPoint;  //科技点数
-
-typedef int    TCellID;
-typedef int    TTentacleID;
-
-
-typedef double TPower;  //倍率
-typedef int    TTentacleNum;
-
-//兵力密度
-const double       Density = 0.1;
-const TSpeed       BaseExtendSpeed = 3;
-const TSpeed       BaseFrontSpeed = 20;
-const TSpeed       BaseBackSpeed = 12;
-const TLevel       STUDENT_LEVEL_COUNT = 5;
-const TResourceI   MAX_RESOURCE = 200;
-const TSpeed       BASE_REGENERETION_SPEED[STUDENT_LEVEL_COUNT]{ 1,1.5,2,2.5,3 };
-const TTentacleNum MAX_TENTACLE_NUMBER[STUDENT_LEVEL_COUNT]{ 1,2,2,3,3 };  //可伸触手数量
-const TResourceI   STUDENT_STAGE[STUDENT_LEVEL_COUNT + 1]{ 0 ,10,40,80,150,MAX_RESOURCE };
-const int          NO_DATA = -1;
-const TPlayerID        Neutral = NO_DATA;
-
-//最大技能等级
-const TLevel MAX_REGENERATION_SPEED_LEVEL = 5;
-const TLevel MAX_EXTENDING_SPEED_LEVEL = 5;
-const TLevel MAX_EXTRA_CONTROL_LEVEL = 3;
-const TLevel MAX_DEFENCE_LEVEL = 3;
-
-//各技能等级对应数值
-const TPower RegenerationSpeedStage[MAX_REGENERATION_SPEED_LEVEL + 1] = { 1,1.05,1.1,1.15,1.2,1.25 };
-const TPower SpeedStage[MAX_EXTENDING_SPEED_LEVEL + 1] = { 1,1.1,1.2,1.3,1.4,1.5 };
-const TPower ExtraControlStage[MAX_EXTRA_CONTROL_LEVEL + 1] = { 0,0.5,1,1.5 };
-const TPower DefenceStage[MAX_DEFENCE_LEVEL + 1] = { 1.5,1.4,1.3,1.2 };
-
-//各个技能升级所需科创点数
-const TResourceD RegenerationSpeedUpdateCost[MAX_REGENERATION_SPEED_LEVEL] = { 2,4,6,8,10 };
-const TResourceD ExtendingSpeedUpdateCost[MAX_EXTENDING_SPEED_LEVEL] = { 2,4,6,8,10 };
-const TResourceD ExtraControlStageUpdateCost[MAX_EXTRA_CONTROL_LEVEL] = { 3,5,7 };
-const TResourceD DefenceStageUpdateCost[MAX_DEFENCE_LEVEL] = { 3,5,7 };
-///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 //【FC18】二维坐标点结构体
 struct TPoint
@@ -448,82 +403,6 @@ const TBattlePoint CorpsBattleGain[TERRAIN_TYPE_NUM + 1] =
 };
 
 
-//以下来自FC15，我们应该用不到了
-///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-enum CellStrategy
-{
-	Normal    //初始状态
-	, Attack  //攻击  
-	, Defence //防御
-	, Grow    //发育
-};
-
-//细胞策略改变花费科技点
-const TTechPoint CellChangeCost[4][4] = {
-	//TO        N    A    D    G
-	/*F  N */   0,   3,   3,   3,
-	/*R  A */   2,   0,   5,   5,
-	/*O  D */   2,   5,   0,   5,
-	/*M  G */   2,   5,   5,   0
-};
-
-//细胞对峙消耗倍率
-const TPower CellConfrontPower[4][4] = {
-	//TO        N    A    D    G
-	/*F  N */  1.0, 1.0, 1.0, 1.0,
-	/*R  A */  2.0, 1.0, 1.0, 5.0,
-	/*O  D */  1.0, 3.0, 1.0, 1.0,
-	/*M  G */  2.0, 1.0, 1.0, 1.0
-};
-
-//细胞压制消耗倍率
-const TPower CellSupressPower[4][4] = {
-	//TO        N    A    D    G
-	/*F  N */  1.5, 1.5, 1.0, 1.5,
-	/*R  A */  3.0, 1.5, 1.0, 6.0,
-	/*O  D */  1.0, 1.0, 1.0, 1.0,
-	/*M  G */  3.0, 1.5, 1.0, 1.5
-};
-
-//细胞资源生长倍率
-const TPower CellStrategyRegenerate[4] = {
-	//    N    A    D    G
-		 1.0, 1.0, 0.5, 1.5
-};
-
-const TPower TentacleDecay[4] = {
-	//触手数量   0    1    2    3
-			   1.0, 1.0, 0.8, 0.6
-};
-
-enum TPlayerProperty
-{
-	RegenerationSpeed    //再生速度
-	, ExtendingSpeed //延伸速度
-	, ExtraControl   //额外控制数
-	, CellWall        //防御等级
-};
-
-enum TentacleState
-{
-	Extending           //延伸中
-	, Attacking          //攻击中（面对对方触手）
-	, Backing            //退后中（被打退）
-	, Confrontation      //对峙中
-	, Arrived            //已到达目的地
-	, AfterCut           //被切断
-};
-
-enum CellType  //细胞种类的枚举
-{
-	Alpha = 0,
-	Beta_1,
-	Beta_2,
-	Gamma_1,
-	Gamma_2
-};
-///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
 
 //@@@【FC18】防御塔结构体，有需要的信息再加
 
@@ -592,37 +471,6 @@ struct mapBlockInfo
 	TTowerID towerIndex;                        //【FC18】地图方格信息，NOTOWER表示没有塔
 };
 
-struct CellInfo
-{
-	TCellID id;
-	CellType type;
-	TPlayerID owner;
-	CellStrategy strategy;
-
-	TResourceD resource;
-	TResourceD occupyPoint;  //只有中立时才有意义
-	TPlayerID occupyOwner;//只有中立时才有意义
-
-	TPoint position;
-
-	TResourceD maxResource;
-	int maxTentacleNum;  //最大触手数量
-	int currTentacleNum;
-	TPower techSpeed;    //科创点数是资源再生速率的几倍
-};
-
-//【FC15】
-struct TentacleInfo
-{
-	bool	exist;		//是否存在
-	TCellID         sourceCell;              //源同学
-	TCellID         targetCell;              //目标同学
-	TentacleState   state;                     //触手状态
-	TLength         maxlength;                     //触手长度（由源/目标决定）
-	TResourceD      resource;                   //当前资源      （切断前有效）
-	TResourceD      frontResource;              //切断后前方资源（切断后有效）
-	TResourceD      backResource;               //切断后后方资源（切断后有效）
-};
 
 //类声明
 class CommandList;
@@ -662,7 +510,7 @@ public:
 	vector<TPoint>     m_studentPos;               //只设定细胞的坐标，之后的势力分配交给game
 
 	//【FC18】存储地图上的所有兵团信息的向量（元素为兵团信息结构体），可以参照vector<TPoint> m_studentPos
-	vector<CorpsInfoUnit>     m_corpsinfo;
+	//vector<CorpsInfoUnit>     m_corpsinfo;
 
 	//@@@【FC18】获取地图上的所有防御塔信息函数，可以参照const  vector<TPoint>& getStudentPos() const
 	//@@@【FC18】返回一个防御塔信息结构体的vector引用，方便外部访问修改
@@ -672,27 +520,6 @@ public:
 	//【FC18】返回一个兵团信息结构体的vector引用，方便外部访问修改
 	const  vector<CorpsInfoUnit>& getCropsInfo() const { return m_corpsinfo; }
 
-	//FC15的
-	vector<TBarrier>   m_barrier;                  //记录所有障碍的信息
-	const  vector<TBarrier>& getBarriar()    const { return m_barrier; }
-	bool   passable(TPoint p1, TPoint p2)          //判断触手能否连接这两个点
-	{
-		for (auto b : m_barrier)
-		{
-			//快速排斥实验
-			int minFX = max(min(p1.m_x, p2.m_x), min(b.m_beginPoint.m_x, b.m_endPoint.m_x));
-			int maxFX = min(max(p1.m_x, p2.m_x), max(b.m_beginPoint.m_x, b.m_endPoint.m_x));
-			int minFY = max(min(p1.m_y, p2.m_y), min(b.m_beginPoint.m_y, b.m_endPoint.m_y));
-			int maxFY = min(max(p1.m_y, p2.m_y), max(b.m_beginPoint.m_y, b.m_endPoint.m_y));
-			if (minFX > maxFX || minFY > maxFY)
-				return false;
-			//跨越实验
-			if (cross(p1 - b.m_beginPoint, b.m_endPoint - b.m_beginPoint) * cross(b.m_endPoint - b.m_beginPoint, p2 - b.m_beginPoint) >= 0
-				|| cross(b.m_beginPoint - p1, p2 - p1) * cross(p2 - p1, b.m_endPoint - p1) >= 0)
-				return false;
-		}
-		return true;
-	}
 	bool   isPosValid(TPoint p) { return isPosValid(p.m_x, p.m_y); }             //判断点是否越界
 	bool   isPosValid(int x, int y) { return x >= 0 && x < m_width && y >= 0 && y < m_height; }
 	//protected:
@@ -767,12 +594,12 @@ private:
 //@@@【FC18】用于与玩家共享场上的各项信息
 struct Info
 {
-	TPlayer totalPlayers;                                   //【FC18】总玩家数                               
-	TPlayer playerAlive;                                    //【FC18】剩余玩家数
-	TRound totalRounds;                                     //【FC18】当前回合数
-	TTower totalTowers;                                     //【FC18】总的防御塔个数
-	TCorps totalCorps;                                      //【FC18】总的兵团个数
-	TPlayerID myID;                                         //【FC18】选手ID号
+	TPlayer totalPlayers;                                   //【FC18】总玩家数（4人）                               
+	TPlayer playerAlive;                                    //【FC18】剩余玩家数（还活着的）
+	TRound totalRounds;                                     //【FC18】当前回合数（4个玩家依次执行一次操作为1回合，UI中是1个玩家执行操作记1回合）
+	TTower totalTowers;                                     //【FC18】存活的总的防御塔个数
+	TCorps totalCorps;                                      //【FC18】存活的总的兵团个数
+	TPlayerID myID;                                         //【FC18】选手ID号（注意游戏中玩家ID都是从1开始，索引时请用[myID - 1]这种格式
 
 	CommandList myCommandList;                              //【FC18】用于接收玩家发出的指令的指令集
 

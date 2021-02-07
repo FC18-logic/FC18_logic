@@ -125,7 +125,7 @@ public:
 	//遭到兵团进攻时，计算考虑增益后塔的战斗力
 	TBattlePoint get_towerbp();
 	//抵御兵团的进攻，返回塔是否被攻陷
-	bool Be_Attacked(TPlayerID enemy_id, THealthPoint hp_decrease);
+	bool Be_Attacked(TPlayerID enemy_id, THealthPoint hp_decrease, bool attackerAlive);
 	//兵团驻扎信息录入 
 	void input_staycrops(Crops* newcrop) { m_staycrops.push_back(newcrop); }
 	//修理塔回复生命值

@@ -249,7 +249,7 @@ TBattlePoint Tower::get_towerbp()
 返回值：塔是否被攻陷（即生命值是否小于0，但塔不一定能被攻占，有可能已经被摧毁）
 by lxj
 */
-bool Tower::Be_Attacked(TPlayerID enemy_id,THealthPoint hp_decrease)
+bool Tower::Be_Attacked(TPlayerID enemy_id,THealthPoint hp_decrease, bool attackerAlive)
 {
 	m_healthpoint -= hp_decrease;
 	m_data->changeTowers.insert(m_id);  //by jyp:记录塔的生命值等改变
@@ -269,9 +269,12 @@ bool Tower::Be_Attacked(TPlayerID enemy_id,THealthPoint hp_decrease)
 			m_data->dieTower.insert(m_id);
 			//更新occupypoint/owner
 			m_data->gameMap.modifyOccupyPoint(m_PlayerID, NOTOWER, m_position);
+			//塔被摧毁更新攻击者占塔数量
+			int currentCqTowerNum = m_data->players[enemy_id - 1].getCqTowerNum();
+			m_data->players[enemy_id - 1].setCqTowerNum(currentCqTowerNum + 1);
 		}
-		//塔被攻占
-		else
+		//如果攻方还活着（攻方是塔的话判定攻方死亡，即不能占领），塔被攻占
+		else if (attackerAlive == true)
 		{
 			set_all(m_level);
 			m_data->players[m_PlayerID - 1].getTower().erase(m_id);//修改原拥有者的塔列表
@@ -279,15 +282,30 @@ bool Tower::Be_Attacked(TPlayerID enemy_id,THealthPoint hp_decrease)
 			//更新occupypoint/owner
 			m_data->gameMap.modifyOccupyPoint(m_PlayerID, enemy_id, m_position);
 			m_PlayerID = enemy_id;
-			//塔被攻占后所有驻扎兵团
+			//塔被攻占更新攻击者占塔数量
+			int currentCqTowerNum = m_data->players[enemy_id - 1].getCqTowerNum();
+			m_data->players[enemy_id - 1].setCqTowerNum(currentCqTowerNum + 1);
 		}
+		else//攻方占领失败，塔的所有者不变，按当前等级重置各项属性（满级）
+			set_all(m_level);
 		//【规则修改】
 		//塔被摧毁或攻占后驻扎兵团消灭
-		int num = m_staycrops.size();
-		for (int i = 0; i < num; i++)
+		int newDieCorps = m_data->players[enemy_id - 1].getElCorpsNum();
+		newDieCorps += m_staycrops.size();
+		for (int i = 0; i < m_staycrops.size(); i++)
 			m_staycrops[i]->KillCorps();
-		int currentElNum = m_data->players[enemy_id - 1].getElCorpsNum();
-		m_data->players[enemy_id - 1].setElCorpsNum(num + currentElNum);
+		m_staycrops.clear();
+		//被摧毁的塔所在方格上，把除了攻击方兵团外的所有兵团都杀死
+		TPoint towerPos = m_position;
+		for (TCorpsID c : m_data->gameMap.map[towerPos.m_y][towerPos.m_x].corps)
+		{
+			if (m_data->myCorps[c].getPlayerID() != enemy_id)
+			{
+				m_data->myCorps[c].KillCorps();
+				newDieCorps++;
+			}
+		}
+		m_data->players[enemy_id - 1].setElCorpsNum(newDieCorps);
 		/*
 		//俘虏驻扎工程兵并修改data
 		for(int i = 0; i<m_staycrops.size(); i++)
@@ -338,6 +356,7 @@ bool Tower::set_attacktarget(int crop_id)
 	//攻击失败
 	if (crop_id < 0 || crop_id >= m_data->myCorps.size())//id越界
 		return false;
+	if (m_data->myCorps[crop_id].isStation() == true) return false;   //兵团驻扎到塔，这种情况塔就不能攻击了
 	Crops enemy = m_data->myCorps[crop_id];
 	if (enemy.bAlive() == false)//兵团死亡
 		return false;
