@@ -254,8 +254,8 @@ namespace DAGAN
 			{
 			case(CMove):
 				newCmd.cm_type = JMove;
-				newCmd.aim_x = point.m_x + DAGAN::moveDir[c.parameters[2]].m_x;
-				newCmd.aim_z = point.m_y + DAGAN::moveDir[c.parameters[2]].m_y;
+				newCmd.aim_x = point.m_x /*+ DAGAN::moveDir[c.parameters[2]].m_x*/;
+				newCmd.aim_z = point.m_y /*+ DAGAN::moveDir[c.parameters[2]].m_y*/;
 				//newCmd["mv"] = Json::Value(std::to_string(int(c.parameters[2])));
 				//newCmd["dir"] = Json::Value(std::to_string(std::atan2(DAGAN::moveDir[c.parameters[2]].m_y, DAGAN::moveDir[c.parameters[2]].m_x)));
 				break;
@@ -708,7 +708,7 @@ namespace DAGAN
 		{
 			for (int i = 0; i < info.corpsInfo.size(); i++) {
 				if (info.corpsInfo[i].owner != m_ID && getDist(info.towerInfo[t].position, info.corpsInfo[i].pos) <= 2) {
-					info.myCommandList.addCommand(towerCommand, { TAttackCorps,info.corpsInfo[i].ID });
+					info.myCommandList.addCommand(towerCommand, { TAttackCorps,t,i });
 					break;
 				}
 			}

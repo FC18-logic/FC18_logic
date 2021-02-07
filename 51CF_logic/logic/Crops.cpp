@@ -29,6 +29,7 @@ Crops::Crops(DATA::Data* _data, corpsType type, battleCorpsType battletype, cons
 	m_StationTower = nullptr;//兵团生产出来后，需要指令才驻守当地的塔
 	m_BuildPoint = 0;
 	m_HealthPoint = 0;
+	m_MovePoint = 0;
 
 	if (type == Battle)
 	{
@@ -230,7 +231,7 @@ bool Crops::BeAttacked(int attack, TPlayerID ID, bool bAlive)
 	if(m_type == Construct)
 	{
 		if(bAlive){   
-			if (m_data->players[ID - 1].constructNumControl() == false)//如果攻击方的工程兵团数目满了，那么不俘虏，直接消灭
+			if (m_data->players[ID - 1].constructNumControl() == true)//如果攻击方的工程兵团数目满了，那么不俘虏，直接消灭
 			{
 				KillCorps();
 				int num = m_data->players[ID - 1].getElCorpsNum() + 1;

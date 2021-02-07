@@ -409,9 +409,9 @@ void Game::saveJson(ofstream& infoFile) {
 	//保存所有兵团的ID和位置信息
 	for (int i = 0; i < data.myCorps.size(); i++) {
 		if (data.myCorps[i].bAlive() == false) {
-			char bufferCorpsDead[32];
+			/*char bufferCorpsDead[32];
 			sprintf(bufferCorpsDead,"%d \n", i);
-			infoFile << bufferCorpsDead;
+			infoFile << bufferCorpsDead;*/
 			continue;    //兵团没了，就不记录信息
 		}
 		char bufferCorpsBasic[64];
@@ -469,9 +469,9 @@ void Game::saveJson(ofstream& infoFile) {
 	infoFile << bufferTowerHead;
 	for (int i = 0; i < data.myTowers.size(); i++) {
 		if (data.myTowers[i].getexsit() == false) {
-			char bufferTowerDead[32];
+			/*char bufferTowerDead[32];
 			sprintf(bufferTowerDead, "%d \n", i);
-			infoFile << bufferTowerDead;
+			infoFile << bufferTowerDead;*/
 			continue;   //塔没了，就不记录信息
 		}
 		char bufferTowerBasic[64];
