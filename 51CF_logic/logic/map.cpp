@@ -465,6 +465,7 @@ void Map::modifyOccupyPoint(TPlayerID oldOwner, TPlayerID newOwner, TPoint p) {
 	if (!withinMap(p)) return;  //当前方格在地图之外
 	if (oldOwner != NOTOWER && oldOwner >= 1 && oldOwner <= 4) map[p.m_y][p.m_x].occupyPoint[oldOwner - 1] -= INF;
 	if (newOwner != NOTOWER && newOwner >= 1 && newOwner <= 4) map[p.m_y][p.m_x].occupyPoint[newOwner - 1] += INF;
+	ownerChange(p);
 	for (int i = p.m_y - 5; i <= p.m_y + 5; i++) {
 		for (int j = p.m_x - 5; j <= p.m_x + 5; j++) {
 			TPoint currentPoint = { j,i };

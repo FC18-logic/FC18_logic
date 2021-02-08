@@ -43,7 +43,7 @@ Player::~Player()
 void Player::Kill()
 {
 	alive = false;
-	deadRound = std::ceil(data->getRound() / 4); //返回死亡回合数是大回合数
+	deadRound = std::ceil(data->getRound() / 4.0); //返回死亡回合数是大回合数
 }
 
 /***********************************************************************************************
