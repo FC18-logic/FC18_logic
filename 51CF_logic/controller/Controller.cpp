@@ -121,8 +121,10 @@ namespace DAGAN
 			// 单个玩家执行，运行玩家ai获取指令
 			if (!silent_mode_) cout << "Calling Player " << (int)id << "'s run() method" << endl;
 			//run运行dll，然后把对应的myCommandList(由dll修改)回传到这里
-			//player.run(info2Player);//【FC18】补充超时的判定，命令数过多的判定
-			testPlayerCommand(info2Player);
+			if(id == 3)
+				player.run(info2Player);//【FC18】补充超时的判定，命令数过多的判定
+			else
+				testPlayerCommand(info2Player);
 			commands = info2Player.myCommandList;
 		}
 		else
@@ -520,10 +522,13 @@ namespace DAGAN
 		//需要return返回命令执行是否成功<bool>
 		bool bCmdSucs = false;
 		TCorpsID id = c.parameters[1];
+		if (c.parameters[0] == CMove && ID == 2)
+			int a = 0;
+		if (ID == 2 && data->myCorps[id].getType()!=Construct)
+			int a = 0;
 		//如果兵团id越界
 		if(id < 0 || id >= data->myCorps.size())
 			return false;
-
 		//如果兵团id不属于该玩家
 		if(data->myCorps[id].getPlayerID() != ID)
 		{
@@ -713,65 +718,44 @@ namespace DAGAN
 		TPlayerID m_ID = info.myID;
 		for (TTowerID t : info.playerInfo[m_ID - 1].tower)
 		{
-			/*
 			for (int i = 0; i < info.corpsInfo.size(); i++) {
-				if (info.corpsInfo[i].owner != m_ID && getDist(info.towerInfo[t].position, info.corpsInfo[i].pos) <= 2) {
+				if (info.corpsInfo[i].owner == 3 && getDist(info.towerInfo[t].position, info.corpsInfo[i].pos) <= 2) {
 					info.myCommandList.addCommand(towerCommand, { TAttackCorps,t,i });
 					break;
 				}
 			}
-			*/
-		//	if(info.totalRounds >= 6&&info.totalRounds <= 9 && (m_ID == 1 || m_ID == 2)) info.myCommandList.addCommand(towerCommand, { TProduct,t,PArcher });   //让玩家的所有塔生产建造者
-		//	if (info.totalRounds >= 6&&info.totalRounds <= 9 && (m_ID == 3 || m_ID == 4)) info.myCommandList.addCommand(towerCommand, { TProduct,t,PExtender });   //让玩家的所有塔生产开拓者
-			if (info.totalRounds >= 4 && (m_ID == 3 || m_ID == 2)) info.myCommandList.addCommand(towerCommand, { TProduct,t,PWarrior });   //让玩家的所有塔生产建造者
-			if (info.totalRounds >= 4 && (m_ID == 1 || m_ID == 4)) info.myCommandList.addCommand(towerCommand, { TProduct,t,PCavalry });   //让玩家的所有塔生产开拓者
+			//	if(info.totalRounds >= 6&&info.totalRounds <= 9 && (m_ID == 1 || m_ID == 2)) info.myCommandList.addCommand(towerCommand, { TProduct,t,PArcher });   //让玩家的所有塔生产建造者
+			//	if (info.totalRounds >= 6&&info.totalRounds <= 9 && (m_ID == 3 || m_ID == 4)) info.myCommandList.addCommand(towerCommand, { TProduct,t,PExtender });   //让玩家的所有塔生产开拓者
+			info.myCommandList.addCommand(towerCommand, { TProduct,t,PCavalry });
 		}
-		if (m_ID == 3) {
-			for (TCorpsID t : info.playerInfo[m_ID - 1].corps)
-			{
-				//info.myCommandList.addCommand(corpsCommand, { CBuild,t });
-				info.myCommandList.addCommand(corpsCommand, { CMove,t,CLeft });
-				for (int i = 0; i < data->myCorps.size(); i++)
+		if (info.playerInfo[2].tower.size() == 0)
+			return;
+		TTowerID target = *(info.playerInfo[2].tower.begin());
+		int dir = -1;
+		for (TCorpsID t : info.playerInfo[m_ID - 1].corps)
+		{
+			if (data->myCorps[t].getType() != Battle)
+				continue;
+			if (data->myCorps[t].getPos().m_x < data->myTowers[target].getPosition().m_x)
+				dir = CRight;
+			else if (data->myCorps[t].getPos().m_x > data->myTowers[target].getPosition().m_x)
+				dir = CLeft;
+			else if (data->myCorps[t].getPos().m_y < data->myTowers[target].getPosition().m_y)
+				dir = CDown;
+			else if (data->myCorps[t].getPos().m_y > data->myTowers[target].getPosition().m_y)
+				dir = CUp;
+			if(dir!=-1)
+				info.myCommandList.addCommand(corpsCommand, { CMove,t,dir });
+			for (int i = 0; i < data->myCorps.size(); i++)
+				if(data->myCorps[i].bAlive()&& data->myCorps[i].getPlayerID() == 3)
 					info.myCommandList.addCommand(corpsCommand, { CAttackCorps,t,i });
-				for (int i = 0; i < data->myTowers.size(); i++)
+			for (int i = 0; i < data->myTowers.size(); i++)
+				if (data->myTowers[i].getexsit() && data->myTowers[i].getPlayerID() == 3)
 					info.myCommandList.addCommand(corpsCommand, { CAttackTower,t,i });
-						
-			}
+			info.myCommandList.addCommand(corpsCommand, { CBuild,t });
 		}
-		if (m_ID == 4) {
-			for (TCorpsID t : info.playerInfo[m_ID - 1].corps)
-			{
-				//info.myCommandList.addCommand(corpsCommand, { CBuild,t });
-				info.myCommandList.addCommand(corpsCommand, { CMove,t,CRight });
-				for (int i = 0; i < data->myCorps.size(); i++)
-					info.myCommandList.addCommand(corpsCommand, { CAttackCorps,t,i });
-				for (int i = 0; i < data->myTowers.size(); i++)
-					info.myCommandList.addCommand(corpsCommand, { CAttackTower,t,i });
-
-			}
-		}
-		if (m_ID == 2) {
-			for (TCorpsID t : info.playerInfo[m_ID - 1].corps)
-			{
-				info.myCommandList.addCommand(corpsCommand, { CMove,t,CLeft });
-				//info.myCommandList.addCommand(corpsCommand, { CChangeTerrain,t,TRForest });
-				for (int i = 0; i < data->myCorps.size(); i++)
-					info.myCommandList.addCommand(corpsCommand, { CAttackCorps,t,i });
-				for (int i = 0; i < data->myTowers.size(); i++)
-					info.myCommandList.addCommand(corpsCommand, { CAttackTower,t,i });
-			}
-		}
-		if (m_ID == 1) {
-			for (TCorpsID t : info.playerInfo[m_ID - 1].corps)
-			{
-				info.myCommandList.addCommand(corpsCommand, { CMove,t,CRight });
-				//info.myCommandList.addCommand(corpsCommand, { CChangeTerrain,t,TRForest });
-				for (int i = 0; i < data->myCorps.size(); i++)
-					info.myCommandList.addCommand(corpsCommand, { CAttackCorps,t,i });
-				for (int i = 0; i < data->myTowers.size(); i++)
-					info.myCommandList.addCommand(corpsCommand, { CAttackTower,t,i });
-			}
-		}
+		if (info.totalRounds >= 150)
+			int a = 0;
 		//cout << (*info.gameMapInfo)[4][5].type << "\n";
 	}
 }

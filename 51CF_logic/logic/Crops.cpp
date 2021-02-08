@@ -166,7 +166,6 @@ bool Crops::Move(int dir)
 AttackCrops
 该兵团对另一兵团发起攻击，负责计算攻击力、攻击兵团、并移动
 参数 enemy 受攻击兵团指针
-返回值 int 减少的HP
 lmx
 */
 void Crops::AttackCrops(Crops* enemy)
@@ -533,7 +532,8 @@ void Crops::AttackTower(class Tower *enemy)
 
 	bool IsTowerDestroy = false;
 	//判断塔是否被攻陷(占领、摧毁都算)
-	IsTowerDestroy = enemy->Be_Attacked(m_PlayerID, enemylost,m_bAlive);
+	IsTowerDestroy = !enemy->Be_Attacked(m_PlayerID, enemylost,m_bAlive);
+
 	if(IsTowerDestroy/*&&!(enemy->getexsit())*/)
 	{
 		int num = m_data->players[m_PlayerID - 1].getCqTowerNum() + 1;
@@ -583,13 +583,8 @@ bool Crops::Attack(int type, TCorpsID ID)
 			return false;
 
 		//如果敌人驻扎到了所在位置存在敌方势力塔 优先与塔结算
-		int x = enemy->m_position.m_x;
-		int y = enemy->m_position.m_y;
-		int index = m_data->gameMap.map[y][x].TowerIndex;
-		if(index == NOTOWER)
-			AttackCrops(enemy);
-		else if(m_StationTower != NULL && m_data->myTowers[index].getPlayerID() == enemy->m_PlayerID)
-			AttackTower(&(m_data->myTowers[index]));
+		if (enemy->m_StationTower != nullptr)
+			AttackTower(enemy->m_StationTower);
 		else
 			AttackCrops(enemy);
 	}
