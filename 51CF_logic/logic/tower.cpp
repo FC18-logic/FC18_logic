@@ -369,7 +369,7 @@ bool Tower::set_attacktarget(int crop_id)
 		return false;
 	//¹¥»÷³É¹¦
 	float deta = 0.04 * ((float)m_battlepoint - enemy.getCE());
-	int crop_lost = floor(28 * pow(2.71828, deta));
+	int crop_lost = floor(30 * pow(2.71828, deta));
 	enemy.BeAttacked(crop_lost, m_PlayerID, m_exsit);
 	return true;
 }

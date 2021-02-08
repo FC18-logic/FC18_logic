@@ -158,7 +158,7 @@ namespace DAGAN
 				if (data->newCorps.find(c.parameters[1]) != data->newCorps.end() || corpsBanned.find(c.parameters[1]) != corpsBanned.end()) continue;     //这个兵团本回合不能(再)接受操作，请求驳回
 				if (handleCorpsCommand(id, c) == true) {   //记录不能再进行其他操作的兵团序号
 					jsonChange(id, c,cmdFile);   //更新有效的指令Json
-//					outPutCommand(id, c);  //复读被执行的命令，未执行的不复读
+					outPutCommand(id, c);  //复读被执行的命令，未执行的不复读
 					switch (c.parameters[0]) {
 					//case(CStation):
 					case(CStationTower):
@@ -710,44 +710,66 @@ namespace DAGAN
 		TPlayerID m_ID = info.myID;
 		for (TTowerID t : info.playerInfo[m_ID - 1].tower)
 		{
+			/*
 			for (int i = 0; i < info.corpsInfo.size(); i++) {
 				if (info.corpsInfo[i].owner != m_ID && getDist(info.towerInfo[t].position, info.corpsInfo[i].pos) <= 2) {
 					info.myCommandList.addCommand(towerCommand, { TAttackCorps,t,i });
 					break;
 				}
 			}
-			if(info.totalRounds >= 6 && (m_ID == 1 || m_ID == 2)) info.myCommandList.addCommand(towerCommand, { TProduct,t,PBuilder});   //让玩家的所有塔生产建造者
-			if (info.totalRounds >= 6 && (m_ID == 3 || m_ID == 4)) info.myCommandList.addCommand(towerCommand, { TProduct,t,PExtender });   //让玩家的所有塔生产开拓者
+			*/
+		//	if(info.totalRounds >= 6&&info.totalRounds <= 9 && (m_ID == 1 || m_ID == 2)) info.myCommandList.addCommand(towerCommand, { TProduct,t,PArcher });   //让玩家的所有塔生产建造者
+		//	if (info.totalRounds >= 6&&info.totalRounds <= 9 && (m_ID == 3 || m_ID == 4)) info.myCommandList.addCommand(towerCommand, { TProduct,t,PExtender });   //让玩家的所有塔生产开拓者
+			if (info.totalRounds >= 4 && (m_ID == 3 || m_ID == 2)) info.myCommandList.addCommand(towerCommand, { TProduct,t,PWarrior });   //让玩家的所有塔生产建造者
+			if (info.totalRounds >= 4 && (m_ID == 1 || m_ID == 4)) info.myCommandList.addCommand(towerCommand, { TProduct,t,PCavalry });   //让玩家的所有塔生产开拓者
 		}
-		if (info.totalRounds < 11) {
-			for (TCorpsID c : info.playerInfo[m_ID - 1].corps)
+		if (m_ID == 3) {
+			for (TCorpsID t : info.playerInfo[m_ID - 1].corps)
 			{
-				info.myCommandList.addCommand(corpsCommand, { CMove,c,CUp });
-				info.myCommandList.addCommand(corpsCommand, { CMove,c,CUp });         //让玩家的所有兵团向上移动
-				info.myCommandList.addCommand(corpsCommand, { CMove,c,CRight });
+				//info.myCommandList.addCommand(corpsCommand, { CBuild,t });
+				info.myCommandList.addCommand(corpsCommand, { CMove,t,CLeft });
+				for (int i = 0; i < data->myCorps.size(); i++)
+					info.myCommandList.addCommand(corpsCommand, { CAttackCorps,t,i });
+				for (int i = 0; i < data->myTowers.size(); i++)
+					info.myCommandList.addCommand(corpsCommand, { CAttackTower,t,i });
+						
 			}
 		}
-		if (info.totalRounds >= 11)
-		{	
-			if (m_ID == 3) {
-				for (TCorpsID t : info.playerInfo[m_ID - 1].corps)
-				{
-					info.myCommandList.addCommand(corpsCommand, { CBuild,t });
-					info.myCommandList.addCommand(corpsCommand, { CMove,t,CLeft });
-				}
-			}
-			if (m_ID == 1) {
-				for (TCorpsID t : info.playerInfo[m_ID - 1].corps)
-				{
-					info.myCommandList.addCommand(corpsCommand, { CMove,t,CUp });
-					if(info.totalRounds % 2 == 0)
-						info.myCommandList.addCommand(corpsCommand, { CChangeTerrain,t,TRForest });
-					else
-						info.myCommandList.addCommand(corpsCommand, { CChangeTerrain,t,TRPlain });
-				}
+		if (m_ID == 4) {
+			for (TCorpsID t : info.playerInfo[m_ID - 1].corps)
+			{
+				//info.myCommandList.addCommand(corpsCommand, { CBuild,t });
+				info.myCommandList.addCommand(corpsCommand, { CMove,t,CRight });
+				for (int i = 0; i < data->myCorps.size(); i++)
+					info.myCommandList.addCommand(corpsCommand, { CAttackCorps,t,i });
+				for (int i = 0; i < data->myTowers.size(); i++)
+					info.myCommandList.addCommand(corpsCommand, { CAttackTower,t,i });
+
 			}
 		}
-		cout << (*info.gameMapInfo)[4][5].type << "\n";
+		if (m_ID == 2) {
+			for (TCorpsID t : info.playerInfo[m_ID - 1].corps)
+			{
+				info.myCommandList.addCommand(corpsCommand, { CMove,t,CLeft });
+				//info.myCommandList.addCommand(corpsCommand, { CChangeTerrain,t,TRForest });
+				for (int i = 0; i < data->myCorps.size(); i++)
+					info.myCommandList.addCommand(corpsCommand, { CAttackCorps,t,i });
+				for (int i = 0; i < data->myTowers.size(); i++)
+					info.myCommandList.addCommand(corpsCommand, { CAttackTower,t,i });
+			}
+		}
+		if (m_ID == 1) {
+			for (TCorpsID t : info.playerInfo[m_ID - 1].corps)
+			{
+				info.myCommandList.addCommand(corpsCommand, { CMove,t,CRight });
+				//info.myCommandList.addCommand(corpsCommand, { CChangeTerrain,t,TRForest });
+				for (int i = 0; i < data->myCorps.size(); i++)
+					info.myCommandList.addCommand(corpsCommand, { CAttackCorps,t,i });
+				for (int i = 0; i < data->myTowers.size(); i++)
+					info.myCommandList.addCommand(corpsCommand, { CAttackTower,t,i });
+			}
+		}
+		//cout << (*info.gameMapInfo)[4][5].type << "\n";
 	}
 }
 

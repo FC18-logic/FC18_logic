@@ -371,8 +371,13 @@ bool Crops::JudgeChangeTerrain(Command& c)
 	int curID = m_data->gameMap.map[m_position.m_y][m_position.m_x].owner;
 	if (curID != m_PlayerID)
 		return false;
+	if (target == m_data->gameMap.map[m_position.m_y][m_position.m_x].type)
+		return false;
+	if (m_MovePoint == 0)
+		return false;
 	if (m_data->gameMap.map[m_position.m_y][m_position.m_x].TowerIndex == NOTOWER)
 	{
+		m_MovePoint = 0;//建造后行动力为零
 		return true;
 	}
 	return false;
@@ -561,11 +566,7 @@ bool Crops::Attack(int type, TCorpsID ID)
 	if(m_MovePoint == 0)
 		return false;
 
-	m_MovePoint = 0;
-	m_data->changeCorps.insert(m_myID);//by jyp:记录兵团行动力等的改变
 
-	//我方HP减少值
-	int mylost = 0;
 	if(type == CAttackCorps)
 	{
 		Crops* enemy = NULL;
@@ -612,6 +613,8 @@ bool Crops::Attack(int type, TCorpsID ID)
 	else//指令有误
 		return false;
 
+	m_MovePoint = 0;
+	m_data->changeCorps.insert(m_myID);//by jyp:记录兵团行动力等的改变
 	return true;
 }
 
@@ -691,7 +694,8 @@ bool Crops::MendTower()
 		return false;
 	if(m_BuildType != Builder)
 		return false;
-
+	if (m_MovePoint == 0)
+		return false;
 	//获取该位置塔的信息
 	int index = m_data->gameMap.map[m_position.m_y][m_position.m_x].TowerIndex;
 	//如果没有塔
