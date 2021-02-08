@@ -28,6 +28,7 @@ Player::Player(Player& _player)// copyππ‘Ïplayer
 	name = _player.getName();
 	rank = _player.getRank();
 	score = _player.getScore();
+	deadRound = _player.getdeadRound();
 
 	data = _player.data;   //±‹√‚«≥∏¥÷∆?
 

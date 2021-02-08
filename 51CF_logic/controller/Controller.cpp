@@ -158,7 +158,7 @@ namespace DAGAN
 				if (data->newCorps.find(c.parameters[1]) != data->newCorps.end() || corpsBanned.find(c.parameters[1]) != corpsBanned.end()) continue;     //这个兵团本回合不能(再)接受操作，请求驳回
 				if (handleCorpsCommand(id, c) == true) {   //记录不能再进行其他操作的兵团序号
 					jsonChange(id, c,cmdFile);   //更新有效的指令Json
-					outPutCommand(id, c);  //复读被执行的命令，未执行的不复读
+					//outPutCommand(id, c);  //复读被执行的命令，未执行的不复读
 					switch (c.parameters[0]) {
 					//case(CStation):
 					case(CStationTower):
@@ -212,6 +212,9 @@ namespace DAGAN
 				{
 					//
 					cout << "Rank " << ++rank << " : player " << players_[r - 1].getName() << endl;
+				}
+				for (int playerID = 1; playerID <= 4; playerID++) {
+					cout << "ID: " << playerID << " score: " << data->players[playerID - 1].getScore() << " deadround: " << data->players[playerID - 1].getdeadRound() << "\n";
 				}
 			}
 		}
@@ -442,7 +445,7 @@ namespace DAGAN
 	***********************************************************************************************/
 	void Controller::killPlayers() {
 		for (int i = 0; i < 4; i++) {
-			if (data->players[i].getTower().size() <= 0)  //没有防御塔的玩家直接出局，打出局回合的标签
+			if (data->players[i].isAlive() == true && data->players[i].getTower().size() <= 0)  //没有防御塔的玩家直接出局，打出局回合的标签
 			{
 				data->players[i].Kill();
 			}
