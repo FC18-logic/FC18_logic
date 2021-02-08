@@ -143,43 +143,47 @@ by lxj
 */
 void Tower::product_crops(productType protype)
 {
-	if (protype == PWarrior) 
-	{
-		Crops temp(m_data, Battle, Warrior, Builder, m_PlayerID, m_position);
-		m_data->myCorps.push_back(temp);
-		m_data->changeCorps.insert(temp.getID());
-	}
-	if (protype == PArcher) 
-	{
-		Crops temp(m_data, Battle, Archer, Builder, m_PlayerID, m_position);
-		m_data->myCorps.push_back(temp);
-		m_data->changeCorps.insert(temp.getID());
-	}
-	if (protype == PCavalry) 
-	{
-		Crops temp(m_data, Battle, Cavalry, Builder, m_PlayerID, m_position);
-		m_data->myCorps.push_back(temp);
-		m_data->changeCorps.insert(temp.getID());
-	}
-	if (protype == PBuilder) 
-	{
-		Crops temp(m_data, Construct, Warrior, Builder, m_PlayerID, m_position);
-		m_data->myCorps.push_back(temp);
-		m_data->changeCorps.insert(temp.getID());
-	}
-	if (protype == PExtender) 
-	{
-		Crops temp(m_data, Construct, Warrior, Extender, m_PlayerID, m_position);
-		m_data->myCorps.push_back(temp);
-		m_data->changeCorps.insert(temp.getID());
-		//by jyp：开拓者生产出后所在方格塔减小1
-		if (m_level > 1)
+	if (m_data->players[m_PlayerID - 1].battleNumControl() == false) {
+		if (protype == PWarrior)
 		{
-			m_level--;
-			set_all(m_level);//暂时把等级减小后的塔等级设为满级
+			Crops temp(m_data, Battle, Warrior, Builder, m_PlayerID, m_position);
+			m_data->myCorps.push_back(temp);
+			m_data->changeCorps.insert(temp.getID());
 		}
-		//对于已经是一级（最低级）的塔，既不
-	}	
+		else if (protype == PArcher)
+		{
+			Crops temp(m_data, Battle, Archer, Builder, m_PlayerID, m_position);
+			m_data->myCorps.push_back(temp);
+			m_data->changeCorps.insert(temp.getID());
+		}
+		else if (protype == PCavalry)
+		{
+			Crops temp(m_data, Battle, Cavalry, Builder, m_PlayerID, m_position);
+			m_data->myCorps.push_back(temp);
+			m_data->changeCorps.insert(temp.getID());
+		}
+	}
+	if (m_data->players[m_PlayerID - 1].constructNumControl() == false) {
+		if (protype == PBuilder)
+		{
+			Crops temp(m_data, Construct, Warrior, Builder, m_PlayerID, m_position);
+			m_data->myCorps.push_back(temp);
+			m_data->changeCorps.insert(temp.getID());
+		}
+		else if (protype == PExtender)
+		{
+			Crops temp(m_data, Construct, Warrior, Extender, m_PlayerID, m_position);
+			m_data->myCorps.push_back(temp);
+			m_data->changeCorps.insert(temp.getID());
+			//by jyp：开拓者生产出后所在方格塔减小1
+			if (m_level > 1)
+			{
+				m_level--;
+				set_all(m_level);//暂时把等级减小后的塔等级设为满级
+			}
+			//对于已经是一级（最低级）的塔，既不
+		}
+	}
 }
 
 
@@ -357,7 +361,8 @@ bool Tower::set_attacktarget(int crop_id)
 	if (crop_id < 0 || crop_id >= m_data->myCorps.size())//id越界
 		return false;
 	if (m_data->myCorps[crop_id].isStation() == true) return false;   //兵团驻扎到塔，这种情况塔就不能攻击了
-	Crops enemy = m_data->myCorps[crop_id];
+	if (m_data->myCorps[crop_id].getPlayerID() == m_PlayerID) return false;
+	Crops& enemy = m_data->myCorps[crop_id];
 	if (enemy.bAlive() == false)//兵团死亡
 		return false;
 	if (getDist(enemy.getPos(), m_position) > m_attackrange)//超出攻击范围

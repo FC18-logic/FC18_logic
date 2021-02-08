@@ -518,7 +518,7 @@ public:
 
 	//【FC18】获取地图上的所有兵团信息函数，可以参照const  vector<TPoint>& getStudentPos() const
 	//【FC18】返回一个兵团信息结构体的vector引用，方便外部访问修改
-	const  vector<CorpsInfoUnit>& getCropsInfo() const { return m_corpsinfo; }
+	//const  vector<CorpsInfoUnit>& getCropsInfo() const { return m_corpsinfo; }
 
 	bool   isPosValid(TPoint p) { return isPosValid(p.m_x, p.m_y); }             //判断点是否越界
 	bool   isPosValid(int x, int y) { return x >= 0 && x < m_width && y >= 0 && y < m_height; }

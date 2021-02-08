@@ -66,7 +66,7 @@ public:
 	TPoint getPos() { return m_position; }	//获取当前兵团的位置
 	battleCorpsType getbattleType() { return m_BattleType; }	//获取当前战斗兵团的类型
 	TPlayerID getPlayerID() { return m_PlayerID; }				//获取兵团所属阵营
-	bool isStation() { return m_StationTower; }
+	bool isStation() { return (m_StationTower != NULL); }
 
 
 	//void haveCmd();								//接受命令 退出自动休整状态
