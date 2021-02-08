@@ -136,6 +136,10 @@ namespace DAGAN
 		if (file_output_enabled_)
 			cout << "Player " << id << "'s commands:" << endl;
 #endif
+		/*for (Command c : commands.getCommand())
+		{
+			outPutCommand(id, c);
+		}*/
 		//循环执行玩家命令
 		set<TTowerID> towerBanned;//不能再执行操作的塔
 		set<TCorpsID> corpsBanned;//不能再执行操作的兵团
