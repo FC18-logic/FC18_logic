@@ -185,7 +185,8 @@ void Game::DebugPhase()
 			<< " 任务消耗：" << ((data.myTowers[i].ShowInfo().pdtType >= 0 && data.myTowers[i].ShowInfo().pdtType <= 5) ? data.myTowers[i].ShowInfo().productConsume:0) << endl;
 		for (TCorpsID u : data.gameMap.
 				map[data.myTowers[i].getPosition().m_y][data.myTowers[i].getPosition().m_x].corps) {
-			if (!data.myCorps[u].bAlive()) continue;
+			if (!data.myCorps[u].bAlive()|| 
+				(data.myCorps[u].getPlayerID() != data.myTowers[i].getPlayerID())) continue;
 			cout <<u << " "; //兵团序号
 		}
 		cout << endl;

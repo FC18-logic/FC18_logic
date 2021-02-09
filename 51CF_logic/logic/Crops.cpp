@@ -40,7 +40,6 @@ Crops::Crops(DATA::Data* _data, corpsType type, battleCorpsType battletype, cons
 		m_MovePoint = constructMovePoint[buildtype];
 		if(buildtype == Builder )m_BuildPoint = 3;
 	}
-	//m_bResting = true;//兵团生产出来后默认休整
 	m_data->gameMap.map[m_position.m_y][m_position.m_x].corps.push_back(m_myID);
 	m_data->players[m_PlayerID - 1].addCrops(m_myID);
 	m_data->totalCorps++;
@@ -98,20 +97,12 @@ bool Crops::Move(int dir)
 	next_pos.m_y = next_y;
 	if (m_data->gameMap.withinMap(next_pos) == false) return false;  //by jyp要前往的位置不在地图内，判断失败
 
-	//判断目标位置是否存在己方塔
+	//判断目标位置是否存在塔
 	bool haveTower = false;
 	int index = m_data->gameMap.map[next_y][next_x].TowerIndex;
 	if(index != NOTOWER)
 	{
-		class Tower targettower = m_data->myTowers[index];
-		if(targettower.getPlayerID() != m_PlayerID)
-		{
-			return false;
-		}
-		else
-		{
-			haveTower = true;
-		}
+		haveTower = true;
 	}
 	if(!haveTower)
 	{
@@ -236,14 +227,14 @@ bool Crops::BeAttacked(int attack, TPlayerID ID, bool bAlive)
 				KillCorps();
 				int num = m_data->players[ID - 1].getElCorpsNum() + 1;
 				m_data->players[ID - 1].setElCorpsNum(num);
-				return true;
+				return false;
 			}
 			ChangeOwner(ID);
 			int num = m_data->players[ID - 1].getCqCorpsNum() + 1;
 			m_data->players[ID - 1].setCqCorpsNum(num);
 			m_data->changeCorps.insert(m_myID);//by jyp:记录工程兵团所有者改变
 		}
-		return true;
+		return true;//不移动 如果移动则return false
 	}
 	//战斗兵
 	//m_PeaceNum = 0;
@@ -565,7 +556,7 @@ bool Crops::Attack(int type, TCorpsID ID)
 
 		//如果敌人驻扎到了所在位置存在敌方势力塔 优先与塔结算
 		int index = m_data->gameMap.map[enemy->m_position.m_y][enemy->m_position.m_x].TowerIndex;
-		if (index != NOTOWER)
+		if (index != NOTOWER&&m_data->myTowers[index].getPlayerID() == enemy->m_PlayerID)
 			AttackTower(&(m_data->myTowers[index]));
 		else
 			AttackCrops(enemy);
@@ -763,7 +754,7 @@ void Crops::doChangingTerrain(terrainType target, int x, int y)
 bool Crops::isStation()
 {
 	int index = m_data->gameMap.map[m_position.m_y][m_position.m_x].TowerIndex;
-	if (index != NOTOWER)
+	if (index != NOTOWER&&m_data->myTowers[index].getPlayerID() == m_PlayerID)
 		return true;
 	return false;
 }

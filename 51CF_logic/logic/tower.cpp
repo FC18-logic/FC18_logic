@@ -238,10 +238,13 @@ by lxj
 TBattlePoint Tower::get_towerbp()
 {
 	int bonus = 0;
-	int index;
-	for (int i = 0; i < m_data->gameMap.map[m_position.m_y][m_position.m_x].corps.size(); i++)
+	vector<TCorpsID> Unit = m_data->gameMap.map[m_position.m_y][m_position.m_x].corps;
+	TCorpsID index;
+	for (int i = 0; i < Unit.size(); i++)
 	{
-		index = m_data->gameMap.map[m_position.m_y][m_position.m_x].corps[i];
+		index = Unit[i];
+		if (m_data->myCorps[index].getPlayerID() != m_PlayerID)//如果不是自己的兵团
+			continue;
 		bonus += corpsBattleGain[m_data->myCorps[index].getbattleType()][0] * (m_data->myCorps[index].getLevel() + 1);
 	}
 	return (m_battlepoint + bonus);
@@ -300,13 +303,7 @@ bool Tower::Be_Attacked(TPlayerID enemy_id,THealthPoint hp_decrease, bool attack
 		//【规则修改】
 		//塔被摧毁或攻占后驻扎兵团消灭
 		int newDieCorps = m_data->players[enemy_id - 1].getElCorpsNum();
-		//newDieCorps += m_data->gameMap.map[m_position.m_y][m_position.m_x].corps.size();
-		/*int index;
-		for (int i = 0; i < m_data->gameMap.map[m_position.m_y][m_position.m_x].corps.size(); i++)
-		{
-			index = m_data->gameMap.map[m_position.m_y][m_position.m_x].corps[i];
-			m_data->myCorps[index].KillCorps();
-		}*/
+
 		//被摧毁的塔所在方格上，把被摧毁塔所属势力在该方格的兵团都杀死
 		TPoint towerPos = m_position;
 		for (TCorpsID c : m_data->gameMap.map[towerPos.m_y][towerPos.m_x].corps)
@@ -318,37 +315,6 @@ bool Tower::Be_Attacked(TPlayerID enemy_id,THealthPoint hp_decrease, bool attack
 			}
 		}
 		m_data->players[enemy_id - 1].setElCorpsNum(newDieCorps);
-		/*
-		//俘虏驻扎工程兵并修改data
-		for(int i = 0; i<m_staycrops.size(); i++)
-		{
-			if(m_staycrops[i]->getType() == Construct)
-			{
-				m_staycrops[i]->ChangeOwner(enemy_id);
-				int num = m_data->players[enemy_id - 1].getCqCorpsNum() + 1;
-				m_data->players[enemy_id - 1].setCqCorpsNum(num);
-			}
-			else
-			{
-				m_staycrops[i]->KillCorps();
-				int num = m_data->players[enemy_id - 1].getElCorpsNum() + 1;
-				m_data->players[enemy_id - 1].setElCorpsNum(num);
-			}
-		}
-		//从驻扎兵团中移除战斗兵团
-		for (vector<Crops*>::iterator it = m_staycrops.begin(); it != m_staycrops.end(); )
-		{
-			if ((*it)->getType() == Battle)
-			{
-				it = m_staycrops.erase(it);
-			}
-			else
-			{
-				++it;
-			}
-		}
-		return true;
-		*/
 	}
 	return m_exsit;
 }

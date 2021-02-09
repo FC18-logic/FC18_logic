@@ -121,8 +121,10 @@ namespace DAGAN
 			// 单个玩家执行，运行玩家ai获取指令
 			if (!silent_mode_) cout << "Calling Player " << (int)id << "'s run() method" << endl;
 			//run运行dll，然后把对应的myCommandList(由dll修改)回传到这里
-			player.run(info2Player);//【FC18】补充超时的判定，命令数过多的判定
-			//testPlayerCommand(info2Player);
+			if(id == 2)
+				player.run(info2Player);//【FC18】补充超时的判定，命令数过多的判定
+			else
+				testPlayerCommand(info2Player);
 			commands = info2Player.myCommandList;
 		}
 		else
@@ -720,7 +722,7 @@ namespace DAGAN
 		for (TTowerID t : info.playerInfo[m_ID - 1].tower)
 		{
 			for (int i = 0; i < info.corpsInfo.size(); i++) {
-				if (info.corpsInfo[i].owner == 3 && getDist(info.towerInfo[t].position, info.corpsInfo[i].pos) <= 2) {
+				if (info.corpsInfo[i].owner == 2 && getDist(info.towerInfo[t].position, info.corpsInfo[i].pos) <= 2) {
 					info.myCommandList.addCommand(towerCommand, { TAttackCorps,t,i });
 					break;
 				}
@@ -729,9 +731,9 @@ namespace DAGAN
 			//	if (info.totalRounds >= 6&&info.totalRounds <= 9 && (m_ID == 3 || m_ID == 4)) info.myCommandList.addCommand(towerCommand, { TProduct,t,PExtender });   //让玩家的所有塔生产开拓者
 			info.myCommandList.addCommand(towerCommand, { TProduct,t,PCavalry });
 		}
-		if (info.playerInfo[2].tower.size() == 0)
+		if (info.playerInfo[1].tower.size() == 0)
 			return;
-		TTowerID target = *(info.playerInfo[2].tower.begin());
+		TTowerID target = *(info.playerInfo[1].tower.begin());
 		int dir = -1;
 		for (TCorpsID t : info.playerInfo[m_ID - 1].corps)
 		{
@@ -747,8 +749,11 @@ namespace DAGAN
 				dir = CUp;
 			if(dir!=-1)
 				info.myCommandList.addCommand(corpsCommand, { CMove,t,dir });
+			for(int i = 0;i<data->myCorps.size(); i++)
+				if (data->myCorps[i].bAlive() && data->myCorps[i].getPlayerID() == 2)
+					info.myCommandList.addCommand(corpsCommand, { CAttackCorps,t,i });
 			for (int i = 0; i < data->myTowers.size(); i++)
-				if(data->myTowers[i].getexsit()&& data->myTowers[i].getPlayerID() == 3)
+				if(data->myTowers[i].getexsit()&& data->myTowers[i].getPlayerID() == 2)
 					info.myCommandList.addCommand(corpsCommand, { CAttackTower,t,i });
 		}
 	}
