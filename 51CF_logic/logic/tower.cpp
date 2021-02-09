@@ -265,6 +265,7 @@ bool Tower::Be_Attacked(TPlayerID enemy_id,THealthPoint hp_decrease, bool attack
 	{
 		m_level -= 4;//塔的等级下降4级
 		//塔被摧毁
+		TPlayerID oldOwner = m_PlayerID;
 		if (m_level < 1 || m_data->players[enemy_id - 1].towerNumControl() == true)  //攻击者防御塔数目超过限制，那么即使塔等级不低于1，也直接摧毁
 		{
 			m_exsit = false;
@@ -299,18 +300,18 @@ bool Tower::Be_Attacked(TPlayerID enemy_id,THealthPoint hp_decrease, bool attack
 		//【规则修改】
 		//塔被摧毁或攻占后驻扎兵团消灭
 		int newDieCorps = m_data->players[enemy_id - 1].getElCorpsNum();
-		newDieCorps += m_data->gameMap.map[m_position.m_y][m_position.m_x].corps.size();
-		int index;
+		//newDieCorps += m_data->gameMap.map[m_position.m_y][m_position.m_x].corps.size();
+		/*int index;
 		for (int i = 0; i < m_data->gameMap.map[m_position.m_y][m_position.m_x].corps.size(); i++)
 		{
 			index = m_data->gameMap.map[m_position.m_y][m_position.m_x].corps[i];
 			m_data->myCorps[index].KillCorps();
-		}
-		//被摧毁的塔所在方格上，把除了攻击方兵团外的所有兵团都杀死
+		}*/
+		//被摧毁的塔所在方格上，把被摧毁塔所属势力在该方格的兵团都杀死
 		TPoint towerPos = m_position;
 		for (TCorpsID c : m_data->gameMap.map[towerPos.m_y][towerPos.m_x].corps)
 		{
-			if (m_data->myCorps[c].getPlayerID() != enemy_id)
+			if (m_data->myCorps[c].getPlayerID() == oldOwner)
 			{
 				m_data->myCorps[c].KillCorps();
 				newDieCorps++;

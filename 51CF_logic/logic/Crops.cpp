@@ -178,7 +178,7 @@ void Crops::AttackCrops(Crops* enemy)
 		//是否存在护卫
 		for(int i = 0; i< m_data->gameMap.map[enemy->m_position.m_y][enemy->m_position.m_x].corps.size(); i++)
 		{
-			int index = m_data->gameMap.map[m_position.m_y][m_position.m_x].corps[i];
+			int index = m_data->gameMap.map[enemy->m_position.m_y][enemy->m_position.m_x].corps[i];
 			colleage = &(m_data->myCorps[index]);
 			if(colleage->m_type == Battle&&colleage->m_PlayerID == enemy->m_PlayerID)
 				enemy = colleage;
