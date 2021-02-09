@@ -205,6 +205,8 @@ void Crops::AttackCrops(Crops* enemy)
 	if (m_HealthPoint <= 0)
 	{
 		KillCorps();
+		int num = m_data->players[enemy->getPlayerID() - 1].getElCorpsNum();
+		m_data->players[enemy->getPlayerID() - 1].setElCorpsNum(num + 1);
 	}
 	//如果对方死亡 则移动位置
 	if (!enemy->BeAttacked(enemylost, m_PlayerID, m_bAlive))
@@ -371,7 +373,7 @@ bool Crops::JudgeChangeTerrain(Command& c)
 		return false;
 	if (target == m_data->gameMap.map[m_position.m_y][m_position.m_x].type)
 		return false;
-	if (m_MovePoint == 0)
+	if (m_MovePoint <= 0)
 		return false;
 	if (m_data->gameMap.map[m_position.m_y][m_position.m_x].TowerIndex == NOTOWER)
 	{
@@ -505,6 +507,8 @@ void Crops::AttackTower(class Tower *enemy)
 	if (m_HealthPoint <= 0)
 	{
 		KillCorps();
+		int num = m_data->players[enemy->getPlayerID() - 1].getElCorpsNum();
+		m_data->players[enemy->getPlayerID() - 1].setElCorpsNum(num + 1);
 	}
 
 	bool IsTowerDestroy = false;
@@ -513,8 +517,8 @@ void Crops::AttackTower(class Tower *enemy)
 
 	if(IsTowerDestroy/*&&!(enemy->getexsit())*/)
 	{
-		int num = m_data->players[m_PlayerID - 1].getCqTowerNum() + 1;
-		m_data->players[m_PlayerID - 1].setCqTowerNum(num);
+		//int num = m_data->players[m_PlayerID - 1].getCqTowerNum() + 1;
+		//m_data->players[m_PlayerID - 1].setCqTowerNum(num);
 	}
 
 	if(m_bAlive)
@@ -660,7 +664,7 @@ bool Crops::MendTower()
 		return false;
 	if(m_BuildType != Builder)
 		return false;
-	if (m_MovePoint == 0)
+	if (m_MovePoint <= 0)
 		return false;
 	//获取该位置塔的信息
 	int index = m_data->gameMap.map[m_position.m_y][m_position.m_x].TowerIndex;
@@ -694,6 +698,8 @@ bool Crops::BuildTower()
 	if (m_type != Construct)
 		return false;
 	if (m_BuildType != Extender)
+		return false;
+	if (m_MovePoint <= 0)
 		return false;
 
 	//获取该位置塔的信息

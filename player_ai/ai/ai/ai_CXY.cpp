@@ -16,9 +16,9 @@ void player_ai(Info& info)
 	vector<int> MyTower;
 	vector<int> MyCorps;
 	srand(time(NULL));
-	for (int i = 0; i < info.totalTowers; i++)
+	for (int i = 0; i < info.towerInfo.size(); i++)
 		if (info.towerInfo[i].ownerID == info.myID)MyTower.push_back(i);
-	for (int i = 0; i < info.totalCorps; i++)
+	for (int i = 0; i < info.corpsInfo.size(); i++)
 		if (info.corpsInfo[i].owner == info.myID)MyCorps.push_back(i);
 	for(int i=0;i<MyTower.size();i++)
 		if (info.towerInfo[MyTower[i]].pdtType != -1)
@@ -36,7 +36,7 @@ void player_ai(Info& info)
 			}
 			else
 			{
-				info.myCommandList.addCommand(corpsCommand, { CMove, rand()%4});
+				info.myCommandList.addCommand(corpsCommand, { CMove, MyCorps[i], rand()%4});
 			}
 		}
 }
