@@ -33,7 +33,6 @@ private:
 	//辅助属性
 	TExperPoint			m_upgradexper;//升级到下一级所需经验值
 	int					m_productconsume;//当前生产任务对应的生产力消耗值	
-	vector <Crops*>     m_staycrops;//储存驻扎兵团指针
 	int					task_cache[6];//缓存未完成任务进度：储存任务的生产力消耗值（若为0，则为完成状态）
 public:
 	Tower(void);
@@ -80,8 +79,6 @@ public:
 	int getLevel() { return m_level; }
 	//获取塔当前是否存活（等级小于1即被摧毁）
 	bool getexsit() { return m_exsit; }
-	//获取驻扎兵团
-	vector<Crops*> getCrops() { return m_staycrops; }
 	//获取塔生产力
 	TProductPoint getProductPoint() { return m_productpoint; }
 	//获取塔生产任务
@@ -94,7 +91,8 @@ public:
 	TExperPoint getExperPoint() { return m_experpoint; }
 	//获取塔攻击范围
 	int getAttackRange() { return m_attackrange; }
-
+	//获取塔ID
+	TTowerID getTowerID() { return m_id; }
 
 	/*提供防御塔信息*/
 	TowerInfo ShowInfo() {
@@ -126,11 +124,7 @@ public:
 	TBattlePoint get_towerbp();
 	//抵御兵团的进攻，返回塔是否被攻陷
 	bool Be_Attacked(TPlayerID enemy_id, THealthPoint hp_decrease, bool attackerAlive);
-	//兵团驻扎信息录入 
-	void input_staycrops(Crops* newcrop) { m_staycrops.push_back(newcrop); }
 	//修理塔回复生命值
 	void Recover();
-	//删除驻扎兵团
-	void remove_crop(TCorpsID crop_id);
 };
 #endif

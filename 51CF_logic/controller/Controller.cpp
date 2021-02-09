@@ -121,10 +121,8 @@ namespace DAGAN
 			// 单个玩家执行，运行玩家ai获取指令
 			if (!silent_mode_) cout << "Calling Player " << (int)id << "'s run() method" << endl;
 			//run运行dll，然后把对应的myCommandList(由dll修改)回传到这里
-			if(id == 3)
-				player.run(info2Player);//【FC18】补充超时的判定，命令数过多的判定
-			else
-				testPlayerCommand(info2Player);
+			player.run(info2Player);//【FC18】补充超时的判定，命令数过多的判定
+			//testPlayerCommand(info2Player);
 			commands = info2Player.myCommandList;
 		}
 		else
@@ -149,7 +147,8 @@ namespace DAGAN
 			data->players[id - 1].Kill();
 			cout << "Player " << id << " break the rules! Out!" << endl;
 		}
-	
+		if (id == 1)
+			int a = 0;
 		//回合数增加1
 		game_.addRound();
 		//执行本回合命令
@@ -558,12 +557,14 @@ namespace DAGAN
 			}
 			break;
 			*/
+			/*该操作不存在，兵团自动驻扎
 		case(CStationTower)://兵团没有属性值改变
 			//兵团驻扎当前格防御塔的操作
 			{
 				bCmdSucs = data->myCorps[id].StationInTower();
 			}
 			break;
+			*/
 		case(CAttackCorps):
 		case(CAttackTower):
 			//兵团攻击的操作
@@ -746,17 +747,10 @@ namespace DAGAN
 				dir = CUp;
 			if(dir!=-1)
 				info.myCommandList.addCommand(corpsCommand, { CMove,t,dir });
-			for (int i = 0; i < data->myCorps.size(); i++)
-				if(data->myCorps[i].bAlive()&& data->myCorps[i].getPlayerID() == 3)
-					info.myCommandList.addCommand(corpsCommand, { CAttackCorps,t,i });
 			for (int i = 0; i < data->myTowers.size(); i++)
-				if (data->myTowers[i].getexsit() && data->myTowers[i].getPlayerID() == 3)
+				if(data->myTowers[i].getexsit()&& data->myTowers[i].getPlayerID() == 3)
 					info.myCommandList.addCommand(corpsCommand, { CAttackTower,t,i });
-			info.myCommandList.addCommand(corpsCommand, { CBuild,t });
 		}
-		if (info.totalRounds >= 150)
-			int a = 0;
-		//cout << (*info.gameMapInfo)[4][5].type << "\n";
 	}
 }
 

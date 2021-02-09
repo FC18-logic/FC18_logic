@@ -238,8 +238,12 @@ by lxj
 TBattlePoint Tower::get_towerbp()
 {
 	int bonus = 0;
-	for (int i = 0; i < m_staycrops.size(); i++)
-		bonus += corpsBattleGain[m_staycrops[i]->getbattleType()][0] * (m_staycrops[i]->getLevel() + 1);
+	int index;
+	for (int i = 0; i < m_data->gameMap.map[m_position.m_y][m_position.m_x].corps.size(); i++)
+	{
+		index = m_data->gameMap.map[m_position.m_y][m_position.m_x].corps[i];
+		bonus += corpsBattleGain[m_data->myCorps[index].getbattleType()][0] * (m_data->myCorps[index].getLevel() + 1);
+	}
 	return (m_battlepoint + bonus);
 }
 
@@ -295,10 +299,13 @@ bool Tower::Be_Attacked(TPlayerID enemy_id,THealthPoint hp_decrease, bool attack
 		//【规则修改】
 		//塔被摧毁或攻占后驻扎兵团消灭
 		int newDieCorps = m_data->players[enemy_id - 1].getElCorpsNum();
-		newDieCorps += m_staycrops.size();
-		for (int i = 0; i < m_staycrops.size(); i++)
-			m_staycrops[i]->KillCorps();
-		m_staycrops.clear();
+		newDieCorps += m_data->gameMap.map[m_position.m_y][m_position.m_x].corps.size();
+		int index;
+		for (int i = 0; i < m_data->gameMap.map[m_position.m_y][m_position.m_x].corps.size(); i++)
+		{
+			index = m_data->gameMap.map[m_position.m_y][m_position.m_x].corps[i];
+			m_data->myCorps[index].KillCorps();
+		}
 		//被摧毁的塔所在方格上，把除了攻击方兵团外的所有兵团都杀死
 		TPoint towerPos = m_position;
 		for (TCorpsID c : m_data->gameMap.map[towerPos.m_y][towerPos.m_x].corps)
@@ -389,21 +396,6 @@ void Tower::Recover()
 	if(m_healthpoint >= levelInfo.initHealthPoint)
 	{
 		m_healthpoint = levelInfo.initHealthPoint;
-	}
-}
-void Tower::remove_crop(TCorpsID crop_id) 
-{
-	Crops* temp = &(m_data->myCorps[crop_id]);
-	for (vector<Crops*>::iterator it = m_staycrops.begin(); it != m_staycrops.end(); )
-	{
-		if ((*it) == temp)
-		{
-			it = m_staycrops.erase(it);
-		}
-		else
-		{
-			++it;
-		}
 	}
 }
 

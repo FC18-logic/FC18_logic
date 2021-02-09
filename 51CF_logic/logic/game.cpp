@@ -183,9 +183,10 @@ void Game::DebugPhase()
 			<< ") 等级：" << data.myTowers[i].getLevel() << " 生产力：" << data.myTowers[i].getProductPoint() << " 战斗力：" << data.myTowers[i].getBattlePoint() << " 生命值：" << data.myTowers[i].getHealthPoint()
 			<< " 生产：" << ((data.myTowers[i].ShowInfo().pdtType >= 0 && data.myTowers[i].ShowInfo().pdtType <= 5) ? ProductCmd[data.myTowers[i].ShowInfo().pdtType] : "N/A")
 			<< " 任务消耗：" << ((data.myTowers[i].ShowInfo().pdtType >= 0 && data.myTowers[i].ShowInfo().pdtType <= 5) ? data.myTowers[i].ShowInfo().productConsume:0) << endl;
-		for (Crops* u : data.myTowers[i].getCrops()) {
-			if (!u->bAlive()) continue;
-			cout << u->getID() << " "; //兵团序号
+		for (TCorpsID u : data.gameMap.
+				map[data.myTowers[i].getPosition().m_y][data.myTowers[i].getPosition().m_x].corps) {
+			if (!data.myCorps[u].bAlive()) continue;
+			cout <<u << " "; //兵团序号
 		}
 		cout << endl;
 	}

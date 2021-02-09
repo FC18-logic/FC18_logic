@@ -31,8 +31,7 @@ private:
 
 	DATA::Data* const	m_data;	//游戏信息
 
-	bool	m_bAlive;		//是否存活
-	Tower*	m_StationTower;	//驻守塔指针，未驻守为空
+	bool		m_bAlive;		//是否存活
 
 public:
 
@@ -44,7 +43,6 @@ public:
 	bool BeAttacked(int attack, TPlayerID ID, bool bAlive);	//作战兵团受到攻击 返回是否存活 如果死亡
 	bool Move(int dir);							//作战兵团移动 返回是否成功移动
 	bool Attack(int type, TCorpsID ID);			//兵团攻击
-	bool StationInTower();						//玩家驻扎所在位置的己方塔
 	bool BuildTower();							//开拓者建塔
 	void ChangeOwner(TPlayerID newowner);		//兵团改变所属
 	void KillCorps();							//兵团死亡
@@ -66,7 +64,7 @@ public:
 	TPoint getPos() { return m_position; }	//获取当前兵团的位置
 	battleCorpsType getbattleType() { return m_BattleType; }	//获取当前战斗兵团的类型
 	TPlayerID getPlayerID() { return m_PlayerID; }				//获取兵团所属阵营
-	bool isStation() { return (m_StationTower != NULL); }
+	bool isStation();
 
 
 	//void haveCmd();								//接受命令 退出自动休整状态
@@ -80,7 +78,6 @@ protected:
 	void UpdatePos(TPoint targetpos);		//更新位置时需要进行的统一操作
 	bool IsNeighbor(TPoint point);			//判断是否相邻
 	bool IsInRange(TPoint point);			//判断是否处在攻击范围内
-
 	//void Recover();	//回复HP
 };
 

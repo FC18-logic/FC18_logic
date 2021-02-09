@@ -26,7 +26,6 @@ Crops::Crops(DATA::Data* _data, corpsType type, battleCorpsType battletype, cons
 	m_staticID++;
 //	m_PeaceNum = 0;
 	m_level = 0;
-	m_StationTower = nullptr;//兵团生产出来后，需要指令才驻守当地的塔
 	m_BuildPoint = 0;
 	m_HealthPoint = 0;
 	m_MovePoint = 0;
@@ -177,7 +176,7 @@ void Crops::AttackCrops(Crops* enemy)
 	{
 		Crops* colleage = NULL;
 		//是否存在护卫
-		for(int i = 0; i< m_data->gameMap.map[m_position.m_y][m_position.m_x].corps.size(); i++)
+		for(int i = 0; i< m_data->gameMap.map[enemy->m_position.m_y][enemy->m_position.m_x].corps.size(); i++)
 		{
 			int index = m_data->gameMap.map[m_position.m_y][m_position.m_x].corps[i];
 			colleage = &(m_data->myCorps[index]);
@@ -452,28 +451,6 @@ bool Crops::GoRest()
 }
 */
 
-/*
-StationInTower
-如果该位置存在己方势力的塔，则返回true
-*/
-bool Crops::StationInTower()
-{
-	if (m_StationTower != NULL) return false; //已经驻扎到塔里，就不重复下命令了
-	bool bStation = false;
-	int index = m_data->gameMap.map[m_position.m_y][m_position.m_x].TowerIndex;
-	//如果选择驻扎的位置有塔 则驻扎在塔中
-	if(index != NOTOWER)
-	{
-		//如果塔属于己方则驻扎
-		if(m_data->myTowers[index].getPlayerID() == m_PlayerID)
-		{
-			m_StationTower = &(m_data->myTowers[index]);
-			m_StationTower->input_staycrops(this);
-			bStation = true;
-		}
-	}
-	return bStation;
-}
 
 
 /*
@@ -583,8 +560,9 @@ bool Crops::Attack(int type, TCorpsID ID)
 			return false;
 
 		//如果敌人驻扎到了所在位置存在敌方势力塔 优先与塔结算
-		if (enemy->m_StationTower != nullptr)
-			AttackTower(enemy->m_StationTower);
+		int index = m_data->gameMap.map[enemy->m_position.m_y][enemy->m_position.m_x].TowerIndex;
+		if (index != NOTOWER)
+			AttackTower(&(m_data->myTowers[index]));
 		else
 			AttackCrops(enemy);
 	}
@@ -633,13 +611,6 @@ void Crops::UpdatePos(TPoint targetpos)
 	//在data中更新
 	m_position = targetpos;
 	m_data->gameMap.map[m_position.m_y][m_position.m_x].corps.push_back(m_myID);
-	//如果驻守在塔中 则删除
-	if(m_StationTower)
-	{
-		m_StationTower->remove_crop(m_myID);
-		m_StationTower = NULL;
-	}
-
 }
 
 /*
@@ -664,7 +635,7 @@ void Crops::KillCorps()
 	m_BuildPoint = 0;
 	m_data->players[m_PlayerID - 1].deleteCrops(m_myID);
 	m_data->totalCorps--;
-	m_StationTower = NULL;
+
 
 	vector<TCorpsID>::iterator it;
 	for (it = m_data->gameMap.map[m_position.m_y][m_position.m_x].corps.begin();
@@ -781,4 +752,12 @@ void Crops::doChangingTerrain(terrainType target, int x, int y)
 		KillCorps();
 	}
 	m_data->changeCorps.insert(m_myID);
+}
+
+bool Crops::isStation()
+{
+	int index = m_data->gameMap.map[m_position.m_y][m_position.m_x].TowerIndex;
+	if (index != NOTOWER)
+		return true;
+	return false;
 }
