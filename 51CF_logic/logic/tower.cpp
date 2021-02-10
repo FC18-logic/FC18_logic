@@ -22,6 +22,7 @@ Tower::Tower(DATA::Data* _data, TPlayerID m_playid, TPoint pos) :m_data(_data)
 	m_exsit = true;
 	m_level = 1;//初始等级为1  
 	set_all(m_level);
+	m_healthpoint = M_healthpoint;
 	m_experpoint = 0;//初始经验值为0
 	m_producttype = NOTASK;
 	m_productconsume = 0;
@@ -69,7 +70,10 @@ void Tower::upgrade()
 	m_level++;
 	if (m_level > MAX_TOWER_LEVEL) //不得超过最大等级
 		m_level = MAX_TOWER_LEVEL;
+	THealthPoint old_Mhp = M_healthpoint;
 	set_all(m_level);
+	//实际生命值与生命值上限成比例改变
+	m_healthpoint = (M_healthpoint * m_healthpoint) / old_Mhp;
 }
 
 
@@ -155,7 +159,10 @@ void Tower::product_crops(productType protype)
 			if (m_level > 1)
 			{
 				m_level--;
-				set_all(m_level);//暂时把等级减小后的塔等级设为满级
+				THealthPoint old_Mhp = M_healthpoint;
+				set_all(m_level);
+				//实际生命值与生命值上限成比例改变
+				m_healthpoint = (M_healthpoint * m_healthpoint) / old_Mhp;
 			}
 		}
 	}
@@ -265,6 +272,8 @@ bool Tower::Be_Attacked(TPlayerID enemy_id,THealthPoint hp_decrease, bool attack
 		else if (attackerAlive == true)
 		{
 			set_all(m_level);
+			//生命值回满
+			m_healthpoint = M_healthpoint;
 			m_data->players[m_PlayerID - 1].getTower().erase(m_id);//修改原拥有者的塔列表
 			m_data->players[enemy_id - 1].getTower().insert(m_id);//修改新拥有者的塔列表
 			//更新occupypoint/owner
@@ -275,7 +284,11 @@ bool Tower::Be_Attacked(TPlayerID enemy_id,THealthPoint hp_decrease, bool attack
 			m_data->players[enemy_id - 1].setCqTowerNum(currentCqTowerNum + 1);
 		}
 		else//攻方占领失败，塔的所有者不变，按当前等级重置各项属性（满级）
+		{
 			set_all(m_level);
+			//生命值回满
+			m_healthpoint = M_healthpoint;
+		}
 		//塔被摧毁或攻占后所在方格己方兵团消灭
 		int newDieCorps = m_data->players[enemy_id - 1].getElCorpsNum();//记录新增死亡兵团数
 		TPoint towerPos = m_position;
@@ -310,14 +323,13 @@ bool Tower::set_attacktarget(int crop_id)
 		return false;
 	if (m_data->myCorps[crop_id].isStation() == true)//兵团驻扎到塔
 		return false;   
-	if (m_data->myCorps[crop_id].getPlayerID() == m_PlayerID)//己方兵团
+	if (m_data->myCorps[crop_id].getPlayerID() == m_PlayerID)//攻击目标为己方兵团
 		return false;
 	Crops* enemy = &(m_data->myCorps[crop_id]);
 	if (enemy->bAlive() == false)//兵团死亡
 		return false;
-	if (getDist(enemy->getPos(), m_position) > m_attackrange)//超出攻击范围
+	if (getDist(enemy->getPos(), m_position) > 2)//超出攻击范围
 		return false;
-
 	//如果是工程兵，判断是否存在护卫
 	if (enemy->getType() == Construct)
 	{
