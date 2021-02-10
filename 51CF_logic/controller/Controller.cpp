@@ -121,7 +121,7 @@ namespace DAGAN
 			// 单个玩家执行，运行玩家ai获取指令
 			if (!silent_mode_) cout << "Calling Player " << (int)id << "'s run() method" << endl;
 			//run运行dll，然后把对应的myCommandList(由dll修改)回传到这里
-			if(id == 3 || id == 4)
+			if(id == 2)
 				player.run(info2Player);//【FC18】补充超时的判定，命令数过多的判定
 			else
 				testPlayerCommand(info2Player);

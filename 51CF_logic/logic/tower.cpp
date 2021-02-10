@@ -312,15 +312,31 @@ bool Tower::set_attacktarget(int crop_id)
 		return false;   
 	if (m_data->myCorps[crop_id].getPlayerID() == m_PlayerID)//己方兵团
 		return false;
-	Crops& enemy = m_data->myCorps[crop_id];
-	if (enemy.bAlive() == false)//兵团死亡
+	Crops* enemy = &(m_data->myCorps[crop_id]);
+	if (enemy->bAlive() == false)//兵团死亡
 		return false;
-	if (getDist(enemy.getPos(), m_position) > m_attackrange)//超出攻击范围
+	if (getDist(enemy->getPos(), m_position) > m_attackrange)//超出攻击范围
 		return false;
+
+	//如果是工程兵，判断是否存在护卫
+	if (enemy->getType() == Construct)
+	{
+		Crops* colleage;
+		TPoint pos = enemy->getPos();
+		//是否存在护卫
+		for (int i = 0; i < m_data->gameMap.map[pos.m_y][pos.m_x].corps.size(); i++)
+		{
+			int index = m_data->gameMap.map[pos.m_y][pos.m_x].corps[i];
+			colleage = &(m_data->myCorps[index]);
+			if (colleage->getType() == Battle && colleage->getPlayerID() == enemy->getPlayerID())
+				enemy = colleage;
+		}
+	}
+
 	//攻击成功
-	float deta = 0.04 * ((float)get_towerbp() - (float)enemy.getCE());
+	float deta = 0.04 * ((float)get_towerbp() - (float)enemy->getCE());
 	int crop_lost = floor(30 * pow(2.71828, deta));
-	enemy.BeAttacked(crop_lost, m_PlayerID, m_exsit);
+	enemy->BeAttacked(crop_lost, m_PlayerID, m_exsit);
 	return true;
 }
 

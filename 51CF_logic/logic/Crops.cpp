@@ -97,11 +97,13 @@ bool Crops::Move(int dir)
 	next_pos.m_y = next_y;
 	if (m_data->gameMap.withinMap(next_pos) == false) return false;  //by jyp要前往的位置不在地图内，判断失败
 
-	//判断目标位置是否存在塔
+	//判断目标位置是否存在己方塔
 	bool haveTower = false;
 	int index = m_data->gameMap.map[next_y][next_x].TowerIndex;
 	if(index != NOTOWER)
 	{
+		if (m_data->myTowers[index].getPlayerID() != m_PlayerID)
+			return false;
 		haveTower = true;
 	}
 	if(!haveTower)
@@ -507,13 +509,8 @@ void Crops::AttackTower(class Tower *enemy)
 
 	bool IsTowerDestroy = false;
 	//判断塔是否被攻陷(占领、摧毁都算)
-	IsTowerDestroy = !enemy->Be_Attacked(m_PlayerID, enemylost,m_bAlive);
+	IsTowerDestroy = enemy->Be_Attacked(m_PlayerID, enemylost,m_bAlive);
 
-	if(IsTowerDestroy/*&&!(enemy->getexsit())*/)
-	{
-		//int num = m_data->players[m_PlayerID - 1].getCqTowerNum() + 1;
-		//m_data->players[m_PlayerID - 1].setCqTowerNum(num);
-	}
 
 	if(m_bAlive)
 	{
