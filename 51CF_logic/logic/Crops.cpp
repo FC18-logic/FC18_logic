@@ -347,6 +347,7 @@ ChangeTerrain
 bool Crops::JudgeChangeTerrain(Command& c)
 {
 	terrainType target = (terrainType)c.parameters[2];
+	terrainType current = (terrainType)m_data->gameMap.map[m_position.m_y][m_position.m_x].type;
 	c.parameters.clear();
 	c.parameters.push_back(CChangeTerrain);
 	c.parameters.push_back(m_myID);
@@ -362,7 +363,9 @@ bool Crops::JudgeChangeTerrain(Command& c)
 	int curID = m_data->gameMap.map[m_position.m_y][m_position.m_x].owner;
 	if (curID != m_PlayerID)
 		return false;
-	if (target == m_data->gameMap.map[m_position.m_y][m_position.m_x].type)
+	if (target == current)
+		return false;
+	if (!((current == TRPlain && target == TRForest) || (current == TRForest && target == TRPlain)))
 		return false;
 	if (m_MovePoint <= 0)
 		return false;
@@ -528,7 +531,7 @@ Attack
 兵团发动攻击 返回是否攻击成功
 参数 type<CorpsCommandEnum> 攻击敌方兵团或塔， ID 敌方ID
 */
-bool Crops::Attack(int type, TCorpsID ID)
+bool Crops::Attack(int type, TCorpsID ID, Command& c)
 {
 	//如果不是战斗兵
 	if(m_type!=Battle)
@@ -556,8 +559,11 @@ bool Crops::Attack(int type, TCorpsID ID)
 
 		//如果敌人驻扎到了所在位置存在敌方势力塔 优先与塔结算
 		int index = m_data->gameMap.map[enemy->m_position.m_y][enemy->m_position.m_x].TowerIndex;
-		if (index != NOTOWER&&m_data->myTowers[index].getPlayerID() == enemy->m_PlayerID)
+		if (index != NOTOWER && m_data->myTowers[index].getPlayerID() == enemy->m_PlayerID) {
+			c.parameters[0] = CAttackTower;
+			c.parameters[2] = index;
 			AttackTower(&(m_data->myTowers[index]));
+		}
 		else
 			AttackCrops(enemy);
 	}

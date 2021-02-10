@@ -240,6 +240,7 @@ TBattlePoint Tower::get_towerbp()
 	int bonus = 0;
 	vector<TCorpsID> Unit = m_data->gameMap.map[m_position.m_y][m_position.m_x].corps;
 	TCorpsID index;
+	int baseBattlePoint = std::ceil((float)m_battlepoint * (float)m_healthpoint / (float)TowerInitConfig[m_level - 1].initHealthPoint);
 	for (int i = 0; i < Unit.size(); i++)
 	{
 		index = Unit[i];
@@ -247,7 +248,7 @@ TBattlePoint Tower::get_towerbp()
 			continue;
 		bonus += corpsBattleGain[m_data->myCorps[index].getbattleType()][0] * (m_data->myCorps[index].getLevel() + 1);
 	}
-	return (m_battlepoint + bonus);
+	return (baseBattlePoint + bonus);
 }
 
 

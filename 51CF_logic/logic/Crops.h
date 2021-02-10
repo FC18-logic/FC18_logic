@@ -42,7 +42,7 @@ public:
 	//兵团操作
 	bool BeAttacked(int attack, TPlayerID ID, bool bAlive);	//作战兵团受到攻击 返回是否存活 如果死亡
 	bool Move(int dir);							//作战兵团移动 返回是否成功移动
-	bool Attack(int type, TCorpsID ID);			//兵团攻击
+	bool Attack(int type, TCorpsID ID, Command& c);			//兵团攻击
 	bool BuildTower();							//开拓者建塔
 	void ChangeOwner(TPlayerID newowner);		//兵团改变所属
 	void KillCorps();							//兵团死亡

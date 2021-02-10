@@ -121,7 +121,7 @@ namespace DAGAN
 			// 单个玩家执行，运行玩家ai获取指令
 			if (!silent_mode_) cout << "Calling Player " << (int)id << "'s run() method" << endl;
 			//run运行dll，然后把对应的myCommandList(由dll修改)回传到这里
-			if(id == 2)
+			if(id == 3 || id == 4)
 				player.run(info2Player);//【FC18】补充超时的判定，命令数过多的判定
 			else
 				testPlayerCommand(info2Player);
@@ -575,7 +575,7 @@ namespace DAGAN
 				TCorpsID enemyid = c.parameters[2];
 				if (type == CAttackCorps && (enemyid < 0 || enemyid >= data->myCorps.size())) return false;   //越界：操作数非法
 				if (type == CAttackTower && (enemyid < 0 || enemyid >= data->myTowers.size())) return false;   //越界：操作数非法
-				bCmdSucs = data->myCorps[id].Attack(type,enemyid);
+				bCmdSucs = data->myCorps[id].Attack(type,enemyid,c);
 			}
 			break;
 		/*case(CRegroup)://这个操作就不要了
@@ -756,6 +756,9 @@ namespace DAGAN
 				if(data->myTowers[i].getexsit()&& data->myTowers[i].getPlayerID() == 2)
 					info.myCommandList.addCommand(corpsCommand, { CAttackTower,t,i });
 		}
+		if (info.totalRounds >= 150)
+			int a = 0;
+		//cout << (*info.gameMapInfo)[4][5].type << "\n";
 	}
 }
 

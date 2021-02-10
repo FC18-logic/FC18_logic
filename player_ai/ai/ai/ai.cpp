@@ -261,3 +261,4 @@ void player_ai(Info& info)
 	}
 
 }
+

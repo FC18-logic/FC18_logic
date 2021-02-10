@@ -183,11 +183,21 @@ void Game::DebugPhase()
 			<< ") 等级：" << data.myTowers[i].getLevel() << " 生产力：" << data.myTowers[i].getProductPoint() << " 战斗力：" << data.myTowers[i].getBattlePoint() << " 生命值：" << data.myTowers[i].getHealthPoint()
 			<< " 生产：" << ((data.myTowers[i].ShowInfo().pdtType >= 0 && data.myTowers[i].ShowInfo().pdtType <= 5) ? ProductCmd[data.myTowers[i].ShowInfo().pdtType] : "N/A")
 			<< " 任务消耗：" << ((data.myTowers[i].ShowInfo().pdtType >= 0 && data.myTowers[i].ShowInfo().pdtType <= 5) ? data.myTowers[i].ShowInfo().productConsume:0) << endl;
+		cout << "塔格兵团：" << endl;
+		vector<TCorpsID> stationC, UstationC;
 		for (TCorpsID u : data.gameMap.
 				map[data.myTowers[i].getPosition().m_y][data.myTowers[i].getPosition().m_x].corps) {
-			if (!data.myCorps[u].bAlive()|| 
-				(data.myCorps[u].getPlayerID() != data.myTowers[i].getPlayerID())) continue;
-			cout <<u << " "; //兵团序号
+			if (!data.myCorps[u].bAlive()) continue;
+			if (data.myCorps[u].getPlayerID() != data.myTowers[i].getPlayerID()) UstationC.push_back(u);
+			else stationC.push_back(u);
+			cout << "驻扎兵团：";
+			for (TCorpsID c : stationC) {
+				cout << c << " "; //兵团序号
+			}
+			cout << "\n非驻扎兵团：";
+			for (TCorpsID c : UstationC) {
+				cout << c << " ";
+			}
 		}
 		cout << endl;
 	}
