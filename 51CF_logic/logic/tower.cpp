@@ -50,7 +50,7 @@ by lxj
 void Tower::set_all(int level)
 {
 	m_productpoint = TowerInitConfig[level - 1].initBuildPoint;
-	m_healthpoint = TowerInitConfig[level - 1].initHealthPoint;
+	M_healthpoint = TowerInitConfig[level - 1].initHealthPoint;
 	m_battlepoint = TowerInitConfig[level - 1].initProductPoint;
 	m_upgradexper = TowerInitConfig[level - 1].upgradeExper;
 	m_attackrange = TowerInitConfig[level - 1].battleRegion;

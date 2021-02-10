@@ -25,6 +25,7 @@ private:
 	TProductPoint       m_productpoint;//生产力
 	productType			m_producttype;//生产任务类型
 	THealthPoint        m_healthpoint;//生命值
+	THealthPoint		M_healthpoint;//生命值上限
 	TBattlePoint        m_battlepoint;//战斗力
 	TExperPoint			m_experpoint;//经验值
 	int					m_level;//等级:从1开始               
