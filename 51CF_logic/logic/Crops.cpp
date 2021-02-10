@@ -171,7 +171,7 @@ void Crops::AttackCrops(Crops* enemy)
 		{
 			int index = m_data->gameMap.map[enemy->m_position.m_y][enemy->m_position.m_x].corps[i];
 			colleage = &(m_data->myCorps[index]);
-			if(colleage->m_type == Battle&&colleage->m_PlayerID == enemy->m_PlayerID)
+			if (colleage->m_type == Battle && colleage->m_PlayerID == enemy->m_PlayerID)
 				enemy = colleage;
 		}
 	}
@@ -760,7 +760,7 @@ void Crops::doChangingTerrain(terrainType target, int x, int y)
 bool Crops::isStation()
 {
 	int index = m_data->gameMap.map[m_position.m_y][m_position.m_x].TowerIndex;
-	if (index != NOTOWER&&m_data->myTowers[index].getPlayerID() == m_PlayerID)
+	if (index != NOTOWER && m_data->myTowers[index].getPlayerID() == m_PlayerID)
 		return true;
 	return false;
 }

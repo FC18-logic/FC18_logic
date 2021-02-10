@@ -11,30 +11,6 @@ Tower::~Tower(void)
 
 
 
-//塔复制构造函数
-/*Tower::Tower(const Tower& tower):m_data(tower.m_data) {
-	m_PlayerID = tower.m_PlayerID;
-	m_position = tower.m_position;
-	m_id = tower.m_id;
-	m_exsit = tower.m_exsit;
-	m_level = tower.m_level;//初始等级为1  
-	set_all(m_level);
-	m_experpoint = tower.m_experpoint;//初始经验值为0
-	m_productconsume = tower.m_productconsume;
-	for (int i = 0; i < 6; i++)
-		task_cache[i] = 0;
-	//更新data
-	m_data->totalTowers++;
-	m_data->players[m_PlayerID - 1].getTower().insert(m_id);
-	m_data->gameMap.map[m_position.m_y][m_position.m_x].TowerIndex = m_id;
-	//by jyp:塔被建立之后，修改方格地形为塔
-	m_data->gameMap.map[m_position.m_y][m_position.m_x].type = TRTower;
-	//by jyp : 记录新建的塔ID
-	m_data->newTower.insert(m_id);
-	//更新occupypoint/owner
-	m_data->gameMap.modifyOccupyPoint(NOTOWER, m_PlayerID, m_position);
-}*/
-
 
 //构造函数：塔属性初始化
 Tower::Tower(DATA::Data* _data, TPlayerID m_playid, TPoint pos) :m_data(_data)
@@ -175,13 +151,12 @@ void Tower::product_crops(productType protype)
 			Crops temp(m_data, Construct, Warrior, Extender, m_PlayerID, m_position);
 			m_data->myCorps.push_back(temp);
 			m_data->changeCorps.insert(temp.getID());
-			//by jyp：开拓者生产出后所在方格塔减小1
+			//by jyp：开拓者生产出后所在方格塔等级减小1
 			if (m_level > 1)
 			{
 				m_level--;
 				set_all(m_level);//暂时把等级减小后的塔等级设为满级
 			}
-			//对于已经是一级（最低级）的塔，既不
 		}
 	}
 }
@@ -223,7 +198,7 @@ bool Tower::set_producttype(productType m_protype)
 		m_productconsume = task_cache[int(m_producttype)];
 		m_productconsume -= m_productpoint;
 	}
-	m_data->changeTowers.insert(m_id);  //by jyp:记录塔的生产任务改变
+	m_data->changeTowers.insert(m_id);//by jyp:记录塔的生产任务改变
 	return true;
 }
 
@@ -244,7 +219,7 @@ TBattlePoint Tower::get_towerbp()
 	for (int i = 0; i < Unit.size(); i++)
 	{
 		index = Unit[i];
-		if (m_data->myCorps[index].getPlayerID() != m_PlayerID)//如果不是自己的兵团
+		if (m_data->myCorps[index].getPlayerID() != m_PlayerID)//非己方兵团
 			continue;
 		bonus += corpsBattleGain[m_data->myCorps[index].getbattleType()][0] * (m_data->myCorps[index].getLevel() + 1);
 	}
@@ -258,26 +233,26 @@ TBattlePoint Tower::get_towerbp()
 名称：Be_Attacked
 功能：兵团攻击塔时更新塔的生命值
 参数：生命值损失
-返回值：塔是否被攻陷（即生命值是否小于0，但塔不一定能被攻占，有可能已经被摧毁）
+返回值：塔的生命值是否降为0（攻占/摧毁：m_exsit = false）
 by lxj
 */
 bool Tower::Be_Attacked(TPlayerID enemy_id,THealthPoint hp_decrease, bool attackerAlive)
 {
 	m_healthpoint -= hp_decrease;
-	m_data->changeTowers.insert(m_id);  //by jyp:记录塔的生命值等改变
+	m_data->changeTowers.insert(m_id);//by jyp:记录塔的生命值等改变
 	if (m_healthpoint <= 0)
 	{
 		m_level -= 4;//塔的等级下降4级
-		//塔被摧毁
-		TPlayerID oldOwner = m_PlayerID;
-		if (m_level < 1 || m_data->players[enemy_id - 1].towerNumControl() == true)  //攻击者防御塔数目超过限制，那么即使塔等级不低于1，也直接摧毁
+		TPlayerID oldOwner = m_PlayerID;//缓存旧主信息
+		//塔被摧毁：等级小于1/攻击者防御塔数目超过限制
+		if (m_level < 1 || m_data->players[enemy_id - 1].towerNumControl() == true)  
 		{
 			m_exsit = false;
 			//更新data
 			m_data->totalTowers--;
 			m_data->players[m_PlayerID - 1].getTower().erase(m_id);
 			m_data->gameMap.map[m_position.m_y][m_position.m_x].TowerIndex = NOTOWER;
-			//m_data->gameMap.map[m_position.m_y][m_position.m_x].type = TRPlain;  //by jyp: 塔被摧毁之后统一修改方格地形为平原
+			//m_data->gameMap.map[m_position.m_y][m_position.m_x].type = TRPlain;//by jyp: 塔被摧毁之后统一修改方格地形为平原
 			//by jyp : 记录被摧毁的塔的ID
 			m_data->dieTower.insert(m_id);
 			//更新occupypoint/owner
@@ -286,7 +261,7 @@ bool Tower::Be_Attacked(TPlayerID enemy_id,THealthPoint hp_decrease, bool attack
 			int currentCqTowerNum = m_data->players[enemy_id - 1].getCqTowerNum();
 			m_data->players[enemy_id - 1].setCqTowerNum(currentCqTowerNum + 1);
 		}
-		//如果攻方还活着（攻方是塔的话判定攻方死亡，即不能占领），塔被攻占
+		//如果攻方还活着（攻方是塔的话判定攻方死亡，即不能占领）：塔被攻占
 		else if (attackerAlive == true)
 		{
 			set_all(m_level);
@@ -301,11 +276,8 @@ bool Tower::Be_Attacked(TPlayerID enemy_id,THealthPoint hp_decrease, bool attack
 		}
 		else//攻方占领失败，塔的所有者不变，按当前等级重置各项属性（满级）
 			set_all(m_level);
-		//【规则修改】
-		//塔被摧毁或攻占后驻扎兵团消灭
-		int newDieCorps = m_data->players[enemy_id - 1].getElCorpsNum();
-
-		//被摧毁的塔所在方格上，把被摧毁塔所属势力在该方格的兵团都杀死
+		//塔被摧毁或攻占后所在方格己方兵团消灭
+		int newDieCorps = m_data->players[enemy_id - 1].getElCorpsNum();//记录新增死亡兵团数
 		TPoint towerPos = m_position;
 		for (TCorpsID c : m_data->gameMap.map[towerPos.m_y][towerPos.m_x].corps)
 		{
@@ -316,8 +288,9 @@ bool Tower::Be_Attacked(TPlayerID enemy_id,THealthPoint hp_decrease, bool attack
 			}
 		}
 		m_data->players[enemy_id - 1].setElCorpsNum(newDieCorps);
+		return true;
 	}
-	return m_exsit;
+	return false;
 }
 
 
@@ -335,20 +308,21 @@ bool Tower::set_attacktarget(int crop_id)
 	//攻击失败
 	if (crop_id < 0 || crop_id >= m_data->myCorps.size())//id越界
 		return false;
-	if (m_data->myCorps[crop_id].isStation() == true) return false;   //兵团驻扎到塔，这种情况塔就不能攻击了
-	if (m_data->myCorps[crop_id].getPlayerID() == m_PlayerID) return false;
+	if (m_data->myCorps[crop_id].isStation() == true)//兵团驻扎到塔
+		return false;   
+	if (m_data->myCorps[crop_id].getPlayerID() == m_PlayerID)//己方兵团
+		return false;
 	Crops& enemy = m_data->myCorps[crop_id];
 	if (enemy.bAlive() == false)//兵团死亡
 		return false;
 	if (getDist(enemy.getPos(), m_position) > m_attackrange)//超出攻击范围
 		return false;
 	//攻击成功
-	float deta = 0.04 * ((float)m_battlepoint - enemy.getCE());
+	float deta = 0.04 * ((float)get_towerbp() - (float)enemy.getCE());
 	int crop_lost = floor(30 * pow(2.71828, deta));
 	enemy.BeAttacked(crop_lost, m_PlayerID, m_exsit);
 	return true;
 }
-
 
 
 /*
