@@ -44,8 +44,10 @@ public:
 	void regeneratePhase();                                          //【FC18】重生阶段，兵团生命力恢复
 	void beginPhase();                                               //【FC18】开始阶段，塔的生产任务结算
 	void endPhase(vector<vector<Command>>& cmd2operate, TPlayerID id);             //【FC18】每位玩家指令结算后的操作
+	bool recordOldCommand(string command_path);                     //【FC18】从旧的指令文档中恢复
 	//std::ofstream& cmdFile;                                           //【FC18】存放指令数据的文件
 	//std::ofstream& infoFile;                                          //【FC18】存放信息数据的文件
+	int gameState = Normal;                                          //【FC18】游戏运行的状态
 
 
 

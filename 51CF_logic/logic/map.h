@@ -50,17 +50,22 @@ public:
 	vector<vector<mapBlock>> map;               //【FC18】游戏中实际存储的地图
 	//~Map();
 	bool randomInitMap(ofstream& cmdF,ofstream& infoF);                          //【FC18】随机生成一幅地图，分配势力和设定初始塔的位置
-    bool readMap(ifstream& inMap, ofstream& cmdF, ofstream& infoF,bool enableOutput, vector<string> players_name);   //通过文件初始化地图信息，包括读入地图数据和初始化玩家数组
+    bool readMap(ifstream& inMap, ofstream& cmdF, ofstream& infoF,bool enableOutput, vector<string> players_name, string log_path);   //通过文件初始化地图信息，包括读入地图数据和初始化玩家数组
 	void saveMapJson();                       //【FC18】保存地图的json数据
     mapBlockInfo ShowInfo(int x,int y);                       //【FC18】生成地图方格信息
     void modifyOccupyPoint(TPlayerID oldOwner, TPlayerID newOwner, TPoint p);       //【FC18】按塔的所有者改变修改周围方格的占有属性值
     bool withinMap(TPoint p);                    //【FC18】判断p点是否在地图之内
     TPlayerID ownerChange(TPoint p);             //【FC18】检查、改变方格p位置的拥有者
     TPlayerID showOwner(TPoint p);               //【FC18】判断当前方格拥有者的ID
+    void setReadPath(string readPath) { read_path = readPath; }   //【FC18】设置游戏存档路径
     void clearAll();                        //【FC18】把new出来的所有corps都delete掉，也把所有player都delete掉
+    void saveMap();                         //【FC18】将本轮游戏随机地图保存
+    bool recoverFromMap(vector<pair<TPoint, TPoint>>& towerPoint);                  //【FC18】从地图存档恢复
 
 private:
 	DATA::Data* data;                            //【FC18】用于游戏中的数据传输
+    string log_path;                             //【FC18】输出文件的路径
+    string read_path;                            //【FC18】用于读入存档的路径
 };
 
 

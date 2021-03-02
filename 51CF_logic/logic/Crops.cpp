@@ -69,12 +69,12 @@ bool Crops::Move(int dir)
 	{
 	case CUp:
 		{
-			next_y--;
+			next_y++;
 		}
 		break;
 	case CDown:
 		{
-			next_y++;
+			next_y--;
 		}
 		break;
 	case CLeft:

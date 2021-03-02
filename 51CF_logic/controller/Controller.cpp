@@ -121,11 +121,22 @@ namespace DAGAN
 			// 单个玩家执行，运行玩家ai获取指令
 			if (!silent_mode_) cout << "Calling Player " << (int)id << "'s run() method" << endl;
 			//run运行dll，然后把对应的myCommandList(由dll修改)回传到这里
-			if(id == 2)
-				player.run(info2Player);//【FC18】补充超时的判定，命令数过多的判定
-			else
-				testPlayerCommand(info2Player);
-			commands = info2Player.myCommandList;
+			if ((data->gameState == RecoverRound || data->gameState == RecoverMap) && data->getRound() == stopRound) {
+				getCmdFromKeyboard(id, commands);
+			}
+			else {
+				if (data->gameState == RecoverRound) {
+					if (data->memoCommand.size() - 1 < data->getRound()) commands = CommandList();
+					else commands = data->memoCommand[data->getRound()];
+				}
+				else if (data->gameState == Normal || data->gameState == RecoverMap) {
+					if(id == 3 || id == 4)
+						player.run(info2Player);//【FC18】补充超时的判定，命令数过多的判定
+					else if(id == 1 || id == 2)
+						testPlayerCommand(info2Player);
+					commands = info2Player.myCommandList;
+				}
+			}
 		}
 		else
 		{
@@ -266,6 +277,7 @@ namespace DAGAN
 				newCmd.cm_type = JMove;
 				newCmd.aim_x = point.m_x /*+ DAGAN::moveDir[c.parameters[2]].m_x*/;
 				newCmd.aim_z = point.m_y /*+ DAGAN::moveDir[c.parameters[2]].m_y*/;
+				newCmd.pT = c.parameters[2];  //问问UI这个会不会有问题
 				//newCmd["mv"] = Json::Value(std::to_string(int(c.parameters[2])));
 				//newCmd["dir"] = Json::Value(std::to_string(std::atan2(DAGAN::moveDir[c.parameters[2]].m_y, DAGAN::moveDir[c.parameters[2]].m_x)));
 				break;
@@ -488,7 +500,7 @@ namespace DAGAN
 					cout << " with corps " << c.parameters[2];
 					break;*/
 				case(CChangeTerrain):
-					cout << " of (" << data->myCorps[c.parameters[1]].getPos().m_x << "," << data->myCorps[c.parameters[1]].getPos().m_y << ")" << " to " << Terrain[c.parameters[2] - 1];
+					cout << " of (" << data->myCorps[c.parameters[1]].getPos().m_x << "," << data->myCorps[c.parameters[1]].getPos().m_y << ")" << " to " << Terrain[c.parameters[2]];
 					break;
 				default:;
 				}
@@ -729,36 +741,154 @@ namespace DAGAN
 			}
 			//	if(info.totalRounds >= 6&&info.totalRounds <= 9 && (m_ID == 1 || m_ID == 2)) info.myCommandList.addCommand(towerCommand, { TProduct,t,PArcher });   //让玩家的所有塔生产建造者
 			//	if (info.totalRounds >= 6&&info.totalRounds <= 9 && (m_ID == 3 || m_ID == 4)) info.myCommandList.addCommand(towerCommand, { TProduct,t,PExtender });   //让玩家的所有塔生产开拓者
-			info.myCommandList.addCommand(towerCommand, { TProduct,t,PCavalry });
+			if(info.totalRounds <= 100 )info.myCommandList.addCommand(towerCommand, { TProduct,t,PBuilder });
+			else info.myCommandList.addCommand(towerCommand, { TProduct,t,PCavalry });
 		}
 		if (info.playerInfo[1].tower.size() == 0)
 			return;
-		TTowerID target = *(info.playerInfo[1].tower.begin());
+		int enemyID = 0;
+		if (info.myID == 1)  enemyID = 2;
+		else if (info.myID == 2) enemyID = 1;
+		TTowerID target = *(info.playerInfo[enemyID - 1].tower.begin());
 		int dir = -1;
 		for (TCorpsID t : info.playerInfo[m_ID - 1].corps)
 		{
+			if (data->myCorps[t].getType() == Construct)
+			{
+				info.myCommandList.addCommand(corpsCommand, { CMove,t,generateRanInt(0,3) });
+				if(info.totalRounds % 2 == 0)
+					info.myCommandList.addCommand(corpsCommand, { CChangeTerrain,t,TRForest });
+				else
+					info.myCommandList.addCommand(corpsCommand, { CChangeTerrain,t,TRPlain });
+				continue;
+			}
 			if (data->myCorps[t].getType() != Battle)
 				continue;
+			for (int i = 0; i < data->myCorps.size(); i++)
+				if (data->myCorps[i].bAlive() && data->myCorps[i].getPlayerID() == enemyID)
+					info.myCommandList.addCommand(corpsCommand, { CAttackCorps,t,i });
+			for (int i = 0; i < data->myTowers.size(); i++)
+				if (data->myTowers[i].getexsit() && data->myTowers[i].getPlayerID() == enemyID)
+					info.myCommandList.addCommand(corpsCommand, { CAttackTower,t,i });
 			if (data->myCorps[t].getPos().m_x < data->myTowers[target].getPosition().m_x)
 				dir = CRight;
 			else if (data->myCorps[t].getPos().m_x > data->myTowers[target].getPosition().m_x)
 				dir = CLeft;
 			else if (data->myCorps[t].getPos().m_y < data->myTowers[target].getPosition().m_y)
-				dir = CDown;
-			else if (data->myCorps[t].getPos().m_y > data->myTowers[target].getPosition().m_y)
 				dir = CUp;
+			else if (data->myCorps[t].getPos().m_y > data->myTowers[target].getPosition().m_y)
+				dir = CDown;
 			if(dir!=-1)
 				info.myCommandList.addCommand(corpsCommand, { CMove,t,dir });
-			for(int i = 0;i<data->myCorps.size(); i++)
-				if (data->myCorps[i].bAlive() && data->myCorps[i].getPlayerID() == 2)
-					info.myCommandList.addCommand(corpsCommand, { CAttackCorps,t,i });
-			for (int i = 0; i < data->myTowers.size(); i++)
-				if(data->myTowers[i].getexsit()&& data->myTowers[i].getPlayerID() == 2)
-					info.myCommandList.addCommand(corpsCommand, { CAttackTower,t,i });
 		}
 		if (info.totalRounds >= 150)
 			int a = 0;
 		//cout << (*info.gameMapInfo)[4][5].type << "\n";
+	}
+
+
+	/***********************************************************************************************
+	*函数名 :【FC18】getCmdFromKeyboard从键盘读入指令函数
+	*函数功能描述 : 从键盘读入玩家指令
+	*函数参数 : CommandList& commands
+	*函数返回值 : 无
+	*作者 : 姜永鹏
+	***********************************************************************************************/
+	void Controller::getCmdFromKeyboard(TPlayerID id, CommandList& commands) {
+		cin.clear();
+		if(data->getRound() == 1) cin.ignore();
+		cout << ">>>当前是第 " << data->getRound() << " 回合。\n";
+		cout << ">>>当前有权操作的玩家是玩家 " << id << " \n";
+		cout << ">>>存档中玩家本回合的命令：\n";
+		if (data->memoCommand[data->getRound()].size() == 0)
+			cout << "(空)\n";
+		else {
+			for (Command c : data->memoCommand[data->getRound()]) {
+				cout << ">>>";
+				outPutCommand(id, c);
+			}
+		}
+cout << ">>>请输入玩家本回合需要执行的指令，按照<指令类型><参数1><参数2><参数...>的顺序输入整数，之间以空格分隔(输入大写字母EOF结束)：\n";
+		while (true) {
+			cout << ">>>请输入指令：";
+			string tempCmd;
+			bool cmdCorrect = true;
+  			getline(cin, tempCmd);
+			if (tempCmd == "EOF") break;
+			int posOfBlank[7] = { -1 };
+			int index = 1;
+			for (int i = 1; i < 6; i++) {
+				posOfBlank[i] = tempCmd.find(" ", index);
+				index += 2;
+			}
+			for (int i = 1; i <= 6; i++)
+				if (posOfBlank[i] <= 0) posOfBlank[i] = INF;
+			int parameters[6] = { 0, 0 };
+			string parameter;
+			for (int i = 0; i < 6 ; i++) {
+				int dist = posOfBlank[i + 1] - posOfBlank[i] - 1;
+				/*if (dist <= 0) {
+					cout << ">>>指令无效！\n";
+					cmdCorrect = false;
+					break;
+				}*/
+				if (posOfBlank[i] + 1 >= tempCmd.size()) {
+					parameters[i] = -1;
+					continue;
+				}
+				parameter = tempCmd.substr(posOfBlank[i] + 1, dist);
+				parameters[i] = atoi(parameter.c_str());
+			}
+			int commandType, paramNum;
+			commandType = parameters[1];
+			if (!cmdCorrect) continue;
+			vector<int> paramVector;
+			switch (parameters[0]) {
+			case(corpsCommand):
+				if (!(commandType >= 0 && commandType <= 9)) {
+					cout << ">>>指令无效！\n";
+					continue;
+				}
+				paramNum = CorpsOperaNumNeed[parameters[1]];
+				break;
+			case(towerCommand):
+				if (!(commandType >= 0 && commandType <= 1)) {
+
+				}
+				paramNum = towerOperaNumNeed[parameters[1]];
+				break;
+			default:
+				cout << ">>>指令无效！\n";
+				continue;
+			}
+			if (paramNum < INF) {
+				paramVector.resize(paramNum);
+				for (int i = 1; i <= paramNum; i++) {
+					paramVector[i - 1] = parameters[i];
+				}
+			}
+			else {
+				cout << ">>>指令无效！\n";
+				continue;
+			}
+			Command c = { enum commandType(parameters[0]), paramVector };
+			commands.addCommand(enum commandType(parameters[0]), paramVector);
+			outPutCommand(id, c);
+			if (commands.size() >= MAX_CMD_NUM) break;
+			cout << "指令输入成功，请输入下一条指令：\n";
+		}
+		cout << ">>>指令输入结束!\n";
+		cout << ">>>请指定下次停止运行的回合数!\n";
+		while (true) {
+			cout << "请输入回合数：";
+			string roundline;
+			getline(cin, roundline);
+			int expectRound = atoi(roundline.c_str());
+			if (expectRound > data->getRound() && expectRound <= data->memoCommand.size() - 1) {
+				stopRound = expectRound;
+				break;
+			}
+		}
 	}
 }
 

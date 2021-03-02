@@ -145,7 +145,6 @@
   <ItemGroup>
     <ClInclude Include="ai.h" />
     <ClInclude Include="definition.h" />
-    <ClInclude Include="user_toolbox.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

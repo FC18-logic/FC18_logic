@@ -69,7 +69,7 @@ bool Game::init(string file, string json_file, vector<string> players_name, std:
 	data.currentRoundJson["cutTentacleActions"];
 	data.currentRoundJson["barrierActions"];
 	*********************************************************************/
-
+	data.gameState = gameState;
 	data.gameMap.setData(&data);
 	ifstream in(file);
 	if (!in)
@@ -85,7 +85,7 @@ bool Game::init(string file, string json_file, vector<string> players_name, std:
 	
 	//旧代码//  in >> _MAX_RESOURCE_ >> _MAX_ROUND_;
 
-	if (!data.gameMap.readMap(in, cmdF,infoF,true, players_name))                       //#Json 读入地图，写地图Json文件头，写0回合玩家指令Json
+	if (!data.gameMap.readMap(in, cmdF,infoF,true, players_name, json_file))                       //#Json 读入地图，写地图Json文件头，写0回合玩家指令Json
 	{
 		cerr << "Something wrong when reading the map file." << endl;
 		return false;
@@ -95,8 +95,10 @@ bool Game::init(string file, string json_file, vector<string> players_name, std:
 		cerr << "Something wrong when randomizing the game map." << endl;
 		return false;
 	}
-
+	data.gameMap.saveMap();
 	printGameMap();
+
+	//从指令文档中恢复指令
 
 	in.close();
 	totalRounds = 0;
@@ -228,7 +230,7 @@ void Game::DebugPhase()
 			if (currentBlock.towerIndex != NOTOWER)
 				cout << " 地形：塔";
 			else
-				cout << " 地形：" << Terrain[currentBlock.type - 1];
+				cout << " 地形：" << Terrain[currentBlock.type];
 			cout << " 占有属性：";
 			for (int u : currentBlock.occupyPoint) {
 				cout << u << " ";
@@ -633,14 +635,72 @@ void Game::printGameMap() {
 			case(3):SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), FOREGROUND_INTENSITY | FOREGROUND_RED | FOREGROUND_GREEN); break;
 			case(4):SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), FOREGROUND_INTENSITY | FOREGROUND_RED | FOREGROUND_BLUE); break;
 			case(5):SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), FOREGROUND_INTENSITY | FOREGROUND_GREEN | FOREGROUND_BLUE); break;
+			default:SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), BACKGROUND_INTENSITY | BACKGROUND_BLUE);
 			}
-			std::cout << setprecision(5) << int(data.gameMap.map[i][j].type) << " ";
+			if (int(data.gameMap.map[i][j].type) >= 8 && int(data.gameMap.map[i][j].type) < 12)
+				std::cout << setprecision(5) << 8 << " ";
+			else if (int(data.gameMap.map[i][j].type) == 12)
+				std::cout << setprecision(5) << 9 << " ";
+			else
+				std::cout << setprecision(5) << int(data.gameMap.map[i][j].type) << " ";
 		}
 		std::cout << "\n";
 	}
 	std::cout << "\n\n";
 }
 
+
+bool Game::recordOldCommand(string command_path) {
+	ifstream ifs(command_path.c_str());
+	string roundline;
+	while (getline(ifs, roundline) && roundline.find("round") != string::npos) {
+		getline(ifs, roundline);
+		if (roundline != "#command")  return false;
+		string templine;
+		CommandList newList;
+		while (getline(ifs, templine) && templine.size() > 0) {
+			vector<int> paraList;
+			int commandType, type;
+			paraList.resize(8);
+			sscanf(templine.c_str(), "%d %d %d %d %d %d %d %d %d\n", &paraList[0]   //from_id
+				                                                   , &commandType   //cm_type
+				                                                   , &paraList[1]   //getcm_id
+				                                                   , &paraList[2]   //aim_x
+				                                                   , &paraList[3]   //aim_z
+				                                                   , &paraList[4]   //result
+				                                                   , &paraList[5]   //dT
+				                                                   , &paraList[6]   //pT
+				                                                   , &paraList[7]); //another_id
+			if (commandType >= 10)
+				type = towerCommand;
+			else
+				type = corpsCommand;
+			switch (commandType) {
+			case(JMove):
+				newList.addCommand(enum commandType(type), { commandType, paraList[1], paraList[6] }); break;
+			case(JAttackCorps):
+			case(JAttackTower):
+				newList.addCommand(enum commandType(type), { commandType, paraList[1], paraList[7] }); break;
+			case(JBuild):
+			case(JRepair):
+				newList.addCommand(enum commandType(type), { commandType, paraList[1] }); break;
+			case(JChangeTerrain):
+				newList.addCommand(enum commandType(type), { commandType, paraList[1], paraList[5] }); break;
+			case(JProduct):
+				newList.addCommand(enum commandType(type), { commandType - 10, paraList[1], paraList[6] }); break;
+			case(JTowerAttackCorps):
+				newList.addCommand(enum commandType(type), { commandType - 10, paraList[1], paraList[7] }); break;
+			default:;
+			}
+		}
+		if (templine.size() != 0) {
+			data.memoCommand.clear();
+			return false;
+		}
+		data.memoCommand.push_back(newList);
+	}
+	ifs.close();
+}
 
 
 void Game::printJson() {

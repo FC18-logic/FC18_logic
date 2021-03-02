@@ -10,6 +10,7 @@
 #define NOTOWER -1    //当前方格没有防御塔
 //#define NOTASK  -1    //当前防御塔无生产任务
 #define OUTOFRANGE -2  //当前方格在地图之外
+#define FC15_SAVEMODE
 
 
 #include <vector>
@@ -198,7 +199,24 @@ enum terrainType
 	TRForest = 3,       //森林
 	TRSwamp = 4,       //沼泽
 	TRRoad = 5,       //道路
+	TRGate = 6,       //二校门
+	TRHall = 7,       //大礼堂
+	TRClassRoom1 = 8,  //清华学堂x+z+
+	TRClassRoom2 = 9,  //清华学堂x-z+
+	TRClassRoom3 = 10, //清华学堂x-z-
+	TRClassRoom4 = 11, //清华学堂x+z-
+	TRTHUEmpty = 12    //清华元素占据的空地
 };
+
+
+//【FC18】游戏运行的状态
+enum gameState
+{
+	Normal = 0,          //正常运行，不存档
+	RecoverMap = 1,      //只按地图存档复现模式
+	RecoverRound = 2,    //按回合（包括地图）存档恢复模式
+};
+
 
 //【FC18】兵团操作名
 const string CorpsCmd[CORPS_ACTION_TYPE_NUM] =
@@ -225,9 +243,9 @@ const string Direction[4] =
 };
 
 //【FC18】改变的地形名
-const string Terrain[TERRAIN_TYPE_NUM] =
+const string Terrain[TERRAIN_TYPE_NUM + 8] =
 {
-	"plain","mountain","forest","swamp","road"
+	"tower","plain","mountain","forest","swamp","road","erxiaomen","dalitang","qinghuaxuetang","qinghuaxuetang","qinghuaxuetang","qinghuaxuetang","THU"
 };
 
 //【FC18】作战兵团名字
@@ -380,7 +398,7 @@ const struct TowerConfig TowerInitConfig[MAX_TOWER_LEVEL] =
 
 
 //【FC18】行动力消耗（与地形的枚举类在序号上对应）
-const TMovePoint CorpsMoveCost[TERRAIN_TYPE_NUM + 1] =
+const TMovePoint CorpsMoveCost[TERRAIN_TYPE_NUM + 8] =
 {
 	0,    //塔
 	2,    //平原
@@ -388,11 +406,18 @@ const TMovePoint CorpsMoveCost[TERRAIN_TYPE_NUM + 1] =
 	3,    //森林
 	4,    //沼泽
 	1,    //道路
+	INF,  //二校门
+	INF,  //大礼堂
+	INF,  //清华学堂1
+	INF,  //清华学堂2
+	INF,  //清华学堂3
+	INF,  //清华学堂4
+	INF   //清华元素空地
 };
 
 
 //【FC18】战斗力增益（与地形的枚举类在序号上对应）
-const TBattlePoint CorpsBattleGain[TERRAIN_TYPE_NUM + 1] =
+const TBattlePoint CorpsBattleGain[TERRAIN_TYPE_NUM + 8] =
 {
 	0,    //塔
 	0,    //平原
@@ -400,10 +425,47 @@ const TBattlePoint CorpsBattleGain[TERRAIN_TYPE_NUM + 1] =
 	3,    //森林
 	-3,   //沼泽
 	0,    //道路
+	0,    //二校门
+	0,    //大礼堂
+	0,    //清华学堂1
+	0,    //清华学堂2
+	0,    //清华学堂3
+	0,    //清华学堂4
+	0     //清华元素空地
 };
 
+/*
+//4组清华元素固定地形，对应不同的生成模式
+const terrainType attachTerrain0[3][4] =
+{
+	{TRClassCenter, TRClassSide, TRHall, TRPlain},
+	{TRClassSide, TRPlain, TRPlain, TRPlain},
+	{TRPlain, TRPlain, TRGate, TRForest}
+};
 
+const terrainType attachTerrain1[3][4] =
+{
+	{TRForest, TRGate, TRPlain, TRPlain},
+	{TRPlain, TRPlain, TRClassCenter, TRClassSide},
+	{TRPlain, TRHall, TRClassSide, TRPlain}
+};
 
+const terrainType attachTerrain2[4][3] =
+{
+	{TRPlain, TRClassCenter, TRClassSide},
+	{TRPlain, TRClassSide, TRPlain},
+	{TRGate, TRPlain, TRHall},
+	{TRForest, TRPlain,TRPlain }
+};
+
+const terrainType attachTerrain3[4][3] =
+{
+	{TRPlain, TRPlain, TRForest},
+	{TRHall, TRPlain, TRGate},
+	{TRPlain, TRClassCenter, TRClassSide},
+	{TRPlain, TRClassSide, TRPlain}
+};
+*/
 //@@@【FC18】防御塔结构体，有需要的信息再加
 
 struct TowerInfo {

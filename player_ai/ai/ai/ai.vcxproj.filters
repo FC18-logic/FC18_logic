@@ -29,8 +29,5 @@
     <ClInclude Include="definition.h">
       <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="user_toolbox.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
   </ItemGroup>
 </Project>

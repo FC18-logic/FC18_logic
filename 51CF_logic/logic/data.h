@@ -74,6 +74,8 @@ namespace DATA                                         //@@@【FC18】名空间
 		TRound addRound() { totalRounds++; return totalRounds; }             //【FC18】data回合数增加，在上一回合Json数据清空，每个玩家ai代码开始跑之前（小回合）
 		TTower getTotalTower() { return totalTowers; } //【FC18】获取当前data记录的总防御塔数
 		TCorps getTotalCorp() { return totalCorps; }   //【FC18】获取当前data记录的总兵团数
+		vector<CommandList> memoCommand;               //【FC18]从指令存档恢复数据时的指令记录           
+		int gameState;                                 //【FC18】当前游戏模式
 
 
 		//FC15的

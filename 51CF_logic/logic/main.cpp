@@ -22,6 +22,53 @@ void outputResult(Game& game, vector<Player_Code>& players) {
 	}
 }
 
+//【FC18】选择存档路径
+void recordSavePath(Game& G) {
+	cout << "请输入存档文件路径，支持完整路径和相对路径，按回车结束。\n";
+	while (true) {
+		cout << ">>>存档路径：";
+		string path;
+		getline(cin, path);
+		string::size_type pos = 0;
+		while ((pos = path.find_first_of('\\', pos)) != string::npos) {
+			path.insert(pos, "\\");
+			pos = pos + 2;
+		}
+		if (0 != _access(path.c_str(), 0)) {
+			cout << ">>>输入路径不存在！\n";
+			continue;
+		}
+		string map_path = path + "/rand_map_save.txt";
+		if (0 != _access(map_path.c_str(), 4)) {
+			cout << ">>>输入路径中不存在有效的存档文件'rand_map_save.txt'\n";
+			continue;
+		}
+		G.getData().gameMap.setReadPath(path);
+		string cmd_path = path + "/log_info.txt";
+		int gameState = Normal;
+		if (0 == _access(cmd_path.c_str(), 4)) {
+			cout << "请输入存档恢复模式：0 == 直接运行不从存档恢复， 1 == 只恢复地图， 2 == 地图和玩家指令均恢复\n";
+			cout << ">>>恢复模式：";
+			while (true) {
+				
+				cin >> gameState;
+				if (gameState == Normal || gameState == RecoverMap || gameState == RecoverRound)
+					break;
+				cout << ">>>输入恢复模式有误！\n";
+				cout << ">>>恢复模式：";
+			}
+		}
+		G.gameState = gameState;
+		if (G.gameState == RecoverRound) {
+			if (!G.recordOldCommand(cmd_path)) {
+				cout << ">>>改存档已被破坏，请选择其他存档！\n";
+				continue;
+			}
+		}
+		break;
+	}
+}
+
 int main(int argc, char** argv)
 {
 	char buffer[1024];
@@ -32,7 +79,7 @@ int main(int argc, char** argv)
 #endif // FC15_DEBUG
 	char log_filename[1024];
 	//旧代码//strftime(json_filename, sizeof(json_filename), "../log_json/log_%Y%m%d_%H%M%S.json", localtime(&t));
-	strftime(log_filename, sizeof(log_filename), "../log_json/%Y%m%d_%H%M%S", localtime(&t));
+	strftime(log_filename, sizeof(log_filename), "../log/%Y%m%d_%H%M%S", localtime(&t));
 	if (0 != _access(log_filename, 0)) _mkdir(log_filename);
 	string  config_filename =
 #ifdef _MSC_VER
@@ -140,11 +187,26 @@ int main(int argc, char** argv)
 	// load map
 	//初始化地图、玩家的势力区域、防御塔、兵团的作战关系表等等
 	Game G;
+	string cmdLine;
+
+#ifdef FC15_SAVEMODE
+	while (true) {
+		cout << ">>>是否从游戏存档中恢复？(y/n)\n";
+		getline(cin, cmdLine);
+		if (cmdLine == "y") {
+			recordSavePath(G);
+			break;
+		}
+		else if (cmdLine == "n")
+			break;
+	}
+#endif
+
 	if (!G.init(map_filename, log_filename, players_name,cmdWriter,infoWriter)) {
 		cout << "[Error] failed to load " << map_filename << endl;
 		return 4;
 	}
-
+	
 
 	// game and controller
 

@@ -8,8 +8,8 @@
 #define TRANSITION -1   //过渡地形区域
 #define PUBLIC 0      //公共地形区域
 #define NOTOWER -1    //当前方格没有防御塔
-//#define NOTASK  -1    //当前防御塔无生产任务
 #define OUTOFRANGE -2  //当前方格在地图之外
+#define FC15_SAVEMODE
 
 
 #include <vector>
@@ -198,6 +198,22 @@ enum terrainType
 	TRForest = 3,       //森林
 	TRSwamp = 4,       //沼泽
 	TRRoad = 5,       //道路
+	TRGate = 6,       //二校门
+	TRHall = 7,       //大礼堂
+	TRClassRoom1 = 8,  //清华学堂x+z+
+	TRClassRoom2 = 9,  //清华学堂x-z+
+	TRClassRoom3 = 10, //清华学堂x-z-
+	TRClassRoom4 = 11, //清华学堂x+z-
+	TRTHUEmpty = 12    //清华元素占据的空地
+};
+
+
+//【FC18】游戏运行的状态
+enum gameState
+{
+	Normal = 0,          //正常运行，不存档
+	RecoverMap = 1,      //只按地图存档复现模式
+	RecoverRound = 2,    //按回合（包括地图）存档恢复模式
 };
 
 
@@ -339,7 +355,7 @@ const struct TowerConfig TowerInitConfig[MAX_TOWER_LEVEL] =
 
 
 //【FC18】行动力消耗（与地形的枚举类在序号上对应）
-const TMovePoint CorpsMoveCost[TERRAIN_TYPE_NUM + 1] =
+const TMovePoint CorpsMoveCost[TERRAIN_TYPE_NUM + 8] =
 {
 	0,    //塔
 	2,    //平原
@@ -347,11 +363,18 @@ const TMovePoint CorpsMoveCost[TERRAIN_TYPE_NUM + 1] =
 	3,    //森林
 	4,    //沼泽
 	1,    //道路
+	INF,  //二校门
+	INF,  //大礼堂
+	INF,  //清华学堂1
+	INF,  //清华学堂2
+	INF,  //清华学堂3
+	INF,  //清华学堂4
+	INF   //清华元素空地
 };
 
 
 //【FC18】战斗力增益（与地形的枚举类在序号上对应）
-const TBattlePoint CorpsBattleGain[TERRAIN_TYPE_NUM + 1] =
+const TBattlePoint CorpsBattleGain[TERRAIN_TYPE_NUM + 8] =
 {
 	0,    //塔
 	0,    //平原
@@ -359,11 +382,14 @@ const TBattlePoint CorpsBattleGain[TERRAIN_TYPE_NUM + 1] =
 	3,    //森林
 	-3,   //沼泽
 	0,    //道路
+	0,    //二校门
+	0,    //大礼堂
+	0,    //清华学堂1
+	0,    //清华学堂2
+	0,    //清华学堂3
+	0,    //清华学堂4
+	0     //清华元素空地
 };
-
-
-
-//@@@【FC18】防御塔结构体，有需要的信息再加
 
 struct TowerInfo {
 	bool    exist;      //防御塔是否存在
@@ -405,7 +431,6 @@ struct PlayerInfo
 	//@@@【FC18】玩家所有塔的序号，参照原来的set<TCellID> cells
 	set<TTowerID> tower;
 
-
 	//【FC18】玩家所有兵团的序号，建议也用set这种数据结构，内部按兵团序号升序来排序
 	set<TCorpsID> corps; //所有兵团
 };
@@ -421,71 +446,17 @@ struct mapBlock                                 //【FC18】地图方格类
 	vector<TCorpsID> corps;						//该位置兵团
 };
 
-//【FC18】地图单元格信息结构体
-struct mapBlockInfo
-{
-	terrainType type;                           //【FC18】地块类型，对应terrainType枚举类
-	int owner;                                  //【FC18】所属玩家序号，-1为过渡TRANSITION，-2为公共PUBLIC
-	vector<int> occupyPoint;                    //【FC18】各玩家的占有属性值，秩为玩家序号-1
-	TTowerID towerIndex;                        //【FC18】地图方格信息，NOTOWER表示没有塔
-};
-
 
 //类声明
 class CommandList;
 //常用数学运算
 //二维坐标减运算
 TPoint operator-(const TPoint& p1, const TPoint& p2);
-//计算欧式距离
-TLength getDistance(const TPoint& p1, const TPoint& p2);
 //计算FC18中塔攻击范围的距离（FC18距离）
 TDist getDist(const TPoint& p1, const TPoint& p2);
 TDist getDist(const int p1_x, const int p1_y, const int p2_x, const int p2_y);
 //生成指定闭区间的随机整数
 int generateRanInt(int start, int end);
-//输出玩家下达的指令集
-
-struct TBarrier
-{
-	TPoint m_beginPoint;
-	TPoint m_endPoint;
-};
-
-
-//@@@【FC18】地图基类
-class BaseMap
-{
-public:
-	void   setID(TMapID _id) { id = _id; }         //【FC18】设置地图的序号
-	TMap   getWidth()  const { return m_width; }   //【FC18】获取地图宽度
-	TMap   getHeigth() const { return m_height; }  //【FC18】获取地图高度
-
-	string             id;                         //【FC18】记录地图的id，由game赋值，被init函数使用，选择对应的文件
-	TMap               m_width;                    //【FC18】地图宽度
-	TMap               m_height;                   //【FC18】地图高度
-
-	//@@@【FC18】存储地图上的所有防御塔信息的向量（元素为防御塔信息结构体），可以参照vector<TPoint> m_studentPos
-	vector<TPoint>     m_studentPos;               //只设定细胞的坐标，之后的势力分配交给game
-
-	//【FC18】存储地图上的所有兵团信息的向量（元素为兵团信息结构体），可以参照vector<TPoint> m_studentPos
-	vector<CorpsInfoUnit>     m_corpsinfo;
-
-	//@@@【FC18】获取地图上的所有防御塔信息函数，可以参照const  vector<TPoint>& getStudentPos() const
-	//@@@【FC18】返回一个防御塔信息结构体的vector引用，方便外部访问修改
-	const  vector<TPoint>& getStudentPos() const { return m_studentPos; }
-
-	//【FC18】获取地图上的所有兵团信息函数，可以参照const  vector<TPoint>& getStudentPos() const
-	//【FC18】返回一个兵团信息结构体的vector引用，方便外部访问修改
-	const  vector<CorpsInfoUnit>& getCropsInfo() const { return m_corpsinfo; }
-
-	bool   isPosValid(TPoint p) { return isPosValid(p.m_x, p.m_y); }             //判断点是否越界
-	bool   isPosValid(int x, int y) { return x >= 0 && x < m_width && y >= 0 && y < m_height; }
-	//protected:
-private:
-	int cross(const TPoint& p1, const TPoint& p2) { return p1.m_x * p2.m_y - p1.m_y * p2.m_x; }//叉乘
-	int min(int a, int b) { return a < b ? a : b; }
-	int max(int a, int b) { return a < b ? b : a; }
-};
 
 
 //【FC18】保存命令相关信息

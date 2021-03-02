@@ -46,6 +46,7 @@ namespace DAGAN
 		void outPutCommand(TPlayerID id,Command& c);                             //【FC18】输出当前玩家的指令，这个函数只输出被实际执行的指令
 
 		void testPlayerCommand(Info& info);                                      //【FC18】用于调试，模拟AI给出玩家命令，放到游戏中执行
+		void getCmdFromKeyboard(TPlayerID id, CommandList& commands);                          //【FC18】通过键盘读入玩家新指令
 
 
 		inline void setSilentMode(bool flag) { silent_mode_ = flag; }                         //【FC18】重设silent_mode
@@ -63,5 +64,6 @@ namespace DAGAN
 		bool silent_mode_;                     //【FC18】silent_mode_为false会输出回合数信息和每个玩家的操作信息等，用于debug
 		bool isValid_;                         //【FC18】游戏是否还能继续进行，用于判断game_over
 		vector<vector<Command>> Corpslastcmd;	//【FC18】兵团上一回合命令，用于需要延迟一回合生效的命令
+		int stopRound = 1;                     //【FC18】游戏停止，接受新指令时的回合数
 	};
 }
